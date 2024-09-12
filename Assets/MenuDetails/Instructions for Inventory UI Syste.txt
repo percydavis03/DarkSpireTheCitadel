@@ -1,0 +1,23 @@
+Instructions for Inventory UI System:
+
+To make a new inventory item:
+
+-create an item scriptable object
+-assign values to the SO
+
+	KEY:
+all options:
+	Assign Item = drag the scriptable object you just made here
+	Item Type: 1 = weapons, 2 = anatomy, 3 = lore, 4 = quests (determines the menu tab it will go to)
+	Item Name: how the item will be titled in the menus (make this the same as whatever you called the item SO)
+	Description: the largest text block
+	Id: ignore that lol
+only for some:
+	Subtitle: subtitle (will show up on the right and left menus for quests and lore)
+	Icon: the image that will represent it on the left menu (only for weapons and anatomy)
+	RightImage: image on the right side (for weapons, anatomy, and lore)
+
+
+To add inventory items to UI (in the game)
+- drag the Item Pickup prefab into the scene (change the mesh or collider if you want)
+- drag the scriptable object for the menu item you want to add into the Item option of the Item Pickup script in the inspector
