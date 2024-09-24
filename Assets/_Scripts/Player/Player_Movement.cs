@@ -8,7 +8,8 @@ public class Player_Movement : MonoBehaviour
     public PlayerSaveState thisGameSave;
 
 
-
+    //attacks
+    public GameObject swordHitbox;
     //FOR THE MOVEMENT:
     //new:
     public int speed;
@@ -90,7 +91,11 @@ public class Player_Movement : MonoBehaviour
             anim.SetBool("isRun", false);
         }
 
-
+        if (Input.GetKey(KeyCode.LeftShift)) 
+            {
+            anim.SetBool("isAttacking", true);
+            swordHitbox.SetActive(true);
+            }
         if (Input.GetKey(KeyCode.Space) && canMove && characterController.isGrounded)
         {
             if (thisGameSave.canJump == true)
