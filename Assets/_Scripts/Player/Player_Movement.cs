@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player_Movement : MonoBehaviour
 {
     public static Player_Movement instance;
     public PlayerSaveState thisGameSave;
-
+    //INPUT
+    public PlayerInputActions playerControls;
+    private InputAction attack;
+    private InputAction jump;
 
     //attacks
     public GameObject swordHitbox;
@@ -42,6 +46,7 @@ public class Player_Movement : MonoBehaviour
         }
 
         speed = thisGameSave.playerSpeed;
+        playerControls = new PlayerInputActions();
     }
     void Start()
     {
@@ -52,6 +57,33 @@ public class Player_Movement : MonoBehaviour
         anim = animationSource.GetComponent<Animator>();
 
 
+    }
+    private void OnEnable() //need for input system
+    {
+        attack = playerControls.General.Attack;
+        attack.Enable();
+
+        jump = playerControls.General.Jump;
+        jump.Enable();
+    }
+
+    private void OnDisable()//need for input system
+    {
+        attack.Disable();
+        jump.Disable();
+    }
+    IEnumerator WaitUntil(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        EndAttack();
+    }
+
+    void EndAttack()
+    {
+        anim.SetBool("isAttacking", false);
+        swordHitbox.SetActive(false);
+        canMove = true;
+        print("attack ended");
     }
 
     void Update()
@@ -75,28 +107,28 @@ public class Player_Movement : MonoBehaviour
 
         if (moveDirection.x != 0)
         {
-            print("im runnin");
             anim.SetBool("isRun", true);
         }
 
         if (moveDirection.z != 0)
         {
-            print("im runnin");
             anim.SetBool("isRun", true);
         }
 
         if(moveDirection.x == 0 && moveDirection.y == 0 && moveDirection.z == 0)
         {
-            print("chill out time");
             anim.SetBool("isRun", false);
         }
 
-        if (Input.GetKey(KeyCode.LeftShift)) 
+        if (attack.IsPressed()) //ATTACK
             {
             anim.SetBool("isAttacking", true);
             swordHitbox.SetActive(true);
+            canMove = false;
+            StartCoroutine(WaitUntil(1));
+            
             }
-        if (Input.GetKey(KeyCode.Space) && canMove && characterController.isGrounded)
+        if (jump.IsPressed() && canMove && characterController.isGrounded) //JUMP
         {
             if (thisGameSave.canJump == true)
             {
@@ -109,7 +141,6 @@ public class Player_Movement : MonoBehaviour
                 anim.SetBool("isJump", false);
                 print("loser cant jump :(");
             }
-            
             
         }
         else
@@ -124,7 +155,7 @@ public class Player_Movement : MonoBehaviour
 
         if (characterController.isGrounded == true)
         {
-            anim.SetBool("isJump", false);
+            //anim.SetBool("isJump", false);
         }
 
         characterController.Move(moveDirection * Time.deltaTime);
