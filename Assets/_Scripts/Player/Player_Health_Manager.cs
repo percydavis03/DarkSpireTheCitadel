@@ -23,9 +23,16 @@ public class Player_Health_Manager : MonoBehaviour
     public string[] animNames;
     // new
     public Image healthFill;
-   
+    public PlayerSaveState thisGameSave;
 
-    
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+    }
+
     void Start()
     {
         if (instance != null)
@@ -35,7 +42,7 @@ public class Player_Health_Manager : MonoBehaviour
         }
         instance = this;
       
-        currentHealth = maxHealth;
+        currentHealth = thisGameSave.maxHP;
        
         //healthSlider.maxValue = maxHealth;
        
@@ -49,16 +56,8 @@ public class Player_Health_Manager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-
-        }
-            if (GetComponent<Knock>().knockBack == false && isHurt == true)
-        {
-            isHurt = false;
-        }
-        //healthSlider.value = currentHealth;
-        healthFill.fillAmount = currentHealth / maxHealth;
+                //healthSlider.value = currentHealth;
+        healthFill.fillAmount = thisGameSave.hitpoints / thisGameSave.maxHP;
 
         if (currentHealth <= 0)
         {
@@ -77,14 +76,6 @@ public class Player_Health_Manager : MonoBehaviour
     
    
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.CompareTag(hurtTags[0]) && Player_Manager.GetInstance().canBeHurt == true)
-        {
-            isHurt=true;
-            DamangePlayer(other.gameObject.GetComponent<HurtBox>().damageValye);
-        }
-    }
     
    
     private IEnumerator DeathScreen()

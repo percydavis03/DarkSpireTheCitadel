@@ -14,6 +14,7 @@ public class Player_Movement : MonoBehaviour
 
     //attacks
     public GameObject swordHitbox;
+    private bool isAttacking;
     //FOR THE MOVEMENT:
     //new:
     public int speed;
@@ -55,7 +56,7 @@ public class Player_Movement : MonoBehaviour
         Cursor.visible = false;
 
         anim = animationSource.GetComponent<Animator>();
-
+        isAttacking = false;
 
     }
     private void OnEnable() //need for input system
@@ -75,14 +76,14 @@ public class Player_Movement : MonoBehaviour
     IEnumerator WaitUntil(float seconds)
     {
         yield return new WaitForSeconds(seconds);
-        EndAttack();
     }
 
-    void EndAttack()
+    public void EndAttack()
     {
         anim.SetBool("isAttacking", false);
         swordHitbox.SetActive(false);
         canMove = true;
+        isAttacking = false;
         print("attack ended");
     }
 
@@ -120,14 +121,20 @@ public class Player_Movement : MonoBehaviour
             anim.SetBool("isRun", false);
         }
 
-        if (attack.IsPressed()) //ATTACK
+        if (attack.WasPressedThisFrame() && !isAttacking && !isAttacking) //ATTACK
             {
             anim.SetBool("isAttacking", true);
             swordHitbox.SetActive(true);
             canMove = false;
-            StartCoroutine(WaitUntil(1));
-            
+            isAttacking = true;
             }
+        else if (attack.WasPressedThisFrame() && isAttacking) //cancel attack
+        {
+            anim.SetBool("isAttacking", false);
+            swordHitbox.SetActive(false);
+            canMove = true;
+            isAttacking = false;
+        }
         if (jump.IsPressed() && canMove && characterController.isGrounded) //JUMP
         {
             if (thisGameSave.canJump == true)
@@ -155,7 +162,7 @@ public class Player_Movement : MonoBehaviour
 
         if (characterController.isGrounded == true)
         {
-            //anim.SetBool("isJump", false);
+            anim.SetBool("isJump", false);
         }
 
         characterController.Move(moveDirection * Time.deltaTime);

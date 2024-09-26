@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Enemy_Basic : MonoBehaviour
 {
-    public int enemyHP = 5;
+    public int enemyHP = 15;
     void Start()
     {
         
@@ -21,6 +21,10 @@ public class Enemy_Basic : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (enemyHP <= 0)
+        {
+            Destroy(gameObject);
+        } 
+            
     }
 }
