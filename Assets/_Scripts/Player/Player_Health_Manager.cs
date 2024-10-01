@@ -10,6 +10,7 @@ public class Player_Health_Manager : MonoBehaviour
     [Header("Values")]
     public float maxHealth;
     public float currentHealth;
+    public float maxHP;
     [Space]
     [Header("Tags")]
     public string[] hurtTags;
@@ -42,7 +43,7 @@ public class Player_Health_Manager : MonoBehaviour
         }
         instance = this;
       
-        currentHealth = thisGameSave.maxHP;
+       
        
         //healthSlider.maxValue = maxHealth;
        
@@ -56,8 +57,10 @@ public class Player_Health_Manager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-                //healthSlider.value = currentHealth;
-        healthFill.fillAmount = thisGameSave.hitpoints / thisGameSave.maxHP;
+        currentHealth = thisGameSave.hitpoints;
+        maxHP = thisGameSave.maxHP;
+        //healthSlider.value = currentHealth;
+        healthFill.fillAmount = currentHealth / maxHP;
 
         if (currentHealth <= 0)
         {

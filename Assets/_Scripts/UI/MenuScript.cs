@@ -2,6 +2,7 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class MenuScript : MonoBehaviour
@@ -14,6 +15,10 @@ public class MenuScript : MonoBehaviour
     public DOTweenAnimation veinAnim;
 
     public bool movePause;
+    //input system
+    public PlayerInputActions playerControls;
+    private InputAction inventory;
+    private InputAction mainMenu;
 
     private void Awake()
     {
@@ -30,6 +35,22 @@ public class MenuScript : MonoBehaviour
         infoMenu.SetActive(false);
         pauseMenu.SetActive(false);
     }
+
+    private void OnEnable()
+    {
+        //inventory = playerControls.UI.OpenInventory;
+        //inventory.Enable();
+        //mainMenu = playerControls.UI.OpenMenu;
+        //mainMenu.Enable();
+    }
+    private void OnDisable()
+    {
+        //inventory.Disable();
+        //mainMenu.Disable();
+    }
+
+
+
     private void Update()
     {
         if (infoMenu == null && isTitle == false)
@@ -41,29 +62,40 @@ public class MenuScript : MonoBehaviour
         {
             Cursor.visible = false;
         }
-
+        //exit menus
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (pauseMenu.activeInHierarchy)
+            { 
+                pauseMenu.SetActive(false);
+               
+            }
+           if (infoMenu.activeInHierarchy)
+            {
+                infoMenu.SetActive(false);
+            }
+        }
+        //change when the input system stops being a little bitch
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (!pauseMenu.activeInHierarchy)
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                
             }
             if (pauseMenu.activeInHierarchy)
-            { 
+            {
                 pauseMenu.SetActive(false);
-               
+
             }
             else
             {
                 pauseMenu.SetActive(true);
             }
         }
-
+        //change when the input system stops being a little bitch
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-
             InventoryManager.Instance.ListItems();
             
 

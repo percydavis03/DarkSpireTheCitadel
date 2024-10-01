@@ -11,6 +11,8 @@ public class PlayerSaveState : ScriptableObject
     public int sprintSpeed;
     public int maxHP;
     public bool canJump;
+    public bool inMenu;
+    public bool canAttack;
 
     public void Init()
     {
