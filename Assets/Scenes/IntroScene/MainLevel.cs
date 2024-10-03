@@ -8,6 +8,6 @@ public class MainLevel : MonoBehaviour
 {
     void OnEnable()
     {
-        SceneManager.LoadScene("Main_Test", LoadSceneMode.Single);
+        SceneManager.LoadScene("Alchemist_Lab", LoadSceneMode.Single);
     }
 }
