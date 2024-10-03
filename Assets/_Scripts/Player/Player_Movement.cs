@@ -39,7 +39,7 @@ public class Player_Movement : MonoBehaviour
 
     public GameObject animationSource;
     public bool canRotate;
-    public GameObject visualBody;
+   
 
     private void Awake()
     {
@@ -88,7 +88,15 @@ public class Player_Movement : MonoBehaviour
         isAttacking = false;
         print("attack ended");
         canRotate = true;
-        visualBody.transform.position = transform.position;
+    }
+
+    public void SwordOn()
+    {
+        swordHitbox.SetActive(true);
+    }
+    public void SwordOff()
+    {
+        swordHitbox.SetActive(false);
     }
 
     void Update()

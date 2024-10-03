@@ -14,6 +14,17 @@ public class Animations_Nyx : MonoBehaviour
     {
         Player_Movement.instance.EndAttack();
     }
+
+    public void ActivateSword()
+    {
+        Player_Movement.instance.SwordOn();
+    }
+
+    public void DeactivateSword()
+    {
+        Player_Movement.instance.SwordOff();    
+    }
+
     // Update is called once per frame
     void Update()
     {
