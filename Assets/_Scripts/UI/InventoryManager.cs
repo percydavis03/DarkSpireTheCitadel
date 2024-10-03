@@ -71,14 +71,24 @@ public class InventoryManager : MonoBehaviour
         popupText.text = item.itemPopup.ToString();
 
         popupBox.SetActive(true);
-        if (visualManager != null)
+        StartCoroutine(Wait());
+
+        /*if (visualManager != null)
         {
             anim.enabled = true;
             visualManager.enabled = true;
             Invoke("Fade", 3);
-        }
+        }*/
         
     }
+
+    IEnumerator Wait()
+    {
+        yield return new WaitForSeconds(5);
+        popupBox.SetActive(false);
+    }
+
+
     void Fade()
     {
         popupBox.SetActive(false);

@@ -22,7 +22,7 @@ public class ItemPickup : MonoBehaviour
     {
 
         InventoryManager.Instance.Add(Item);
-       // InventoryManager.Instance.Popup(Item);
+        InventoryManager.Instance.Popup(Item);
         
         Destroy(gameObject);
 

@@ -38,6 +38,8 @@ public class Player_Movement : MonoBehaviour
     private bool canMove = true;
 
     public GameObject animationSource;
+    public bool canRotate;
+    public GameObject visualBody;
 
     private void Awake()
     {
@@ -57,7 +59,7 @@ public class Player_Movement : MonoBehaviour
 
         anim = animationSource.GetComponent<Animator>();
         isAttacking = false;
-
+        canRotate = true;
     }
     private void OnEnable() //need for input system
     {
@@ -85,6 +87,8 @@ public class Player_Movement : MonoBehaviour
         canMove = true;
         isAttacking = false;
         print("attack ended");
+        canRotate = true;
+        visualBody.transform.position = transform.position;
     }
 
     void Update()
@@ -126,6 +130,7 @@ public class Player_Movement : MonoBehaviour
             anim.SetBool("isAttacking", true);
             swordHitbox.SetActive(true);
             canMove = false;
+            canRotate = false;
             isAttacking = true;
             }
         else if (attack.WasPressedThisFrame() && isAttacking) //cancel attack
@@ -168,7 +173,7 @@ public class Player_Movement : MonoBehaviour
         characterController.Move(moveDirection * Time.deltaTime);
 
 
-        if (rotationDirection != Vector3.zero)
+        if (rotationDirection != Vector3.zero && canRotate)
        {
            Quaternion toRotation = Quaternion.LookRotation(rotationDirection, Vector3.up);
 
