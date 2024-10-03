@@ -121,11 +121,13 @@ public class Player_Movement : MonoBehaviour
         if (moveDirection.x != 0)
         {
             anim.SetBool("isRun", true);
+            canRotate = true;
         }
 
         if (moveDirection.z != 0)
         {
             anim.SetBool("isRun", true);
+            canRotate = true;
         }
 
         if(moveDirection.x == 0 && moveDirection.y == 0 && moveDirection.z == 0)
