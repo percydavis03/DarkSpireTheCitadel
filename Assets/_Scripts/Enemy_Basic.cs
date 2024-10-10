@@ -4,18 +4,25 @@ using UnityEngine;
 
 public class Enemy_Basic : MonoBehaviour
 {
-    public int enemyHP = 30;
+    public PlayerSaveState thisGameSave;
+    public float enemyHP = 30;
+    public int damageTaken;
     public GameObject enemyDrop;
     void Start()
     {
         
+    }
+    private void Awake()
+    {
+        damageTaken = thisGameSave.mainAttackDamage; 
+        print(damageTaken);
     }
     private void OnTriggerEnter(Collider other)
     {
         print("collide");
         if (other.gameObject.CompareTag("Weapon"))
         {
-            enemyHP--;
+            enemyHP = enemyHP - damageTaken;
             
             print("ow");
         }

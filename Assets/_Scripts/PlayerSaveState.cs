@@ -13,6 +13,7 @@ public class PlayerSaveState : ScriptableObject
     public bool canJump;
     public bool inMenu;
     public bool canAttack;
+    public int mainAttackDamage;
 
     public void Init()
     {

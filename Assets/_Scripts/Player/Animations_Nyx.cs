@@ -15,6 +15,23 @@ public class Animations_Nyx : MonoBehaviour
         Player_Movement.instance.EndAttack();
     }
 
+    public void SpinAttackEnd()
+    {
+        
+        Player_Movement.instance.EndAttack();
+        Player_Movement.instance.isSpinAttack = false;
+        
+    }
+    public void StoppedMoving()
+    {
+        Player_Movement.instance.Reposition();
+        Debug.Log("spined");
+    }
+    public void StartSpinAttack()
+    {
+        Player_Movement.instance.isSpinAttack = true;
+    }
+
     public void ActivateSword()
     {
         Player_Movement.instance.SwordOn();

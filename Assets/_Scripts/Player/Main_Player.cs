@@ -26,7 +26,6 @@ public class Main_Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        print("collide");
         if (other.gameObject.CompareTag("Enemy"))
         {
             GameManager.instance.DamagePlayer();

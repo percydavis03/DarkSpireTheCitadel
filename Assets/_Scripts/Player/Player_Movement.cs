@@ -11,6 +11,7 @@ public class Player_Movement : MonoBehaviour
     public PlayerInputActions playerControls;
     private InputAction attack;
     private InputAction jump;
+    private InputAction sprint;
 
     //attacks
     public GameObject swordHitbox;
@@ -36,8 +37,11 @@ public class Player_Movement : MonoBehaviour
     private float rotationX = 0;
     private CharacterController characterController;
     private bool canMove = true;
+    bool isSprint = false;
+    public bool isSpinAttack = false;
 
     public GameObject animationSource;
+    public GameObject thisGameObject;
     public bool canRotate;
    
 
@@ -68,12 +72,16 @@ public class Player_Movement : MonoBehaviour
 
         jump = playerControls.General.Jump;
         jump.Enable();
+
+        sprint = playerControls.General.Sprint;
+        sprint.Enable();
     }
 
     private void OnDisable()//need for input system
     {
         attack.Disable();
         jump.Disable();
+        sprint.Disable();
     }
     IEnumerator WaitUntil(float seconds)
     {
@@ -83,11 +91,20 @@ public class Player_Movement : MonoBehaviour
     public void EndAttack()
     {
         anim.SetBool("isAttacking", false);
+        anim.SetBool("isSpinAttack", false);
         swordHitbox.SetActive(false);
         canMove = true;
         isAttacking = false;
         print("attack ended");
         canRotate = true;
+    }
+
+    public void Reposition()
+    {
+        //thisGameObject.transform.position = new Vector3 (animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z);
+        Vector3 currentPos = new Vector3(thisGameObject.transform.position.x, transform.position.y, thisGameObject.transform.position.z);
+        Vector3 posOffset = new Vector3(animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z) - thisGameObject.transform.position;
+        transform.position = currentPos + posOffset;
     }
 
     public void SwordOn()
@@ -101,7 +118,6 @@ public class Player_Movement : MonoBehaviour
 
     void Update()
     {
-        speed = thisGameSave.playerSpeed;
 
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
@@ -135,7 +151,19 @@ public class Player_Movement : MonoBehaviour
             anim.SetBool("isRun", false);
         }
 
-        if (attack.WasPressedThisFrame() && !isAttacking && !isAttacking && thisGameSave.canAttack) //ATTACK
+        if (sprint.IsPressed())
+        {
+            speed = thisGameSave.sprintSpeed;
+            isSprint = true;    
+        }
+
+        if (!sprint.IsPressed())
+        {
+            speed = thisGameSave.playerSpeed;
+            isSprint = false;
+        }
+
+        if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack) //ATTACK
             {
             anim.SetBool("isAttacking", true);
             swordHitbox.SetActive(true);
@@ -143,13 +171,24 @@ public class Player_Movement : MonoBehaviour
             canRotate = false;
             isAttacking = true;
             }
-        else if (attack.WasPressedThisFrame() && isAttacking) //cancel attack
+        else if (attack.WasPressedThisFrame() && isAttacking && isSpinAttack) //cancel attack
         {
             anim.SetBool("isAttacking", false);
             swordHitbox.SetActive(false);
             canMove = true;
             isAttacking = false;
         }
+       
+        if (attack.WasPressedThisFrame() && isSprint && !isAttacking && thisGameSave.canAttack) //SPIN ATTACK
+        {
+            isSpinAttack = true;
+            anim.SetBool("isSpinAttack", true);
+            canMove = false;
+            canRotate = false;
+            isAttacking = true;
+            Debug.Log("spinAttack");
+        }
+
         if (jump.IsPressed() && canMove && characterController.isGrounded) //JUMP
         {
             if (thisGameSave.canJump == true)
