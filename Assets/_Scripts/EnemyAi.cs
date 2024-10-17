@@ -38,7 +38,7 @@ public class EnemyAi : MonoBehaviour
     {
         enemyHP = 2;
 
-        player = GameObject.Find("ThePlayer").transform;
+        player = GameObject.Find("Player(capsule)").transform;
         agent = GetComponent<NavMeshAgent>();
 
         agent.angularSpeed = 0f;
@@ -124,8 +124,9 @@ public class EnemyAi : MonoBehaviour
 
         //make sure enemy doesnt move
         agent.SetDestination(transform.position);
+        print("attack");
 
-        //transform.LookAt(player);
+        transform.LookAt(player);
 
         if(!alreadyAttacked)
         {
