@@ -23,6 +23,7 @@ public class EnemyAi : MonoBehaviour
     //Attacking
     public float timeBetweenAttacks;
     bool alreadyAttacked;
+    public GameObject weaponHitbox;
 
     //States
     public float sightRange, attackRange;
@@ -132,10 +133,11 @@ public class EnemyAi : MonoBehaviour
     {
         //put attack here:
         //print("Attacking");
-        anim.SetBool("IsAttacking", true);
+        //anim.SetBool("IsAttacking", true);
 
         //make sure enemy doesnt move
         agent.SetDestination(transform.position);
+        weaponHitbox.SetActive(true);
         //print("attack");
 
         transform.LookAt(player);
@@ -150,7 +152,8 @@ public class EnemyAi : MonoBehaviour
     private void ResetAttack()
     {
         alreadyAttacked = false;
-        anim.SetBool("IsAttacking", false);
+        weaponHitbox.SetActive(false);
+        //anim.SetBool("IsAttacking", false);
     }
 
 }
