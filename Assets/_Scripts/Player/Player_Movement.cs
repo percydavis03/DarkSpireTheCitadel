@@ -166,7 +166,6 @@ public class Player_Movement : MonoBehaviour
         if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack) //ATTACK
             {
             anim.SetBool("isAttacking", true);
-            swordHitbox.SetActive(true);
             canMove = false;
             canRotate = false;
             isAttacking = true;
