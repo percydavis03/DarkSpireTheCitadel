@@ -183,7 +183,6 @@ public class Player_Movement : MonoBehaviour
         {
             isSpinAttack = true;
             anim.SetBool("isSpinAttack", true);
-            swordHitbox.SetActive(true);
             canMove = false;
             canRotate = false;
             isAttacking = true;
