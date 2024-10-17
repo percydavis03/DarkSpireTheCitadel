@@ -6,7 +6,7 @@ using UnityEngine.AI;
 public class EnemyAi : MonoBehaviour
 {
     public NavMeshAgent agent;
-
+   
     public Transform player;
 
     public LayerMask whatIsGround, whatIsPlayer;
@@ -30,6 +30,7 @@ public class EnemyAi : MonoBehaviour
 
     //Animation
     public Animator anim;
+    public GameObject animationSource;
 
     //SoulPoints
     public GameObject soulPrefab;
@@ -46,7 +47,10 @@ public class EnemyAi : MonoBehaviour
 
         //anim = GameObject.FindGameObjectWithTag("Enemy").GetComponent<Animator>();
     }
-
+    private void Start()
+    {
+        anim = animationSource.GetComponent<Animator>();
+    }
     private void Update()
     {
         //Check for sight and attack
@@ -64,10 +68,17 @@ public class EnemyAi : MonoBehaviour
             s.transform.position = transform.position;
             Destroy(gameObject);
         }
-       
+        if (agent.velocity.magnitude > 0.1f)
+        {
+            anim.SetBool("IsWalk", true);
+        }
+        if (agent.velocity.magnitude < 0.1f)
+        {
+            anim.SetBool("IsWalk", false);
+        }
     }
 
-    private void OnTriggerEnter(Collider other)
+    /*private void OnTriggerEnter(Collider other)
     {
         
         if (other.gameObject.CompareTag("Attack"))
@@ -75,7 +86,7 @@ public class EnemyAi : MonoBehaviour
             print("ouch");
             enemyHP--;
         }
-    }
+    }*/
     
 
     private void Patroling()
@@ -114,17 +125,18 @@ public class EnemyAi : MonoBehaviour
     private void ChasePlayer()
     {
         agent.SetDestination(player.position);
+        transform.LookAt(player);
     }
 
     private void AttackPlayer()
     {
         //put attack here:
         //print("Attacking");
-        //anim.SetBool("Attacking", true);
+        anim.SetBool("IsAttacking", true);
 
         //make sure enemy doesnt move
         agent.SetDestination(transform.position);
-        print("attack");
+        //print("attack");
 
         transform.LookAt(player);
 
@@ -138,7 +150,7 @@ public class EnemyAi : MonoBehaviour
     private void ResetAttack()
     {
         alreadyAttacked = false;
-        //anim.SetBool("Attacking", false);
+        anim.SetBool("IsAttacking", false);
     }
 
 }
