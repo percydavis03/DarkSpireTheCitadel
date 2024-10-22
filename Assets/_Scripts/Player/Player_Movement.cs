@@ -16,6 +16,7 @@ public class Player_Movement : MonoBehaviour
     //attacks
     public GameObject swordHitbox;
     private bool isAttacking;
+    public float spinDistance;
     //FOR THE MOVEMENT:
     //new:
     public int speed;
@@ -102,9 +103,15 @@ public class Player_Movement : MonoBehaviour
     public void Reposition()
     {
         //thisGameObject.transform.position = new Vector3 (animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z);
-        Vector3 currentPos = new Vector3(thisGameObject.transform.position.x, transform.position.y, thisGameObject.transform.position.z);
-        Vector3 posOffset = new Vector3(animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z) - thisGameObject.transform.position;
-        transform.position = currentPos + posOffset;
+        //Vector3 currentPos = new Vector3(thisGameObject.transform.position.x, transform.position.y, thisGameObject.transform.position.z);
+        //Vector3 posOffset = new Vector3(animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z) - thisGameObject.transform.position;
+        //transform.position = currentPos + posOffset;
+        print("move");
+        speed = 1;
+        Vector3 target = new Vector3(transform.position.x, transform.position.y, transform.position.z + 5.78f);
+        thisGameObject.transform.position = Vector3.MoveTowards(transform.position, target, Time.deltaTime * 0.5f);
+        
+        //transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + 5.78f);
     }
 
     public void SwordOn()
@@ -116,18 +123,24 @@ public class Player_Movement : MonoBehaviour
         swordHitbox.SetActive(false);
     }
 
+    public void StopMoving()
+    {
+        moveDirection = Vector3.zero;
+        speed = thisGameSave.playerSpeed;
+    }
     void Update()
     {
-
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right = transform.TransformDirection(Vector3.right);
-
-       
-        float curSpeedX = canMove ? (speed) * Input.GetAxis("Vertical") : 0;
-        float curSpeedY = canMove ? (speed) * Input.GetAxis("Horizontal") : 0;
+        if (canMove)
+        {
+            Vector3 forward = transform.TransformDirection(Vector3.forward);
+            Vector3 right = transform.TransformDirection(Vector3.right);
+            float curSpeedX = canMove ? (speed) * Input.GetAxis("Vertical") : 0;
+            float curSpeedY = canMove ? (speed) * Input.GetAxis("Horizontal") : 0;
+            
+            moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+           
+        }
         float movementDirectionY = moveDirection.y;
-        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-
         //for making the character face forwards
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
@@ -167,6 +180,7 @@ public class Player_Movement : MonoBehaviour
             {
             anim.SetBool("isAttacking", true);
             canMove = false;
+            moveDirection = Vector3.zero;
             canRotate = false;
             isAttacking = true;
             }

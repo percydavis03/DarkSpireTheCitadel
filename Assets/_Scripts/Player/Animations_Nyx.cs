@@ -24,12 +24,12 @@ public class Animations_Nyx : MonoBehaviour
     }
     public void StoppedMoving()
     {
-        Player_Movement.instance.Reposition();
-        Debug.Log("spined");
+        Player_Movement.instance.StopMoving();
     }
     public void StartSpinAttack()
     {
-        Player_Movement.instance.isSpinAttack = true;
+        //Player_Movement.instance.isSpinAttack = true;
+        Player_Movement.instance.Reposition();
     }
 
     public void ActivateSword()
