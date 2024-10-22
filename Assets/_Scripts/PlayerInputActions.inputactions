@@ -31,6 +31,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "PauseMenu",
+                    "type": "Button",
+                    "id": "77a97e5e-3da9-490f-a33f-c15766630439",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Inventory",
+                    "type": "Button",
+                    "id": "ff8fc92c-62da-460c-9527-3f2587829045",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -99,74 +117,48 @@
                     "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
-                }
-            ]
-        },
-        {
-            "name": "UI",
-            "id": "a620761e-244e-4d81-95c4-6a4e12f61255",
-            "actions": [
-                {
-                    "name": "OpenMenu",
-                    "type": "Button",
-                    "id": "e5528415-86e2-481d-9a16-64d145532129",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 },
                 {
-                    "name": "OpenInventory",
-                    "type": "Button",
-                    "id": "69e918f0-d7f8-4a43-b71f-cc228449cf53",
-                    "expectedControlType": "Button",
-                    "processors": "",
+                    "name": "",
+                    "id": "7c6e5070-8928-4878-a8ba-5582fcba2ccb",
+                    "path": "<Keyboard>/escape",
                     "interactions": "",
-                    "initialStateCheck": false
-                }
-            ],
-            "bindings": [
+                    "processors": "",
+                    "groups": "",
+                    "action": "PauseMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
                 {
                     "name": "",
-                    "id": "87b945c0-607c-4042-b31e-d564728b7229",
+                    "id": "f9374fb3-84ad-41b4-82ed-52cd8dbbf87e",
                     "path": "<Gamepad>/dpad/up",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "OpenMenu",
+                    "action": "PauseMenu",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "90bf7764-5790-481e-88e0-2ff14fa1cb01",
-                    "path": "<Keyboard>/tab",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "OpenMenu",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "2aacedb3-4dd5-472a-bf02-84fb756a3800",
+                    "id": "9cc72792-03d4-4143-8d8c-79db25ec2893",
                     "path": "<Gamepad>/dpad/left",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "OpenInventory",
+                    "action": "Inventory",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "df6b936f-6ae8-49d0-be17-3365d90b32ad",
+                    "id": "3fd443b1-a6d5-4aae-baba-9848b0a3f4d1",
                     "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "OpenInventory",
+                    "action": "Inventory",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

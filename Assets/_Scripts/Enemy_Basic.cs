@@ -10,6 +10,7 @@ public class Enemy_Basic : MonoBehaviour
     public List<GameObject> bloodSplats = new List<GameObject>();
     public int randomListObject;
     public GameObject enemyDrop;
+    private Rigidbody rb;
     void Start()
     {
         
@@ -17,7 +18,7 @@ public class Enemy_Basic : MonoBehaviour
     private void Awake()
     {
         damageTaken = thisGameSave.mainAttackDamage; 
-        print(damageTaken);
+        rb = GetComponent<Rigidbody>();
     }
     private void OnTriggerEnter(Collider other)
     {

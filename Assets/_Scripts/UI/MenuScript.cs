@@ -17,8 +17,8 @@ public class MenuScript : MonoBehaviour
     public bool movePause;
     //input system
     public PlayerInputActions playerControls;
-    private InputAction inventory;
-    private InputAction mainMenu;
+    private InputAction openInfoMenu;
+    private InputAction openPauseMenu;
 
     private void Awake()
     {
@@ -38,15 +38,15 @@ public class MenuScript : MonoBehaviour
 
     private void OnEnable()
     {
-        //inventory = playerControls.UI.OpenInventory;
-        //inventory.Enable();
-        //mainMenu = playerControls.UI.OpenMenu;
-        //mainMenu.Enable();
+       // openInfoMenu = playerControls.General.Inventory;
+        //openInfoMenu.Enable();
+        //openPauseMenu = playerControls.General.PauseMenu;
+        //openPauseMenu.Enable();
     }
     private void OnDisable()
     {
-        //inventory.Disable();
-        //mainMenu.Disable();
+        //openInfoMenu.Disable();
+        //openPauseMenu.Disable();
     }
 
 
@@ -68,7 +68,6 @@ public class MenuScript : MonoBehaviour
             if (pauseMenu.activeInHierarchy)
             { 
                 pauseMenu.SetActive(false);
-               
             }
            if (infoMenu.activeInHierarchy)
             {
@@ -78,7 +77,7 @@ public class MenuScript : MonoBehaviour
         //change when the input system stops being a little bitch
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (!pauseMenu.activeInHierarchy)
+            if (!pauseMenu.activeInHierarchy && !infoMenu.activeInHierarchy)
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
@@ -86,7 +85,6 @@ public class MenuScript : MonoBehaviour
             if (pauseMenu.activeInHierarchy)
             {
                 pauseMenu.SetActive(false);
-
             }
             else
             {
@@ -95,6 +93,7 @@ public class MenuScript : MonoBehaviour
         }
         //change when the input system stops being a little bitch
         if (Input.GetKeyDown(KeyCode.Tab))
+        //if (openInfoMenu.IsPressed())
         {
             InventoryManager.Instance.ListItems();
             

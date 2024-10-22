@@ -12,6 +12,7 @@ public class Player_Movement : MonoBehaviour
     private InputAction attack;
     private InputAction jump;
     private InputAction sprint;
+    private InputAction openInfoMenu;
 
     //attacks
     public GameObject swordHitbox;
@@ -68,6 +69,9 @@ public class Player_Movement : MonoBehaviour
     }
     private void OnEnable() //need for input system
     {
+        openInfoMenu = playerControls.General.Inventory;
+        openInfoMenu.Enable();
+
         attack = playerControls.General.Attack;
         attack.Enable();
 
@@ -83,6 +87,7 @@ public class Player_Movement : MonoBehaviour
         attack.Disable();
         jump.Disable();
         sprint.Disable();
+        openInfoMenu.Disable();
     }
     IEnumerator WaitUntil(float seconds)
     {
@@ -130,6 +135,11 @@ public class Player_Movement : MonoBehaviour
     }
     void Update()
     {
+        if (openInfoMenu.IsPressed())
+        {
+            print("openmenu");
+        }
+
         if (canMove)
         {
             Vector3 forward = transform.TransformDirection(Vector3.forward);

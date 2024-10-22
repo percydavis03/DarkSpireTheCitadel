@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using UnityEditor.Rendering;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -16,6 +17,12 @@ public class InventoryManager : MonoBehaviour
     public TextMeshProUGUI popupText;
     public DOTweenVisualManager visualManager;
     public DOTweenAnimation anim;
+
+    //dialogue
+    public GameObject dialoguePopup;
+    public bool isDialogue;
+    public TextMeshProUGUI dialogueText;
+    private int popupWaitTime;
 
     //weapons
     public Transform weaponsLocation;
@@ -71,6 +78,7 @@ public class InventoryManager : MonoBehaviour
         popupText.text = item.itemPopup.ToString();
 
         popupBox.SetActive(true);
+        popupWaitTime = 5;
         StartCoroutine(Wait());
 
         /*if (visualManager != null)
@@ -82,10 +90,24 @@ public class InventoryManager : MonoBehaviour
         
     }
 
+    public void DialoguePopup(string dialogue)
+    {
+        dialogueText.text = dialogue;
+
+        dialoguePopup.SetActive(true);
+        StartCoroutine(Wait());
+    }
+
+    public void SetWait(int waitTime)
+    {
+        waitTime = popupWaitTime;
+    }
+
     IEnumerator Wait()
     {
         yield return new WaitForSeconds(5);
         popupBox.SetActive(false);
+        dialoguePopup.SetActive(false);
     }
 
 
