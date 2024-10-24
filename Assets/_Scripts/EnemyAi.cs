@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,6 +9,7 @@ public class EnemyAi : MonoBehaviour
     public NavMeshAgent agent;
    
     public Transform player;
+    public GameObject thisGuy;
 
     public LayerMask whatIsGround, whatIsPlayer;
 
@@ -62,6 +64,11 @@ public class EnemyAi : MonoBehaviour
         if(playerInSightRange && !playerInAttackRange) ChasePlayer();
         if(playerInAttackRange && playerInSightRange) AttackPlayer();
 
+        if (playerInAttackRange)
+        {
+            agent.SetDestination(transform.position);
+        }
+
         if(enemyHP == 0)
         {
             
@@ -78,17 +85,6 @@ public class EnemyAi : MonoBehaviour
             anim.SetBool("IsWalk", false);
         }
     }
-
-    /*private void OnTriggerEnter(Collider other)
-    {
-        
-        if (other.gameObject.CompareTag("Attack"))
-        {
-            print("ouch");
-            enemyHP--;
-        }
-    }*/
-    
 
     private void Patroling()
     {
@@ -137,7 +133,7 @@ public class EnemyAi : MonoBehaviour
 
         //make sure enemy doesnt move
         agent.SetDestination(transform.position);
-        weaponHitbox.SetActive(true);
+        //weaponHitbox.SetActive(true);
         //print("attack");
 
         transform.LookAt(player);

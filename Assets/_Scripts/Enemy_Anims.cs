@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Enemy_Anims : MonoBehaviour
 {
+    public void Stab()
+    {
+        Enemy_Basic.instance.WeaponOn();
+    }
     public void AttackEnd()
     {
         Enemy_Basic.instance.StopAttacking();
