@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Enemy_Basic : MonoBehaviour
 {
+    public static Enemy_Basic instance;
     public PlayerSaveState thisGameSave;
     public float enemyHP = 30;
     public int damageTaken;
@@ -11,22 +12,79 @@ public class Enemy_Basic : MonoBehaviour
     public int randomListObject;
     public GameObject enemyDrop;
     private Rigidbody rb;
-    void Start()
+
+    //Animation
+    public Animator anim;
+    public GameObject animationSource;
+    //damage
+    private int hitCount;
+    bool isHit;
+    //combat
+    public GameObject spear_hitbox;
+    private void Start()
     {
-        
+        anim = animationSource.GetComponent<Animator>();
+        hitCount = 0;
     }
     private void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+        }
         damageTaken = thisGameSave.mainAttackDamage; 
         rb = GetComponent<Rigidbody>();
+    }
+
+    public void TakeDamage()
+    {
+        enemyHP = enemyHP - damageTaken;
+        isHit = true;
+        if (hitCount == 1)
+        {
+            anim.SetInteger("HurtAnim", 1);
+        }
+        if (hitCount == 2)
+        {
+            anim.SetInteger("HurtAnim", 2);
+        }
+        if (hitCount == 3) //fall down
+        {
+            anim.SetInteger("HurtAnim", 3);
+            
+        }
+    }
+    public void StopHurt()
+    {
+        isHit = false;
+        anim.SetInteger("HurtAnim", 0);
+        print("hit");
+    }
+    public void GetUp()
+    {
+        hitCount = 0;
+        isHit = false;
+        anim.SetInteger("HurtAnim", 0);
+        print("bighit");
+    }
+
+    public void StopAttacking()
+    {
+        anim.SetBool("IsAttacking", false);
+        spear_hitbox.SetActive(false);
     }
     private void OnTriggerEnter(Collider other)
     {
         print("collide");
         if (other.gameObject.CompareTag("Weapon"))
         {
-            enemyHP = enemyHP - damageTaken;
-            randomListObject = Random.Range(0, bloodSplats.Count);
+            hitCount++;
+            if (isHit == false)
+            {
+                TakeDamage();
+            }
+           
+            //randomListObject = Random.Range(0, bloodSplats.Count);
             
             print("ow");
         }
