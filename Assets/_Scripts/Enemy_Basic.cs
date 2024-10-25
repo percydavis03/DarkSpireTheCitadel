@@ -42,6 +42,7 @@ public class Enemy_Basic : MonoBehaviour
     public void TakeDamage()
     {
         isHit = true;
+        anim.SetBool("IsHurting", true);
        if (enemyHP != 0)
         {
             enemyHP = enemyHP - damageTaken;
@@ -64,6 +65,7 @@ public class Enemy_Basic : MonoBehaviour
     }
     public void StopHurt()
     {
+        anim.SetBool("IsHurting", false);
         isHit = false;
         anim.SetInteger("HurtAnim", 0);
         print("hit");
@@ -72,6 +74,7 @@ public class Enemy_Basic : MonoBehaviour
     {
         hitCount = 0;
         isHit = false;
+        anim.SetBool("IsHurting", false);
         anim.SetInteger("HurtAnim", 0);
         print("bighit");
     }
@@ -89,11 +92,11 @@ public class Enemy_Basic : MonoBehaviour
         print("collide");
         if (other.gameObject.CompareTag("Weapon"))
         {
-            hitCount++;
-            TakeDamage();
+            
             if (isHit == false)
             {
-                
+                hitCount++;
+                TakeDamage();
             }
            
             //randomListObject = Random.Range(0, bloodSplats.Count);
