@@ -3602,6 +3602,90 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1001 &527524673
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1551250344}
+    m_Modifications:
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4681355492210002984, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: dialogueText
+      value: Does one feel the lure of purity within stone?
+      objectReference: {fileID: 0}
+    - target: {fileID: 5865308944297280313, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 2b47bfa32954e304d95f58eb6bc24f3d, type: 2}
+    - target: {fileID: 6212382405707213967, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+        type: 3}
+      propertyPath: m_Name
+      value: StatueDialogue
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f9d7b0952555b8d44a29673ef0fdb5b5, type: 3}
+--- !u!4 &527524674 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 996266472445419067, guid: f9d7b0952555b8d44a29673ef0fdb5b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 527524673}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &568684765
 GameObject:
   m_ObjectHideFlags: 0
@@ -8188,6 +8272,24 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1987387788}
   m_SourcePrefab: {fileID: 100100000, guid: 2d42524ca56b0a744a3a92735fcdf2fd, type: 3}
+--- !u!1 &1190132083 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6203382701816565466, guid: 2d42524ca56b0a744a3a92735fcdf2fd,
+    type: 3}
+  m_PrefabInstance: {fileID: 1190132082}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1190132084 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 848087066949283756, guid: 2d42524ca56b0a744a3a92735fcdf2fd,
+    type: 3}
+  m_PrefabInstance: {fileID: 1190132082}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1190132083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1191685757
 GameObject:
   m_ObjectHideFlags: 0
@@ -9465,6 +9567,9 @@ MonoBehaviour:
   popupText: {fileID: 1373885601}
   visualManager: {fileID: 1373885604}
   anim: {fileID: 0}
+  dialoguePopup: {fileID: 1190132083}
+  isDialogue: 0
+  dialogueText: {fileID: 1190132084}
   weaponsLocation: {fileID: 733052415}
   weaponIventoryItem: {fileID: 3040029780366488299, guid: 6e9907ee02f0656488faba9da43905e3,
     type: 3}
@@ -11389,6 +11494,38 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1551250343
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1551250344}
+  m_Layer: 0
+  m_Name: Dialogue
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1551250344
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1551250343}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.1091919, y: 2.79, z: 29.39}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 527524674}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1571373590
 GameObject:
   m_ObjectHideFlags: 0
@@ -15854,3 +15991,4 @@ SceneRoots:
   - {fileID: 97352768}
   - {fileID: 238178408}
   - {fileID: 1460188057}
+  - {fileID: 1551250344}
