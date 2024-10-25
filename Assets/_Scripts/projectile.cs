@@ -34,7 +34,8 @@ public class projectile : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            Player_Health_Manager.GetInstance().DamangePlayer(10f);
+            //GameManager.GetInstance().DamagePlayer();
+            Player_Health_Manager.GetInstance().DamangePlayer(3);
             Destroy(this);
         }
     }

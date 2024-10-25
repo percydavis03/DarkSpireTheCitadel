@@ -183,6 +183,9 @@ AnimatorStateTransition:
   - m_ConditionMode: 1
     m_ConditionEvent: IsWalk
     m_EventTreshold: 0
+  - m_ConditionMode: 2
+    m_ConditionEvent: IsAttacking
+    m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -2073615135892556552}
   m_Solo: 0
@@ -334,7 +337,7 @@ AnimatorStateMachine:
     m_Position: {x: 470, y: -230, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 5250277672993858595}
-    m_Position: {x: 650, y: 70, z: 0}
+    m_Position: {x: 690, y: 90, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -2073615135892556552}
     m_Position: {x: 620, y: -540, z: 0}
@@ -598,6 +601,9 @@ AnimatorStateTransition:
   - m_ConditionMode: 6
     m_ConditionEvent: HurtAnim
     m_EventTreshold: 1
+  - m_ConditionMode: 2
+    m_ConditionEvent: IsAttacking
+    m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -4657907089807614944}
   m_Solo: 0
@@ -793,6 +799,9 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 2
     m_ConditionEvent: IsAttacking
+    m_EventTreshold: 0
+  - m_ConditionMode: 1
+    m_ConditionEvent: IsWalk
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -2073615135892556552}

@@ -12,7 +12,7 @@ public class Boss : MonoBehaviour
     public AudioSource yippie;
 
     [SerializeField] private float projectileSpeed;
-    [SerializeField] private projectile projectilePrefab;
+    [SerializeField] public projectile projectilePrefab;
     [SerializeField] private float timer = 5;
     private float projectileTime;
     public Transform spawnPoint;
@@ -34,9 +34,12 @@ public class Boss : MonoBehaviour
          explosionPos = transform.position;
         rb = GetComponent<Rigidbody>();
         inRing = false;
-        currentHealth = hurtManager.Health;
+        currentHealth = 300;
+        //currentHealth = hurtManager.Health;
     }
-   
+
+    
+
     // Update is called once per frame
     void Update()
     {
@@ -44,7 +47,7 @@ public class Boss : MonoBehaviour
         boss.SetDestination(player.position);
         ShootAtPlayer();
         
-        currentHealth = hurtManager.Health;
+        //currentHealth = hurtManager.Health;
         if (currentHealth <= 0)
         {
             Dead();
@@ -62,10 +65,11 @@ public class Boss : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player"))
+        if (other.gameObject.CompareTag("Weapon"))
         {
             inRing = true;
             ringOfFire.SetActive(true);
+            currentHealth -= 10;
             //Rigidbody rb = hit.GetComponent<Rigidbody>();
             Invoke("DoKnock", 3);
             //print("uhh");
@@ -86,8 +90,8 @@ public class Boss : MonoBehaviour
         if (inRing)
         {
             ringOfFire.SetActive(false);
-            player.GetComponent<Knock>().KnockBackBig(player);
-            print("gotkncoked");
+            //player.GetComponent<Knock>().KnockBackBig(player);
+            //print("gotkncoked");
         }
         else
         {

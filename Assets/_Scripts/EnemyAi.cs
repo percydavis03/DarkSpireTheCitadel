@@ -54,6 +54,7 @@ public class EnemyAi : MonoBehaviour
     private void Start()
     {
         anim = animationSource.GetComponent<Animator>();
+        alreadyAttacked = false;
     }
     private void Update()
     {
@@ -63,9 +64,9 @@ public class EnemyAi : MonoBehaviour
 
         if (!playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) Patroling();
         if(playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) ChasePlayer();
-        if(playerInAttackRange && playerInSightRange && !anim.GetBool("IsHurting")) AttackPlayer();
+        if(playerInAttackRange && playerInSightRange ) AttackPlayer();
 
-        if (playerInAttackRange)
+        /*if (playerInAttackRange)
         {
             agent.SetDestination(transform.position);
             if (alreadyAttacked)
@@ -73,15 +74,15 @@ public class EnemyAi : MonoBehaviour
                 GetComponent<NavMeshAgent>().speed = setSpeed;
                 ResetAttack();
             }
-        }
+        }*/
 
-        /*if(enemyHP == 0)
+        if(enemyHP == 0)
         {
             
             GameObject s = Instantiate(soulPrefab);
             s.transform.position = transform.position;
             Destroy(gameObject);
-        }*/
+        }
         if (agent.velocity.magnitude > 0.1f && !anim.GetBool("IsHurting") && !anim.GetBool("IsAttacking"))
         {
             anim.SetBool("IsWalk", true);
@@ -91,7 +92,11 @@ public class EnemyAi : MonoBehaviour
             anim.SetBool("IsWalk", false);
         }
     }
-
+    IEnumerator Wait(float s)
+    {
+        yield return new WaitForSeconds(s);
+        ResetAttack();
+    }
     private void Patroling()
     {
         if (!walkPointSet) SearchWalkPoint();
@@ -133,18 +138,42 @@ public class EnemyAi : MonoBehaviour
 
     private void AttackPlayer()
     {
-        anim.SetBool("IsAttacking", true);
-        GetComponent<NavMeshAgent>().speed = 0;
-        //make sure enemy doesnt move
         agent.SetDestination(transform.position);
+        weaponHitbox.SetActive(true);
+        anim.SetBool("IsAttacking", true);
 
-        transform.LookAt(player);
+        //transform.LookAt(player);
 
-        if(!alreadyAttacked)
+        if (!alreadyAttacked)
         {
             alreadyAttacked = true;
-            Invoke(nameof(ResetAttack), timeBetweenAttacks);
+            StartCoroutine(Wait(1.5f));
         }
+        /*anim.SetBool("IsAttacking", true);
+        yield return new WaitForSeconds(.25f);
+        if (!alreadyAttacked)
+        {
+            alreadyAttacked = true;
+            print("wjat???");
+            anim.SetBool("IsAttacking", true);
+            StartCoroutine(Wait(2));
+            alreadyAttacked = true;
+            weaponHitbox.SetActive(true);
+            
+            GetComponent<NavMeshAgent>().speed = 0;
+            //make sure enemy doesnt move
+            agent.SetDestination(transform.position);
+
+            transform.LookAt(player);
+
+            
+        }*/
+
+
+
+
+
+
     }
 
     private void ResetAttack()
@@ -152,7 +181,7 @@ public class EnemyAi : MonoBehaviour
         alreadyAttacked = false;
         weaponHitbox.SetActive(false);
         GetComponent<NavMeshAgent>().speed = setSpeed;
-        //anim.SetBool("IsAttacking", false);
+        anim.SetBool("IsAttacking", false);
     }
 
 }

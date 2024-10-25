@@ -42,7 +42,7 @@ public class HurtManager : MonoBehaviour
             Invoke("beHit",.25f);
         }
 
-        anim.SetInteger(annimNames[0], hurtNum);
+        //anim.SetInteger(annimNames[0], hurtNum);
 
         if(Health <= 0)
         {

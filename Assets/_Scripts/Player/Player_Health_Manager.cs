@@ -71,9 +71,10 @@ public class Player_Health_Manager : MonoBehaviour
       
     }
 
-    public void DamangePlayer(float f)
+    public void DamangePlayer(int f)
     {
-        currentHealth -= f;
+        thisGameSave.hitpoints -= f;
+        print("gay sex");
     }
     
     

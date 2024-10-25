@@ -36,7 +36,7 @@ public class Corruption : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        corruptionFill.fillAmount = corruptionLevel/10f;
+        //corruptionFill.fillAmount = corruptionLevel/10f;
 
         
 
@@ -92,7 +92,7 @@ public class Corruption : MonoBehaviour
     {
         heartBeat.Play();
         corruptionGlow.SetActive(true);
-        Player_Health_Manager.GetInstance().DamangePlayer(0.01f);
+        Player_Health_Manager.GetInstance().DamangePlayer(1);
         yield return new WaitForSeconds(2f);
 
     }

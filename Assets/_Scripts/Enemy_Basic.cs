@@ -52,7 +52,11 @@ public class Enemy_Basic : MonoBehaviour
         //rb.AddForce(dir, ForceMode.Impulse);
     }
 
-
+    IEnumerator Wait(float s)
+    {
+        yield return new WaitForSeconds(s);
+        StopHurt();
+    }
 
     public void TakeDamage()
     {
@@ -73,6 +77,7 @@ public class Enemy_Basic : MonoBehaviour
             anim.SetBool("IsHurting", true);
             anim.SetInteger("HurtAnim", 1);
             print("hurt1");
+            StartCoroutine(Wait(1f));
         }
         else if (hitCount == 2 && !anim.GetBool("IsHurting"))
         {
@@ -81,6 +86,7 @@ public class Enemy_Basic : MonoBehaviour
 
             anim.SetInteger("HurtAnim", 2);
             print("hurt2");
+            StartCoroutine(Wait(1f));
         }
         else if (hitCount == 3 && !anim.GetBool("IsHurting")) //fall down
         {
@@ -88,6 +94,7 @@ public class Enemy_Basic : MonoBehaviour
             anim.SetBool("IsHurting", true);
             anim.SetInteger("HurtAnim", 3);
             print("hurt3");
+            StartCoroutine(Wait(2f));
         }
     }
     public void StopHurt()
