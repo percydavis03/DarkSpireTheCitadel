@@ -12,7 +12,7 @@ public class Main_Player : MonoBehaviour
     public GameObject bloodSplat;
     public List<GameObject> bloodSplats = new List<GameObject>();
     public int randomListObject;
-
+    public GameObject hurt;
 
     private void Awake()
     {
@@ -27,18 +27,32 @@ public class Main_Player : MonoBehaviour
     {
         
     }
+    IEnumerator Wait()
+    {
+        yield return new WaitForSeconds(1);
+        hurt.SetActive(false);
+    }
+
+    public void TakeDamage()
+    {
+        GameManager.instance.DamagePlayer();
+        print("ow");
+        hurt.SetActive(true);
+        StartCoroutine(Wait());
+
+        randomListObject = Random.Range(0, bloodSplats.Count);
+        GameObject b = Instantiate(bloodSplats[randomListObject]);
+        b.transform.position = new Vector3(transform.position.x, transform.position.y - 0.9f, transform.position.z);
+        b.transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
+        //ough.Play();
+    }
+
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Enemy"))
         {
-            GameManager.instance.DamagePlayer();
-            print("ow");
-            randomListObject = Random.Range(0, bloodSplats.Count);
-            GameObject b = Instantiate(bloodSplats[randomListObject]);
-            b.transform.position = new Vector3 (transform.position.x, transform.position.y - 0.9f, transform.position.z);
-            b.transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
-            //ough.Play();
+           TakeDamage();
         }
         if (other.gameObject.CompareTag("JumpReward"))
         {

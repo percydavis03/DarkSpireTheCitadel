@@ -15,6 +15,7 @@ public class EnemyAi : MonoBehaviour
 
     //Enemy
     public int enemyHP;
+    public int setSpeed;
 
     //Patrolling 
     public Vector3 walkPoint;
@@ -67,16 +68,21 @@ public class EnemyAi : MonoBehaviour
         if (playerInAttackRange)
         {
             agent.SetDestination(transform.position);
+            if (alreadyAttacked)
+            {
+                GetComponent<NavMeshAgent>().speed = setSpeed;
+                ResetAttack();
+            }
         }
 
-        if(enemyHP == 0)
+        /*if(enemyHP == 0)
         {
             
             GameObject s = Instantiate(soulPrefab);
             s.transform.position = transform.position;
             Destroy(gameObject);
-        }
-        if (agent.velocity.magnitude > 0.1f)
+        }*/
+        if (agent.velocity.magnitude > 0.1f && !anim.GetBool("IsHurting") && !anim.GetBool("IsAttacking"))
         {
             anim.SetBool("IsWalk", true);
         }
@@ -127,14 +133,10 @@ public class EnemyAi : MonoBehaviour
 
     private void AttackPlayer()
     {
-        //put attack here:
-        //print("Attacking");
         anim.SetBool("IsAttacking", true);
-
+        GetComponent<NavMeshAgent>().speed = 0;
         //make sure enemy doesnt move
         agent.SetDestination(transform.position);
-        //weaponHitbox.SetActive(true);
-        //print("attack");
 
         transform.LookAt(player);
 
@@ -149,6 +151,7 @@ public class EnemyAi : MonoBehaviour
     {
         alreadyAttacked = false;
         weaponHitbox.SetActive(false);
+        GetComponent<NavMeshAgent>().speed = setSpeed;
         //anim.SetBool("IsAttacking", false);
     }
 

@@ -101,7 +101,6 @@ public class Player_Movement : MonoBehaviour
         swordHitbox.SetActive(false);
         canMove = true;
         isAttacking = false;
-        print("attack ended");
         canRotate = true;
     }
 
