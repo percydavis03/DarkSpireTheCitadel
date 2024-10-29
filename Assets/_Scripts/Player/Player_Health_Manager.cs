@@ -66,6 +66,7 @@ public class Player_Health_Manager : MonoBehaviour
         if (currentHealth <= 0)
         {
             print("Dead");
+            thisGameSave.Init();
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             //StartCoroutine(DeathScreen());
         }

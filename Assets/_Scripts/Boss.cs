@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class Boss : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class Boss : MonoBehaviour
     public Transform spawnPoint;
     public Transform spawnPoint2;
     public float enemySpeed;
+    public GameObject blockExit;
 
     //EXPLODE
     public float radius = 5f;
@@ -27,11 +29,14 @@ public class Boss : MonoBehaviour
 
     public GameObject ringOfFire;
     private bool inRing;
+
+    //hp
     public float currentHealth;
-    // Start is called before the first frame update
+    public float maxHP;
+    public Image healthFill;
     void Start()
     {
-         explosionPos = transform.position;
+        explosionPos = transform.position;
         rb = GetComponent<Rigidbody>();
         inRing = false;
         currentHealth = 300;
@@ -46,7 +51,8 @@ public class Boss : MonoBehaviour
         transform.LookAt(player);
         boss.SetDestination(player.position);
         ShootAtPlayer();
-        
+        healthFill.fillAmount = currentHealth / maxHP;
+
         //currentHealth = hurtManager.Health;
         if (currentHealth <= 0)
         {
@@ -61,6 +67,7 @@ public class Boss : MonoBehaviour
     void Dead()
     {
         yippie.Play();
+        blockExit.SetActive(false);
         Destroy(gameObject);
     }
     private void OnTriggerEnter(Collider other)

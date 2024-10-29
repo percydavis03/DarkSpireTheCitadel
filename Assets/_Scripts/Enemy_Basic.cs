@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
+ 
 
 public class Enemy_Basic : MonoBehaviour
 {
@@ -9,6 +12,7 @@ public class Enemy_Basic : MonoBehaviour
     public PlayerSaveState thisGameSave;
     //stats
     public float enemyHP = 30;
+    public float maxEnemyHP = 30;
     public int damageTaken;
     public int setSpeed;
 
@@ -27,6 +31,7 @@ public class Enemy_Basic : MonoBehaviour
     public GameObject thisGuy;
     public Transform player;
     public GameObject pain;
+    public Image healthFill;
     //combat
     public GameObject spear_hitbox;
     private void Start()
@@ -154,6 +159,7 @@ public class Enemy_Basic : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        healthFill.fillAmount = enemyHP / maxEnemyHP;
         if (enemyHP <= 0)
         {
            if (!dead)

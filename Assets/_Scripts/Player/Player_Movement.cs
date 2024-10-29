@@ -146,8 +146,14 @@ public class Player_Movement : MonoBehaviour
             float curSpeedX = canMove ? (speed) * Input.GetAxis("Vertical") : 0;
             float curSpeedY = canMove ? (speed) * Input.GetAxis("Horizontal") : 0;
             
-            moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-           
+            moveDirection = (forward * curSpeedX) + (right * curSpeedY); 
+        }
+
+        if (!isAttacking)
+        {
+            canMove = true;
+            canRotate = true;
+            anim.SetBool("isAttacking", false);
         }
         float movementDirectionY = moveDirection.y;
         //for making the character face forwards

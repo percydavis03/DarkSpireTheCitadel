@@ -273,6 +273,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thisGameSave: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
   enemyHP: 5
+  maxEnemyHP: 30
   damageTaken: 0
   setSpeed: 0
   bloodSplats: []
@@ -284,6 +285,7 @@ MonoBehaviour:
   thisGuy: {fileID: 0}
   player: {fileID: 0}
   pain: {fileID: 0}
+  healthFill: {fileID: 0}
   spear_hitbox: {fileID: 0}
 --- !u!136 &159432431
 CapsuleCollider:
@@ -812,6 +814,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thisGameSave: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
   enemyHP: 15
+  maxEnemyHP: 30
   damageTaken: 0
   setSpeed: 0
   bloodSplats: []
@@ -823,6 +826,7 @@ MonoBehaviour:
   thisGuy: {fileID: 0}
   player: {fileID: 0}
   pain: {fileID: 0}
+  healthFill: {fileID: 0}
   spear_hitbox: {fileID: 1237491182}
 --- !u!136 &560404360
 CapsuleCollider:
@@ -14133,6 +14137,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thisGameSave: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
   enemyHP: 5
+  maxEnemyHP: 30
   damageTaken: 0
   setSpeed: 0
   bloodSplats: []
@@ -14144,6 +14149,7 @@ MonoBehaviour:
   thisGuy: {fileID: 0}
   player: {fileID: 0}
   pain: {fileID: 0}
+  healthFill: {fileID: 0}
   spear_hitbox: {fileID: 0}
 --- !u!136 &1431845068
 CapsuleCollider:
@@ -14929,6 +14935,11 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 4075540614602040070}
+    - target: {fileID: 313694205494822299, guid: bbd4bd9033f4c1348ab985ffe60095e3,
+        type: 3}
+      propertyPath: enemyHP
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 2678868504578785303, guid: bbd4bd9033f4c1348ab985ffe60095e3,
         type: 3}
       propertyPath: m_LocalPosition.x
