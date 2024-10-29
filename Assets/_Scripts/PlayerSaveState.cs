@@ -17,8 +17,8 @@ public class PlayerSaveState : ScriptableObject
 
     public void Init()
     {
-        hitpoints = 5;
+        hitpoints = 60;
         maxHP = 60;
-        canJump = false;    
+        //canJump = false;    
     }
 }

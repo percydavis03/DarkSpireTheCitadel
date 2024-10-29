@@ -38,7 +38,7 @@ public class Player_Movement : MonoBehaviour
     private Vector3 moveDirection = Vector3.zero;
     private float rotationX = 0;
     private CharacterController characterController;
-    private bool canMove = true;
+    public bool canMove = true;
     bool isSprint = false;
     public bool isSpinAttack = false;
 

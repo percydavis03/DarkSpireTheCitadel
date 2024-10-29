@@ -25,6 +25,7 @@ public class Player_Health_Manager : MonoBehaviour
     // new
     public Image healthFill;
     public PlayerSaveState thisGameSave;
+  
 
     private void Awake()
     {
@@ -42,8 +43,8 @@ public class Player_Health_Manager : MonoBehaviour
             Debug.LogWarning("Found more than one Player Health Manager");
         }
         instance = this;
-      
-       
+
+        
        
         //healthSlider.maxValue = maxHealth;
        
@@ -65,7 +66,8 @@ public class Player_Health_Manager : MonoBehaviour
         if (currentHealth <= 0)
         {
             print("Dead");
-            StartCoroutine(DeathScreen());
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            //StartCoroutine(DeathScreen());
         }
 
       
@@ -85,7 +87,7 @@ public class Player_Health_Manager : MonoBehaviour
     private IEnumerator DeathScreen()
     {
         anim.SetBool(animNames[0], true);
-        Player_Manager.GetInstance().canMove = false;
+        Player_Movement.instance.canMove = false;
         yield return new WaitForSeconds(1f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
