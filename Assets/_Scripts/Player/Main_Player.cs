@@ -31,7 +31,7 @@ public class Main_Player : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
         hurt.SetActive(false);
-    }
+    } 
 
     public void TakeDamage()
     {
@@ -53,6 +53,7 @@ public class Main_Player : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy"))
         {
            TakeDamage();
+            StartCoroutine(Wait());
         }
         if (other.gameObject.CompareTag("JumpReward"))
         {

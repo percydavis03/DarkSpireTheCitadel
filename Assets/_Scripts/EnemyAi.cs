@@ -64,7 +64,7 @@ public class EnemyAi : MonoBehaviour
 
         if (!playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) Patroling();
         if(playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) ChasePlayer();
-        if(playerInAttackRange && playerInSightRange ) AttackPlayer();
+        if(playerInAttackRange && playerInSightRange && !anim.GetBool("IsHurting")) AttackPlayer();
 
         /*if (playerInAttackRange)
         {
@@ -139,7 +139,7 @@ public class EnemyAi : MonoBehaviour
     private void AttackPlayer()
     {
         agent.SetDestination(transform.position);
-        weaponHitbox.SetActive(true);
+        //weaponHitbox.SetActive(true);
         anim.SetBool("IsAttacking", true);
 
         //transform.LookAt(player);
@@ -179,7 +179,7 @@ public class EnemyAi : MonoBehaviour
     private void ResetAttack()
     {
         alreadyAttacked = false;
-        weaponHitbox.SetActive(false);
+        //weaponHitbox.SetActive(false);
         GetComponent<NavMeshAgent>().speed = setSpeed;
         anim.SetBool("IsAttacking", false);
     }

@@ -67,6 +67,7 @@ public class Enemy_Basic : MonoBehaviour
     {
         isHit = true;
         anim.SetBool("IsWalk", false);
+        anim.SetBool("IsAttacking", false);
         KnockbackEntity(player);
         pain.SetActive(true);
         if (enemyHP != 0)
