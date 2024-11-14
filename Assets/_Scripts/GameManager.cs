@@ -10,7 +10,8 @@ public class GameManager : MonoBehaviour
 
     //PlayerInfo
     public PlayerSaveState thisGameSave;
-
+    private bool isDead;
+    public bool justDied;
 
     //Scene
     public GameObject Player;
@@ -24,6 +25,7 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
         }
+        isDead = false; 
     }
     void Start()
     {
@@ -64,15 +66,28 @@ public class GameManager : MonoBehaviour
     }
     public void RestartScene()
     {
+       
         SceneManager.LoadScene(thisScene);
     }
-
+    IEnumerator WaitUntil(float seconds)
+    {
+        Player_Movement.instance.StopMoving();
+        //Player_Movement.instance.Die();
+        yield return new WaitForSeconds(seconds);
+        thisGameSave.Init();
+        RestartScene();
+    }
     void Update()
     {
         if (thisGameSave.hitpoints <= 0)
         {
-            RestartScene();
+            if (!isDead)
+            {
+                isDead = true;
+                StartCoroutine(WaitUntil(1));
+            }
         }
+           
         if (thisGameSave.hitpoints >= thisGameSave.maxHP)
         {
             

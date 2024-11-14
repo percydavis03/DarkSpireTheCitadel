@@ -19,7 +19,7 @@ public class Death : MonoBehaviour
         {
             thisGameSave.Init();
 
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }

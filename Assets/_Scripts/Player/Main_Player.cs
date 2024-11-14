@@ -1,18 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Main_Player : MonoBehaviour
 {
     public static Main_Player instance;
     public PlayerSaveState thisGameSave;
+    private bool isDead;
     
-    //damage effects 
+    [Header("Damage")] 
     public AudioSource ough;
     public GameObject bloodSplat;
     public List<GameObject> bloodSplats = new List<GameObject>();
     public int randomListObject;
     public GameObject hurt;
+    bool damageCooldown;
+    public CanvasGroup hurtScreen;
+    private bool isFaded;
+
+    [Header("Camera Shake")]
+    [SerializeField] private CameraShakeController cameraShake;
+    [SerializeField] public float shakeIntensity = 2;
+    [SerializeField] public float shakeTime = 0.5f;
 
     private void Awake()
     {
@@ -20,25 +30,32 @@ public class Main_Player : MonoBehaviour
         {
             instance = this;
         }
-
     }
     
     void Start()
     {
-        
+        isDead = false;
+        isFaded = true;
     }
     IEnumerator Wait()
     {
-        yield return new WaitForSeconds(1);
-        hurt.SetActive(false);
-    } 
+        yield return new WaitForSeconds(0.5f);
+        
+        yield return new WaitForSeconds(0.5f);
+        damageCooldown = false;
+    }
+   
 
     public void TakeDamage()
     {
+        damageCooldown = true;
         GameManager.instance.DamagePlayer();
-        print("ow");
+        Fade();
+        Debug.Log("ow");
+        cameraShake.ShakeCamera(shakeIntensity, shakeTime);
         hurt.SetActive(true);
         StartCoroutine(Wait());
+        Player_Movement.instance.GotHit();
 
         randomListObject = Random.Range(0, bloodSplats.Count);
         GameObject b = Instantiate(bloodSplats[randomListObject]);
@@ -47,12 +64,33 @@ public class Main_Player : MonoBehaviour
         //ough.Play();
     }
 
+    public void Fade()
+    {
+
+        if (isFaded)
+        {
+            hurtScreen.DOFade(1, 0.3f);
+            print("dofadein");
+            StartCoroutine(FadeWait(0.5f));
+        }
+    }
+    IEnumerator FadeWait(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        hurtScreen.DOFade(0, 0.3f);
+        print("dofadeout");
+        isFaded = true;
+    }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Enemy"))
         {
-           TakeDamage();
+           if (!damageCooldown && !isDead)
+            {
+                TakeDamage();
+                
+            }
             StartCoroutine(Wait());
         }
         if (other.gameObject.CompareTag("JumpReward"))
@@ -61,9 +99,12 @@ public class Main_Player : MonoBehaviour
             print("graduated from loser, can jump now");
         }
     }
-    
+
     void Update()
     {
-        
+        if (thisGameSave.hitpoints <= 0)
+        {
+            isDead = true;
+        }
     }
 }

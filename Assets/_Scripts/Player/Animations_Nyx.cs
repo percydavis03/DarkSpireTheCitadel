@@ -9,7 +9,13 @@ public class Animations_Nyx : MonoBehaviour
     {
         
     }
-  
+    
+    
+
+    public void Recover()
+    {
+
+    }
     public void AttackAnimEnd()
     {
         Player_Movement.instance.EndAttack();

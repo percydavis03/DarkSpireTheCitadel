@@ -93,7 +93,15 @@ public class Player_Movement : MonoBehaviour
     {
         yield return new WaitForSeconds(seconds);
     }
-
+    public void Die()
+    {
+        if (GameManager.instance.justDied == true)
+        {
+            GameManager.instance.justDied = false;
+            //anim.SetBool("isDead", true);
+        }
+       
+    }
     public void EndAttack()
     {
         anim.SetBool("isAttacking", false);
@@ -103,7 +111,15 @@ public class Player_Movement : MonoBehaviour
         isAttacking = false;
         canRotate = true;
     }
-
+    public void GotHit()
+    {
+        anim.SetBool("isHurt", true);
+    }
+    
+    public void Recover()
+    {
+        anim.SetBool("isHurt", false );
+    }
     public void Reposition()
     {
         //thisGameObject.transform.position = new Vector3 (animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z);
@@ -117,7 +133,7 @@ public class Player_Movement : MonoBehaviour
         
         //transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + 5.78f);
     }
-
+   
     public void SwordOn()
     {
         swordHitbox.SetActive(true);
@@ -134,6 +150,7 @@ public class Player_Movement : MonoBehaviour
     }
     void Update()
     {
+       
         if (openInfoMenu.IsPressed())
         {
             print("openmenu");
