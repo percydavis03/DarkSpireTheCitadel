@@ -8,6 +8,11 @@ public class Enemy_Anims : MonoBehaviour
     {
         Enemy_Basic.instance.WeaponOn();
     }
+
+    public void WeaponOff()
+    {
+        Enemy_Basic.instance.WeaponOff();
+    }
     public void AttackEnd()
     {
         Enemy_Basic.instance.StopAttacking();
@@ -21,4 +26,8 @@ public class Enemy_Anims : MonoBehaviour
         Enemy_Basic.instance.StopHurt();
     }
     
+    public void Died()
+    {
+        Enemy_Basic.instance.Death();
+    }
 }

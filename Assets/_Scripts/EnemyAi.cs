@@ -26,7 +26,6 @@ public class EnemyAi : MonoBehaviour
     //Attacking
     public float timeBetweenAttacks;
     bool alreadyAttacked;
-    public GameObject weaponHitbox;
 
     //States
     public float sightRange, attackRange;
@@ -63,7 +62,7 @@ public class EnemyAi : MonoBehaviour
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
 
         if (!playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) Patroling();
-        if(playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) ChasePlayer();
+        if(playerInSightRange && !playerInAttackRange && !Enemy_Basic.instance.dead && !anim.GetBool("IsHurting")) ChasePlayer();
         if(playerInAttackRange && playerInSightRange && !Enemy_Basic.instance.isHit) AttackPlayer();
 
         /*if (playerInAttackRange)
@@ -84,11 +83,11 @@ public class EnemyAi : MonoBehaviour
         }
         if (agent.velocity.magnitude > 0.1f && !anim.GetBool("IsHurting") && !anim.GetBool("IsAttacking"))
         {
-            anim.SetBool("IsWalking", true);
+            anim.SetBool("IsRunning", true);
         }
         if (agent.velocity.magnitude < 0.1f)
         {
-            anim.SetBool("IsWalking", false);
+            anim.SetBool("IsRunning", false);
         }
     }
     IEnumerator Wait(float s)
@@ -138,7 +137,6 @@ public class EnemyAi : MonoBehaviour
     private void AttackPlayer()
     {
         agent.SetDestination(transform.position);
-        weaponHitbox.SetActive(true);
         anim.SetBool("IsAttacking", true);
 
         //transform.LookAt(player);

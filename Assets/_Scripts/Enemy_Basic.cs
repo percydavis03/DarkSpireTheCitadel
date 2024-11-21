@@ -27,7 +27,7 @@ public class Enemy_Basic : MonoBehaviour
     //damage
     private int hitCount;
     public bool isHit;
-    bool dead;
+    public bool dead;
     public GameObject thisGuy;
     public Transform player;
     public GameObject pain;
@@ -62,12 +62,13 @@ public class Enemy_Basic : MonoBehaviour
     {
         yield return new WaitForSeconds(s);
         StopHurt();
+        
     }
 
     public void TakeDamage()
     {
         isHit = true;
-        anim.SetBool("IsWalking", false);
+        anim.SetBool("IsRunning", false);
         anim.SetBool("IsAttacking", false);
         KnockbackEntity(player);
         pain.SetActive(true);
@@ -100,10 +101,16 @@ public class Enemy_Basic : MonoBehaviour
         spear_hitbox.SetActive(true);
         print("weapon on");
     }
+
+    public void WeaponOff()
+    {
+        spear_hitbox.SetActive(false);
+        print("weapon off");
+    }
     public void StopAttacking()
     {
-        anim.SetBool("IsAttacking", false);
         spear_hitbox.SetActive(false);
+        anim.SetBool("IsAttacking", false);
         GetComponent<NavMeshAgent>().speed = setSpeed;
         print("stop attacking");
     }
@@ -122,7 +129,7 @@ public class Enemy_Basic : MonoBehaviour
         }
     }
 
-    void Death()
+    public void Death()
     {
         dead = true;
         GameObject s = Instantiate(enemyDrop);
@@ -130,7 +137,7 @@ public class Enemy_Basic : MonoBehaviour
         GameObject b = Instantiate(bloodSplats[randomListObject]);
         b.transform.position = new Vector3(transform.position.x, transform.position.y - 1.2f, transform.position.z);
         b.transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
-        Destroy(thisGuy);
+        //Destroy(thisGuy);
     }
     // Update is called once per frame
     void Update()
@@ -140,7 +147,7 @@ public class Enemy_Basic : MonoBehaviour
         {
            if (!dead)
             {
-                Death();
+                anim.SetBool("IsDead", true);
             }
         } 
             

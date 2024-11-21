@@ -39,9 +39,8 @@ public class Main_Player : MonoBehaviour
     }
     IEnumerator Wait()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.3f);
         
-        yield return new WaitForSeconds(0.5f);
         damageCooldown = false;
     }
    
