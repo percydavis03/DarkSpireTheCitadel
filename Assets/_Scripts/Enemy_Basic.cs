@@ -26,7 +26,7 @@ public class Enemy_Basic : MonoBehaviour
     public GameObject animationSource;
     //damage
     private int hitCount;
-    bool isHit;
+    public bool isHit;
     bool dead;
     public GameObject thisGuy;
     public Transform player;
@@ -34,10 +34,11 @@ public class Enemy_Basic : MonoBehaviour
     public Image healthFill;
     //combat
     public GameObject spear_hitbox;
+   
     private void Start()
     {
         anim = animationSource.GetComponent<Animator>();
-        hitCount = 0;
+        isHit = false;
         dead = false;
     }
     private void Awake()
@@ -66,41 +67,16 @@ public class Enemy_Basic : MonoBehaviour
     public void TakeDamage()
     {
         isHit = true;
-        anim.SetBool("IsWalk", false);
+        anim.SetBool("IsWalking", false);
         anim.SetBool("IsAttacking", false);
         KnockbackEntity(player);
         pain.SetActive(true);
         if (enemyHP != 0)
         {
+            anim.SetBool("IsHurting", true);
             enemyHP = enemyHP - damageTaken;
             print("literally take damage ");
-        }
-      
-      
-        if (hitCount == 1 && !anim.GetBool("IsHurting"))
-        {
-           
-            anim.SetBool("IsHurting", true);
-            anim.SetInteger("HurtAnim", 1);
-            print("hurt1");
-            StartCoroutine(Wait(1f));
-        }
-        else if (hitCount == 2 && !anim.GetBool("IsHurting"))
-        {
-            
-            anim.SetBool("IsHurting", true);
-
-            anim.SetInteger("HurtAnim", 2);
-            print("hurt2");
-            StartCoroutine(Wait(1f));
-        }
-        else if (hitCount == 3 && !anim.GetBool("IsHurting")) //fall down
-        {
-            
-            anim.SetBool("IsHurting", true);
-            anim.SetInteger("HurtAnim", 3);
-            print("hurt3");
-            StartCoroutine(Wait(2f));
+            StartCoroutine(Wait(0.5f));
         }
     }
     public void StopHurt()
@@ -136,11 +112,10 @@ public class Enemy_Basic : MonoBehaviour
         print("collide");
         if (other.gameObject.CompareTag("Weapon"))
         {
-            
             if (isHit == false)
             {
-                hitCount++;
                 TakeDamage();
+                hitCount++;
             }
            
             //randomListObject = Random.Range(0, bloodSplats.Count);
@@ -160,7 +135,7 @@ public class Enemy_Basic : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        healthFill.fillAmount = enemyHP / maxEnemyHP;
+        //healthFill.fillAmount = enemyHP / maxEnemyHP;
         if (enemyHP <= 0)
         {
            if (!dead)

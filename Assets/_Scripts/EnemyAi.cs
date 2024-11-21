@@ -64,7 +64,7 @@ public class EnemyAi : MonoBehaviour
 
         if (!playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) Patroling();
         if(playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) ChasePlayer();
-        if(playerInAttackRange && playerInSightRange && !anim.GetBool("IsHurting")) AttackPlayer();
+        if(playerInAttackRange && playerInSightRange && !Enemy_Basic.instance.isHit) AttackPlayer();
 
         /*if (playerInAttackRange)
         {
@@ -78,18 +78,17 @@ public class EnemyAi : MonoBehaviour
 
         if(enemyHP == 0)
         {
-            
             GameObject s = Instantiate(soulPrefab);
             s.transform.position = transform.position;
             Destroy(gameObject);
         }
         if (agent.velocity.magnitude > 0.1f && !anim.GetBool("IsHurting") && !anim.GetBool("IsAttacking"))
         {
-            anim.SetBool("IsWalk", true);
+            anim.SetBool("IsWalking", true);
         }
         if (agent.velocity.magnitude < 0.1f)
         {
-            anim.SetBool("IsWalk", false);
+            anim.SetBool("IsWalking", false);
         }
     }
     IEnumerator Wait(float s)
@@ -139,7 +138,7 @@ public class EnemyAi : MonoBehaviour
     private void AttackPlayer()
     {
         agent.SetDestination(transform.position);
-        //weaponHitbox.SetActive(true);
+        weaponHitbox.SetActive(true);
         anim.SetBool("IsAttacking", true);
 
         //transform.LookAt(player);
