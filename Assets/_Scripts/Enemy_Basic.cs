@@ -71,7 +71,7 @@ public class Enemy_Basic : MonoBehaviour
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsAttacking", false);
         KnockbackEntity(player);
-        pain.SetActive(true);
+//pain.SetActive(true);
         if (enemyHP != 0)
         {
             anim.SetBool("IsHurting", true);
@@ -85,7 +85,7 @@ public class Enemy_Basic : MonoBehaviour
         anim.SetBool("IsHurting", false);
         isHit = false;
         print("stophurt");
-        pain.SetActive(false);
+       // pain.SetActive(false);
     }
     public void GetUp()
     {
