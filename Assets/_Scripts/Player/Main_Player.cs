@@ -77,6 +77,7 @@ public class Main_Player : MonoBehaviour
     {
         yield return new WaitForSeconds(seconds);
         hurtScreen.DOFade(0, 0.3f);
+        hurt.SetActive(false);
         print("dofadeout");
         isFaded = true;
     }

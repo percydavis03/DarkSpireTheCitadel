@@ -120,19 +120,7 @@ public class Player_Movement : MonoBehaviour
     {
         anim.SetBool("isHurt", false );
     }
-    public void Reposition()
-    {
-        //thisGameObject.transform.position = new Vector3 (animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z);
-        //Vector3 currentPos = new Vector3(thisGameObject.transform.position.x, transform.position.y, thisGameObject.transform.position.z);
-        //Vector3 posOffset = new Vector3(animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z) - thisGameObject.transform.position;
-        //transform.position = currentPos + posOffset;
-        print("move");
-        speed = 1;
-        Vector3 target = new Vector3(transform.position.x, transform.position.y, transform.position.z + 5.78f);
-        thisGameObject.transform.position = Vector3.MoveTowards(transform.position, target, Time.deltaTime * 0.5f);
-        
-        //transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + 5.78f);
-    }
+   
    
     public void SwordOn()
     {

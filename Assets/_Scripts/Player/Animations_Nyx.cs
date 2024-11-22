@@ -35,7 +35,7 @@ public class Animations_Nyx : MonoBehaviour
     public void StartSpinAttack()
     {
         //Player_Movement.instance.isSpinAttack = true;
-        Player_Movement.instance.Reposition();
+       
     }
 
     public void ActivateSword()

@@ -147,6 +147,7 @@ public class Enemy_Basic : MonoBehaviour
         {
            if (!dead)
             {
+                spear_hitbox.SetActive(false);
                 anim.SetBool("IsDead", true);
             }
         } 
