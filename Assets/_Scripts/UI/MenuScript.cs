@@ -100,10 +100,12 @@ public class MenuScript : MonoBehaviour
             if (mainMenu.activeInHierarchy)
             {
                 mainMenu.SetActive(false);
+                thisGameSave.inMenu = false;
             }
            if (infoMenu.activeInHierarchy)
             {
                 infoMenu.SetActive(false);
+                thisGameSave.inMenu = false;
             }
         }
         
