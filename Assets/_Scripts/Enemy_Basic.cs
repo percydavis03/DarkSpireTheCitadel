@@ -132,10 +132,13 @@ public class Enemy_Basic : MonoBehaviour
     public void Death()
     {
         dead = true;
+        spear_hitbox.SetActive (false);
+        this.GetComponent<BoxCollider>().enabled = false; 
+        this.GetComponent<CapsuleCollider>().enabled = false;
         GameObject s = Instantiate(enemyDrop);
         s.transform.position = transform.position;
         GameObject b = Instantiate(bloodSplats[randomListObject]);
-        b.transform.position = new Vector3(transform.position.x, transform.position.y - 1.2f, transform.position.z);
+        b.transform.position = new Vector3(transform.position.x, 0.01f, transform.position.z);
         b.transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
         //Destroy(thisGuy);
     }
