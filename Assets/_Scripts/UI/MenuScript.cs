@@ -8,17 +8,16 @@ using UnityEngine.SceneManagement;
 public class MenuScript : MonoBehaviour
 {
     public static MenuScript instance;
+    public PlayerSaveState thisGameSave;
+
     public GameObject infoMenu;
-    public GameObject pauseMenu;
+    public GameObject mainMenu;
     public bool isTitle;
     public DOTweenVisualManager visualManager;
     public DOTweenAnimation veinAnim;
 
-    public bool movePause;
-    //input system
-    public PlayerInputActions playerControls;
-    private InputAction openInfoMenu;
-    private InputAction openPauseMenu;
+    
+    private bool inMainMenu;
 
     private void Awake()
     {
@@ -31,25 +30,58 @@ public class MenuScript : MonoBehaviour
             Cursor.visible = true;
         }
         
-        movePause = false;
         infoMenu.SetActive(false);
-        pauseMenu.SetActive(false);
+        mainMenu.SetActive(false);
     }
 
-    private void OnEnable()
+   
+
+    public void MainMenu()
     {
-       // openInfoMenu = playerControls.General.Inventory;
-        //openInfoMenu.Enable();
-        //openPauseMenu = playerControls.General.PauseMenu;
-        //openPauseMenu.Enable();
+        if (!mainMenu.activeInHierarchy && !infoMenu.activeInHierarchy)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        if (inMainMenu)
+        {
+            mainMenu.SetActive(false);
+            inMainMenu = false;
+            thisGameSave.inMenu = false;
+        }
+        else if (!mainMenu.activeInHierarchy && !infoMenu.activeInHierarchy)
+        {
+           mainMenu.SetActive(true);
+           thisGameSave.inMenu = true;
+           inMainMenu = true;
+        }
     }
-    private void OnDisable()
+
+    public void InfoMenu()
     {
-        //openInfoMenu.Disable();
-        //openPauseMenu.Disable();
+        InventoryManager.Instance.ListItems();
+
+        if (!infoMenu.activeInHierarchy && !mainMenu.activeInHierarchy)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        if (infoMenu.activeInHierarchy)
+        {
+            infoMenu.SetActive(false);
+           
+            thisGameSave.inMenu = false;
+        }
+        else if (!infoMenu.activeInHierarchy && !mainMenu.activeInHierarchy)
+        {
+            infoMenu.SetActive(true);
+            thisGameSave.inMenu = true;
+            if (visualManager != null)
+            {
+                visualManager.enabled = true;
+            }
+        }
     }
-
-
 
     private void Update()
     {
@@ -58,69 +90,25 @@ public class MenuScript : MonoBehaviour
             Cursor.visible=false;
         }
 
-        if (pauseMenu == null && isTitle == false)
+        if (mainMenu == null && isTitle == false)
         {
             Cursor.visible = false;
         }
         //exit menus
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (pauseMenu.activeInHierarchy)
-            { 
-                pauseMenu.SetActive(false);
+            if (mainMenu.activeInHierarchy)
+            {
+                mainMenu.SetActive(false);
+                thisGameSave.inMenu = false;
             }
            if (infoMenu.activeInHierarchy)
             {
                 infoMenu.SetActive(false);
+                thisGameSave.inMenu = false;
             }
         }
-        //change when the input system stops being a little bitch
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (!pauseMenu.activeInHierarchy && !infoMenu.activeInHierarchy)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
-            if (pauseMenu.activeInHierarchy)
-            {
-                pauseMenu.SetActive(false);
-            }
-            else
-            {
-                pauseMenu.SetActive(true);
-            }
-        }
-        //change when the input system stops being a little bitch
-        if (Input.GetKeyDown(KeyCode.Tab))
-        //if (openInfoMenu.IsPressed())
-        {
-            InventoryManager.Instance.ListItems();
-            
-
-            if (!infoMenu.activeInHierarchy)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-                movePause = true;
-                
-            }
-            if (infoMenu.activeInHierarchy)
-            {
-                infoMenu.SetActive(false);
-               movePause = false;
-                
-            }
-            else
-            {
-                infoMenu.SetActive(true);
-                if (visualManager != null)
-                {
-                    visualManager.enabled = true;
-                }
-            }
-
-        }
+        
     }
 
 

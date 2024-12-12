@@ -10,19 +10,9 @@ public class MenuFunction : MonoBehaviour
     
     public AudioSource buttonpress;
 
-  
-
-    // Start is called before the first frame update
-    void Start()
-    {
-       
-    }
+    public PlayerSaveState thisGameSave;
     
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
     public void ButtonSound()
     {
         buttonpress.Play();
@@ -35,7 +25,6 @@ public class MenuFunction : MonoBehaviour
     public void CloseMenu()
     {
         theMenu.SetActive(false);
-        //Cursor.visible = false;
     }
 
     public void QuitGame()
@@ -53,4 +42,6 @@ public class MenuFunction : MonoBehaviour
     {
         SceneManager.LoadScene("Title");
     }
+
+   
 }

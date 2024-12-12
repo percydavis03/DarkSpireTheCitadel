@@ -7,7 +7,8 @@ using UnityEngine.AI;
 public class EnemyAi : MonoBehaviour
 {
     public NavMeshAgent agent;
-   
+    public PlayerSaveState thisGameSave;
+
     public Transform player;
     public GameObject thisGuy;
 
@@ -62,8 +63,8 @@ public class EnemyAi : MonoBehaviour
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
 
         if (!playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) Patroling();
-        if(playerInSightRange && !playerInAttackRange && !Enemy_Basic.instance.dead && !anim.GetBool("IsHurting")) ChasePlayer();
-        if(playerInAttackRange && playerInSightRange && !Enemy_Basic.instance.isHit) AttackPlayer();
+        //if(playerInSightRange && !thisGameSave.inMenu && !playerInAttackRange && !Enemy_Basic.instance.dead && !anim.GetBool("IsHurting")) ChasePlayer();
+        //if(playerInAttackRange && !thisGameSave.inMenu && playerInSightRange && !Enemy_Basic.instance.isHit) AttackPlayer();
 
         /*if (playerInAttackRange)
         {
@@ -165,11 +166,6 @@ public class EnemyAi : MonoBehaviour
 
             
         }*/
-
-
-
-
-
 
     }
 

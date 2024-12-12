@@ -70,14 +70,7 @@ public class Player_Manager : MonoBehaviour
     void Update()
     {
         
-        if (MenuScript.instance.movePause)
-        {
-            dashFroce = 0f;
-        }
-        else if (MenuScript.instance.movePause == false)
-        {
-            dashFroce = 8;
-        }
+        
         isAttacking = slash.isAttacking;
         isParry = slash.parry;
 

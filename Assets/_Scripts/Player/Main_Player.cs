@@ -36,6 +36,7 @@ public class Main_Player : MonoBehaviour
     {
         isDead = false;
         isFaded = true;
+        thisGameSave.inMenu = false;
     }
     IEnumerator Wait()
     {

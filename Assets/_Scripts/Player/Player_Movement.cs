@@ -13,6 +13,7 @@ public class Player_Movement : MonoBehaviour
     private InputAction jump;
     private InputAction sprint;
     private InputAction openInfoMenu;
+    private InputAction openMainMenu;
 
     //attacks
     public GameObject swordHitbox;
@@ -28,7 +29,7 @@ public class Player_Movement : MonoBehaviour
     //public Camera playerCamera;
     //public float walkSpeed = 6f;
     //public float runSpeed = 12f;
-    public float jumpPower = 0f;
+    public float jumpPower;
     public float gravity = 10f;
     public float lookSpeed = 2f;
     public float lookXLimit = 45f;
@@ -40,6 +41,7 @@ public class Player_Movement : MonoBehaviour
     private CharacterController characterController;
     public bool canMove = true;
     bool isSprint = false;
+    bool isJumping = false;
     public bool isSpinAttack = false;
 
     public GameObject animationSource;
@@ -72,6 +74,9 @@ public class Player_Movement : MonoBehaviour
         openInfoMenu = playerControls.General.Inventory;
         openInfoMenu.Enable();
 
+        openMainMenu = playerControls.General.PauseMenu;    
+        openMainMenu.Enable();
+
         attack = playerControls.General.Attack;
         attack.Enable();
 
@@ -88,6 +93,7 @@ public class Player_Movement : MonoBehaviour
         jump.Disable();
         sprint.Disable();
         openInfoMenu.Disable();
+        openMainMenu.Disable();
     }
     IEnumerator WaitUntil(float seconds)
     {
@@ -138,10 +144,19 @@ public class Player_Movement : MonoBehaviour
     }
     void Update()
     {
-       
-        if (openInfoMenu.IsPressed())
+        if (thisGameSave.inMenu)
+        {
+            canMove = false;
+        }
+        if (openInfoMenu.WasPressedThisFrame()) //INFO MENU
         {
             print("openmenu");
+            MenuScript.instance.InfoMenu();
+        }
+
+        if (openMainMenu.WasPressedThisFrame())
+        {
+            MenuScript.instance.MainMenu();  //MAIN MENU
         }
 
         if (canMove)
@@ -167,13 +182,13 @@ public class Player_Movement : MonoBehaviour
         Vector3 rotationDirection = new Vector3(horizontalInput, 0, verticalInput);
         rotationDirection.Normalize();
 
-        if (moveDirection.x != 0)
+        if (moveDirection.x != 0 && !isJumping)
         {
             anim.SetBool("isRun", true);
             canRotate = true;
         }
 
-        if (moveDirection.z != 0)
+        if (moveDirection.z != 0 && !isJumping)
         {
             anim.SetBool("isRun", true);
             canRotate = true;
@@ -184,7 +199,7 @@ public class Player_Movement : MonoBehaviour
             anim.SetBool("isRun", false);
         }
 
-        if (sprint.IsPressed())
+        if (sprint.IsPressed())  //SPRINT
         {
             speed = thisGameSave.sprintSpeed;
             isSprint = true;    
@@ -196,7 +211,7 @@ public class Player_Movement : MonoBehaviour
             isSprint = false;
         }
 
-        if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack) //ATTACK
+        if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack && !thisGameSave.inMenu) //ATTACK
             {
             anim.SetBool("isAttacking", true);
             canMove = false;
@@ -212,7 +227,7 @@ public class Player_Movement : MonoBehaviour
             isAttacking = false;
         }
        
-        if (attack.WasPressedThisFrame() && isSprint && !isAttacking && thisGameSave.canAttack) //SPIN ATTACK
+        if (attack.WasPressedThisFrame() && isSprint && !isAttacking && thisGameSave.canAttack && !thisGameSave.inMenu) //SPIN ATTACK
         {
             isSpinAttack = true;
             anim.SetBool("isSpinAttack", true);
@@ -226,8 +241,10 @@ public class Player_Movement : MonoBehaviour
         {
             if (thisGameSave.canJump == true)
             {
-                moveDirection.y = jumpPower;
+                isJumping = true;
+                print("jump");
                 anim.SetBool("isJump", true);
+                moveDirection.y = jumpPower;
             }
             else if (thisGameSave.canJump == false)
             {
@@ -244,16 +261,17 @@ public class Player_Movement : MonoBehaviour
 
         if (!characterController.isGrounded)
         {
-            moveDirection.y -= gravity * Time.deltaTime;
+           moveDirection.y -= gravity * Time.deltaTime;
+            isJumping = false;
         }
 
+        
         if (characterController.isGrounded == true)
         {
             anim.SetBool("isJump", false);
         }
 
         characterController.Move(moveDirection * Time.deltaTime);
-
 
         if (rotationDirection != Vector3.zero && canRotate)
        {
