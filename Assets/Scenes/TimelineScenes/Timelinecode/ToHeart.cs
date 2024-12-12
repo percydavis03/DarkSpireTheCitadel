@@ -4,10 +4,10 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 
 
-public class ToLeg : MonoBehaviour
+public class ToHeart : MonoBehaviour
 {
     void OnEnable()
     {
-        SceneManager.LoadScene("Leg", LoadSceneMode.Single);
+        SceneManager.LoadScene("Heart_Grey", LoadSceneMode.Single);
     }
 }
