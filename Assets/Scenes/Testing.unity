@@ -304,22 +304,9 @@ MonoBehaviour:
   dead: 0
   thisGuy: {fileID: 0}
   player: {fileID: 0}
+  pain: {fileID: 0}
   healthFill: {fileID: 0}
   spear_hitbox: {fileID: 0}
-  agent: {fileID: 0}
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 0
-  whatIsPlayer:
-    serializedVersion: 2
-    m_Bits: 0
-  walkPoint: {x: 0, y: 0, z: 0}
-  walkPointRange: 0
-  timeBetweenAttacks: 0
-  sightRange: 0
-  attackRange: 0
-  playerInSightRange: 0
-  playerInAttackRange: 0
 --- !u!136 &159432431
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -860,22 +847,9 @@ MonoBehaviour:
   dead: 0
   thisGuy: {fileID: 0}
   player: {fileID: 0}
+  pain: {fileID: 0}
   healthFill: {fileID: 0}
   spear_hitbox: {fileID: 1237491182}
-  agent: {fileID: 0}
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 0
-  whatIsPlayer:
-    serializedVersion: 2
-    m_Bits: 0
-  walkPoint: {x: 0, y: 0, z: 0}
-  walkPointRange: 0
-  timeBetweenAttacks: 0
-  sightRange: 0
-  attackRange: 0
-  playerInSightRange: 0
-  playerInAttackRange: 0
 --- !u!136 &560404360
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -9528,6 +9502,12 @@ Transform:
   - {fileID: 902520521}
   m_Father: {fileID: 560404364}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!20 &1066162435 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 2499582467431913663, guid: 286cc0691f4f6a041b42a56c044f50c6,
+    type: 3}
+  m_PrefabInstance: {fileID: 7374333671830968548}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1177372213
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14233,22 +14213,9 @@ MonoBehaviour:
   dead: 0
   thisGuy: {fileID: 0}
   player: {fileID: 0}
+  pain: {fileID: 0}
   healthFill: {fileID: 0}
   spear_hitbox: {fileID: 0}
-  agent: {fileID: 0}
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 0
-  whatIsPlayer:
-    serializedVersion: 2
-    m_Bits: 0
-  walkPoint: {x: 0, y: 0, z: 0}
-  walkPointRange: 0
-  timeBetweenAttacks: 0
-  sightRange: 0
-  attackRange: 0
-  playerInSightRange: 0
-  playerInAttackRange: 0
 --- !u!136 &1431845068
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -28523,22 +28490,9 @@ MonoBehaviour:
   dead: 0
   thisGuy: {fileID: 1477497601110147468}
   player: {fileID: 3488818573682954259, guid: 286cc0691f4f6a041b42a56c044f50c6, type: 3}
+  pain: {fileID: 0}
   healthFill: {fileID: 1292415508606973847}
   spear_hitbox: {fileID: 4267379352812027896}
-  agent: {fileID: 0}
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 0
-  whatIsPlayer:
-    serializedVersion: 2
-    m_Bits: 0
-  walkPoint: {x: 0, y: 0, z: 0}
-  walkPointRange: 0
-  timeBetweenAttacks: 0
-  sightRange: 0
-  attackRange: 0
-  playerInSightRange: 0
-  playerInAttackRange: 0
 --- !u!114 &3855118013056452177
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28568,22 +28522,9 @@ MonoBehaviour:
   dead: 0
   thisGuy: {fileID: 1477497600737707707}
   player: {fileID: 3488818573682954259, guid: 286cc0691f4f6a041b42a56c044f50c6, type: 3}
+  pain: {fileID: 0}
   healthFill: {fileID: 1292415508299542688}
   spear_hitbox: {fileID: 710786782}
-  agent: {fileID: 0}
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 0
-  whatIsPlayer:
-    serializedVersion: 2
-    m_Bits: 0
-  walkPoint: {x: 0, y: 0, z: 0}
-  walkPointRange: 0
-  timeBetweenAttacks: 0
-  sightRange: 0
-  attackRange: 0
-  playerInSightRange: 0
-  playerInAttackRange: 0
 --- !u!1 &3858958032915669198
 GameObject:
   m_ObjectHideFlags: 0
@@ -41002,6 +40943,16 @@ PrefabInstance:
       propertyPath: jumpPower
       value: 200
       objectReference: {fileID: 0}
+    - target: {fileID: 3606770076515064864, guid: 286cc0691f4f6a041b42a56c044f50c6,
+        type: 3}
+      propertyPath: cameraRoot
+      value: 
+      objectReference: {fileID: 7374333671830968549}
+    - target: {fileID: 3606770076515064864, guid: 286cc0691f4f6a041b42a56c044f50c6,
+        type: 3}
+      propertyPath: mainCamera
+      value: 
+      objectReference: {fileID: 1066162435}
     - target: {fileID: 4273270656745686941, guid: 286cc0691f4f6a041b42a56c044f50c6,
         type: 3}
       propertyPath: cameraShake

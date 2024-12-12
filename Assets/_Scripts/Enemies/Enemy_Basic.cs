@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class Enemy_Basic : MonoBehaviour
 {
-    
+    public static Enemy_Basic instance;
     public PlayerSaveState thisGameSave;
     //stats
     public float enemyHP = 30;
@@ -30,42 +30,25 @@ public class Enemy_Basic : MonoBehaviour
     public bool dead;
     public GameObject thisGuy;
     public Transform player;
+    public GameObject pain;
     public Image healthFill;
     //combat
     public GameObject spear_hitbox;
-    //AI
-    public NavMeshAgent agent;
-    public LayerMask whatIsGround, whatIsPlayer;
-    //Patrolling 
-    public Vector3 walkPoint;
-    bool walkPointSet;
-    public float walkPointRange;
-    //Attacking
-    public float timeBetweenAttacks;
-    bool alreadyAttacked;
-    //States
-    public float sightRange, attackRange;
-    public bool playerInSightRange, playerInAttackRange;
-    
-
    
-
     private void Start()
     {
         anim = animationSource.GetComponent<Animator>();
         isHit = false;
         dead = false;
-        alreadyAttacked = false;
     }
     private void Awake()
     {
-        player = GameObject.Find("Player").transform;
+        if (instance == null)
+        {
+            instance = this;
+        }
         damageTaken = thisGameSave.mainAttackDamage; 
         rb = GetComponent<Rigidbody>();
-        agent = GetComponent<NavMeshAgent>();
-
-        agent.angularSpeed = 0f;
-        agent.updateRotation = false;
     }
 
     private void KnockbackEntity(Transform player)
@@ -79,6 +62,7 @@ public class Enemy_Basic : MonoBehaviour
     {
         yield return new WaitForSeconds(s);
         StopHurt();
+        
     }
 
     public void TakeDamage()
@@ -87,7 +71,7 @@ public class Enemy_Basic : MonoBehaviour
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsAttacking", false);
         KnockbackEntity(player);
-
+//pain.SetActive(true);
         if (enemyHP != 0)
         {
             anim.SetBool("IsHurting", true);
@@ -110,6 +94,7 @@ public class Enemy_Basic : MonoBehaviour
         anim.SetBool("IsHurting", false);
         anim.SetInteger("HurtAnim", 0);
         print("getup");
+        pain.SetActive(false);
     }
     public void WeaponOn()
     {
@@ -147,26 +132,16 @@ public class Enemy_Basic : MonoBehaviour
     public void Death()
     {
         dead = true;
-        agent.SetDestination(thisGuy.transform.position);
         spear_hitbox.SetActive (false);
         this.GetComponent<BoxCollider>().enabled = false; 
         this.GetComponent<CapsuleCollider>().enabled = false;
         GameObject s = Instantiate(enemyDrop);
         s.transform.position = transform.position;
+        GameObject b = Instantiate(bloodSplats[randomListObject]);
+        b.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+        b.transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
         //Destroy(thisGuy);
     }
-
-    void Bleed()
-    {
-        if (!dead)
-        {
-            GameObject b = Instantiate(bloodSplats[randomListObject]);
-            b.transform.position = transform.position;
-            b.transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
-            b.transform.localScale = new Vector3(1, 1, 1);
-        }
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -176,125 +151,9 @@ public class Enemy_Basic : MonoBehaviour
            if (!dead)
             {
                 spear_hitbox.SetActive(false);
-                Bleed(); /// fix this
                 anim.SetBool("IsDead", true);
-                
             }
-        }
-
-        //Check for sight and attack
-        playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
-        playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
-
-        if (!playerInSightRange && !playerInAttackRange && !anim.GetBool("IsHurting")) Patroling();
-        if (playerInSightRange && !thisGameSave.inMenu && !playerInAttackRange && !dead && !anim.GetBool("IsHurting")) ChasePlayer();
-        if (playerInAttackRange && !thisGameSave.inMenu && playerInSightRange && !isHit) AttackPlayer();
-
-        
-        if (agent.velocity.magnitude > 0.1f && !anim.GetBool("IsHurting") && !anim.GetBool("IsAttacking"))
-        {
-            anim.SetBool("IsRunning", true);
-        }
-        if (agent.velocity.magnitude < 0.1f)
-        {
-            anim.SetBool("IsRunning", false);
-        }
-
-    }
-    //----------AI-----------
-    IEnumerator NavWait(float s)
-    {
-        yield return new WaitForSeconds(s);
-        ResetAttack();
-    }
-    private void Patroling()
-    {
-        if (!walkPointSet) SearchWalkPoint();
-
-        if (walkPointSet)
-        {
-            agent.SetDestination(walkPoint);
-        }
-
-        Vector3 distanceToWalkPoint = transform.position - walkPoint;
-
-        //walkpoint reached
-        if (distanceToWalkPoint.magnitude < 1f)
-        {
-            walkPointSet = false;
-        }
-
-    }
-
-    private void SearchWalkPoint()
-    {
-        //calculate random point in range
-        float randomZ = Random.Range(-walkPointRange, walkPointRange);
-        float randomX = Random.Range(-walkPointRange, walkPointRange);
-
-        walkPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
-
-        if (Physics.Raycast(walkPoint, -transform.up, 2f, whatIsGround))
-        {
-            walkPointSet = true;
-        }
-    }
-
-    private void ChasePlayer()
-    {
-        agent.SetDestination(player.position);
-        transform.LookAt(player);
-    }
-
-    private void AttackPlayer()
-    {
-        agent.SetDestination(thisGuy.transform.position);
-        anim.SetBool("IsAttacking", true);
-        GetComponent<NavMeshAgent>().speed = 0;
-        //transform.LookAt(player);
-
-        if (!alreadyAttacked)
-        {
-            alreadyAttacked = true;
-            StartCoroutine(NavWait(1.5f));
-        }
-    }
-
-    private void ResetAttack()
-    {
-        alreadyAttacked = false;
-        //weaponHitbox.SetActive(false);
-        GetComponent<NavMeshAgent>().speed = setSpeed;
-        anim.SetBool("IsAttacking", false);
-    }
-
-
-
-    //---------ANIMATIONS---------
-    public void AnimStab()
-    {
-       WeaponOn();
-    }
-
-    public void AnimWeaponOff()
-    {
-        WeaponOff();
-    }
-    public void AnimAttackEnd()
-    {
-        StopAttacking();
-    }
-    public void AnimFallEnd()
-    {
-        GetUp();
-    }
-    public void AnimHurtEnd()
-    {
-        StopHurt();
-    }
-
-    public void AnimDied()
-    {
-        Death();
+        } 
+            
     }
 }

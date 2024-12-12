@@ -47,7 +47,19 @@ public class Player_Movement : MonoBehaviour
     public GameObject animationSource;
     public GameObject thisGameObject;
     public bool canRotate;
-   
+
+    public GameObject cameraRoot;
+
+    public Camera mainCamera;
+    private float targetRotation = 0;
+    private float rotationVelocity;
+    public float RotationSmoothTime = 0.12f;
+
+    public bool canTurn = true;
+    private float prevRotation;
+
+
+
 
     private void Awake()
     {
@@ -74,7 +86,7 @@ public class Player_Movement : MonoBehaviour
         openInfoMenu = playerControls.General.Inventory;
         openInfoMenu.Enable();
 
-        openMainMenu = playerControls.General.PauseMenu;    
+        openMainMenu = playerControls.General.PauseMenu;
         openMainMenu.Enable();
 
         attack = playerControls.General.Attack;
@@ -106,7 +118,7 @@ public class Player_Movement : MonoBehaviour
             GameManager.instance.justDied = false;
             //anim.SetBool("isDead", true);
         }
-       
+
     }
     public void EndAttack()
     {
@@ -121,13 +133,13 @@ public class Player_Movement : MonoBehaviour
     {
         anim.SetBool("isHurt", true);
     }
-    
+
     public void Recover()
     {
-        anim.SetBool("isHurt", false );
+        anim.SetBool("isHurt", false);
     }
-   
-   
+
+
     public void SwordOn()
     {
         swordHitbox.SetActive(true);
@@ -159,14 +171,17 @@ public class Player_Movement : MonoBehaviour
             MenuScript.instance.MainMenu();  //MAIN MENU
         }
 
-        if (canMove)
+        if (canMove && canTurn)
         {
             Vector3 forward = transform.TransformDirection(Vector3.forward);
             Vector3 right = transform.TransformDirection(Vector3.right);
             float curSpeedX = canMove ? (speed) * Input.GetAxis("Vertical") : 0;
             float curSpeedY = canMove ? (speed) * Input.GetAxis("Horizontal") : 0;
-            
-            moveDirection = (forward * curSpeedX) + (right * curSpeedY); 
+
+
+            moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+
+
         }
 
         if (!isAttacking)
@@ -177,10 +192,33 @@ public class Player_Movement : MonoBehaviour
         }
         float movementDirectionY = moveDirection.y;
         //for making the character face forwards
+
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
+
         Vector3 rotationDirection = new Vector3(horizontalInput, 0, verticalInput);
         rotationDirection.Normalize();
+
+
+        if (horizontalInput + verticalInput != 0)
+        {
+            if (canTurn)
+                targetRotation = Mathf.Atan2(horizontalInput, verticalInput) * Mathf.Rad2Deg +
+                                  mainCamera.transform.eulerAngles.y;
+            float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
+                RotationSmoothTime);
+
+            // rotate to face input direction relative to camera position
+            transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+
+            if (rotationDirection.z == -1)
+            {
+                canTurn = false;
+                Invoke("ResetCanTurn", 0.75f);
+            }
+        }
+
+
 
         if (moveDirection.x != 0 && !isJumping)
         {
@@ -194,7 +232,7 @@ public class Player_Movement : MonoBehaviour
             canRotate = true;
         }
 
-        if(moveDirection.x == 0 && moveDirection.y == 0 && moveDirection.z == 0)
+        if (moveDirection.x == 0 && moveDirection.y == 0 && moveDirection.z == 0)
         {
             anim.SetBool("isRun", false);
         }
@@ -202,7 +240,7 @@ public class Player_Movement : MonoBehaviour
         if (sprint.IsPressed())  //SPRINT
         {
             speed = thisGameSave.sprintSpeed;
-            isSprint = true;    
+            isSprint = true;
         }
 
         if (!sprint.IsPressed())
@@ -212,13 +250,13 @@ public class Player_Movement : MonoBehaviour
         }
 
         if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack && !thisGameSave.inMenu) //ATTACK
-            {
+        {
             anim.SetBool("isAttacking", true);
             canMove = false;
             moveDirection = Vector3.zero;
             canRotate = false;
             isAttacking = true;
-            }
+        }
         else if (attack.WasPressedThisFrame() && isAttacking && isSpinAttack) //cancel attack
         {
             anim.SetBool("isAttacking", false);
@@ -226,7 +264,7 @@ public class Player_Movement : MonoBehaviour
             canMove = true;
             isAttacking = false;
         }
-       
+
         if (attack.WasPressedThisFrame() && isSprint && !isAttacking && thisGameSave.canAttack && !thisGameSave.inMenu) //SPIN ATTACK
         {
             isSpinAttack = true;
@@ -252,7 +290,7 @@ public class Player_Movement : MonoBehaviour
                 anim.SetBool("isJump", false);
                 print("loser cant jump :(");
             }
-            
+
         }
         else
         {
@@ -261,23 +299,34 @@ public class Player_Movement : MonoBehaviour
 
         if (!characterController.isGrounded)
         {
-           moveDirection.y -= gravity * Time.deltaTime;
+            moveDirection.y -= gravity * Time.deltaTime;
             isJumping = false;
         }
 
-        
+
         if (characterController.isGrounded == true)
         {
             anim.SetBool("isJump", false);
         }
 
+        Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
         characterController.Move(moveDirection * Time.deltaTime);
 
+        /*
         if (rotationDirection != Vector3.zero && canRotate)
-       {
-           Quaternion toRotation = Quaternion.LookRotation(rotationDirection, Vector3.up);
+        {
+            Quaternion toRotation = Quaternion.LookRotation(rotationDirection, Vector3.up);
 
             playerTransform.rotation = Quaternion.RotateTowards(playerTransform.rotation, toRotation, rotationSpeed * Time.deltaTime);
-       }
+        }
+        */
+        //Update cameraRoot rotation
+        cameraRoot.transform.localRotation = playerTransform.rotation;
+
+    }
+
+    public void ResetCanTurn()
+    {
+        canTurn = true;
     }
 }
