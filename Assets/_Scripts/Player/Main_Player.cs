@@ -52,7 +52,7 @@ public class Main_Player : MonoBehaviour
         GameManager.instance.DamagePlayer();
         Fade();
         Debug.Log("ow");
-        cameraShake.ShakeCamera(shakeIntensity, shakeTime);
+        //cameraShake.ShakeCamera(shakeIntensity, shakeTime);
         hurt.SetActive(true);
         StartCoroutine(Wait());
         Player_Movement.instance.GotHit();
@@ -61,7 +61,7 @@ public class Main_Player : MonoBehaviour
         GameObject b = Instantiate(bloodSplats[randomListObject]);
         b.transform.position = new Vector3(transform.position.x, transform.position.y - 0.9f, transform.position.z);
         b.transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
-        //ough.Play();
+        ough.Play();
     }
 
     public void Fade()
