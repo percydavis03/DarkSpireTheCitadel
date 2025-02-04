@@ -43,7 +43,7 @@ public class MenuScript : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
-        if (inMainMenu)
+        if (mainMenu.activeInHierarchy)
         {
             mainMenu.SetActive(false);
             inMainMenu = false;
@@ -95,7 +95,7 @@ public class MenuScript : MonoBehaviour
             Cursor.visible = false;
         }
         //exit menus
-        if (Input.GetKeyDown(KeyCode.Escape))
+        /*if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (mainMenu.activeInHierarchy)
             {
@@ -107,7 +107,7 @@ public class MenuScript : MonoBehaviour
                 infoMenu.SetActive(false);
                 thisGameSave.inMenu = false;
             }
-        }
+        }*/
         
     }
 
