@@ -128,7 +128,7 @@ public class Player_Movement : MonoBehaviour
             canMove = true;
         }
 
-      if (canMove)
+    if (canMove)
         {
             canMove = false;
         }
@@ -334,7 +334,7 @@ public class Player_Movement : MonoBehaviour
         }
         */
         //Update cameraRoot rotation
-        cameraRoot.transform.localRotation = playerTransform.rotation;
+        //cameraRoot.transform.localRotation = playerTransform.rotation;
 
     }
 
