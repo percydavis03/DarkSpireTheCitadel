@@ -120,6 +120,19 @@ public class Player_Movement : MonoBehaviour
         }
 
     }
+
+    public void AttackFailSafe()
+    {
+       if(!canMove)
+        {
+            canMove = true;
+        }
+
+      if (canMove)
+        {
+            canMove = false;
+        }
+    }
     public void EndAttack()
     {
         anim.SetBool("isAttacking", false);
@@ -252,7 +265,7 @@ public class Player_Movement : MonoBehaviour
         if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack && !thisGameSave.inMenu) //ATTACK
         {
             anim.SetBool("isAttacking", true);
-            canMove = false;
+           
             moveDirection = Vector3.zero;
             canRotate = false;
             isAttacking = true;
