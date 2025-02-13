@@ -48,12 +48,12 @@ public class Player_Movement : MonoBehaviour
     public GameObject thisGameObject;
     public bool canRotate;
 
-    public GameObject cameraRoot;
+    /*public GameObject cameraRoot;
 
     public Camera mainCamera;
     private float targetRotation = 0;
     private float rotationVelocity;
-    public float RotationSmoothTime = 0.12f;
+    public float RotationSmoothTime = 0.12f;*/
 
     public bool canTurn = true;
     private float prevRotation;
@@ -213,7 +213,7 @@ public class Player_Movement : MonoBehaviour
         rotationDirection.Normalize();
 
 
-        if (horizontalInput + verticalInput != 0)
+        /*if (horizontalInput + verticalInput != 0)
         {
             if (canTurn)
                 targetRotation = Mathf.Atan2(horizontalInput, verticalInput) * Mathf.Rad2Deg +
@@ -229,7 +229,7 @@ public class Player_Movement : MonoBehaviour
                 canTurn = false;
                 Invoke("ResetCanTurn", 0.75f);
             }
-        }
+        }*/
 
 
 
@@ -322,17 +322,17 @@ public class Player_Movement : MonoBehaviour
             anim.SetBool("isJump", false);
         }
 
-        Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+        //Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
         characterController.Move(moveDirection * Time.deltaTime);
 
-        /*
+        
         if (rotationDirection != Vector3.zero && canRotate)
         {
             Quaternion toRotation = Quaternion.LookRotation(rotationDirection, Vector3.up);
 
             playerTransform.rotation = Quaternion.RotateTowards(playerTransform.rotation, toRotation, rotationSpeed * Time.deltaTime);
         }
-        */
+        
         //Update cameraRoot rotation
         //cameraRoot.transform.localRotation = playerTransform.rotation;
 
