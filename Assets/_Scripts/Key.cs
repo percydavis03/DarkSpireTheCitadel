@@ -7,12 +7,13 @@ using UnityEngine.SceneManagement;
 public class Key : MonoBehaviour
 {
     public GameObject gotKey;
-
+    
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Player"))
         {
             gotKey.SetActive(true);
+           
         }
     }
 }

@@ -7,6 +7,10 @@ public class Dialogue : MonoBehaviour
     public string dialogueText;
     public int waitTime;
     public bool destroy;
+    public bool notDoor;
+    public GameObject doorKey;
+   
+
     // Start is called before the first frame update
     void Start()
     {
@@ -15,7 +19,7 @@ public class Dialogue : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         print("dialogue go");
-        if (other.gameObject.CompareTag("Player"))
+        if (other.gameObject.CompareTag("Player") && notDoor)
         {
             InventoryManager.Instance.SetWait(waitTime);
             InventoryManager.Instance.DialoguePopup(dialogueText);
@@ -23,6 +27,14 @@ public class Dialogue : MonoBehaviour
         if (destroy)
         {
             Destroy(gameObject);
+        }
+        if (!notDoor)
+        {
+            if (!doorKey.activeInHierarchy)
+            {
+                InventoryManager.Instance.SetWait(waitTime);
+                InventoryManager.Instance.DialoguePopup(dialogueText);
+            }
         }
     }
 
