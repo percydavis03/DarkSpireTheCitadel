@@ -7,8 +7,8 @@ public class ChangeCamera : MonoBehaviour
     public GameObject newVCamera;
     public GameObject oldVCamera;
 
-    public GameObject newMainCam;
-    public GameObject oldMainCam;
+    //public GameObject newMainCam;
+    //public GameObject oldMainCam;
 
     // Start is called before the first frame update
     void Start()
@@ -22,11 +22,11 @@ public class ChangeCamera : MonoBehaviour
         {
             newVCamera.SetActive(true);
             oldVCamera.SetActive(false);
-            if (!newMainCam.activeInHierarchy)
+            /*if (!newMainCam.activeInHierarchy)
             {
                 newMainCam.SetActive(true);
                 oldMainCam.SetActive(false);
-            }
+            }*/
             
         }
     }

@@ -10,6 +10,9 @@ public class Enemy_Basic : MonoBehaviour
 {
     
     public PlayerSaveState thisGameSave;
+
+    public bool isLock;
+    public GameObject exit;
     //stats
     public float enemyHP = 30;
     public float maxEnemyHP = 30;
@@ -154,6 +157,10 @@ public class Enemy_Basic : MonoBehaviour
         this.GetComponent<CapsuleCollider>().enabled = false;
         GameObject s = Instantiate(enemyDrop);
         s.transform.position = transform.position;
+        if (isLock)
+        {
+            exit.SetActive(true);
+        }
         //Destroy(thisGuy);
     }
 
