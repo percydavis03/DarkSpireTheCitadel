@@ -48,12 +48,12 @@ public class Player_Movement : MonoBehaviour
     public GameObject thisGameObject;
     public bool canRotate;
 
-    public GameObject cameraRoot;
+    /*public GameObject cameraRoot;
 
     public Camera mainCamera;
     private float targetRotation = 0;
     private float rotationVelocity;
-    public float RotationSmoothTime = 0.12f;
+    public float RotationSmoothTime = 0.12f;*/
 
     public bool canTurn = true;
     private float prevRotation;
@@ -215,20 +215,20 @@ public class Player_Movement : MonoBehaviour
 
         if (horizontalInput + verticalInput != 0)
         {
-            if (canTurn)
+            /*if (canTurn)
                 targetRotation = Mathf.Atan2(horizontalInput, verticalInput) * Mathf.Rad2Deg +
                                   mainCamera.transform.eulerAngles.y;
             float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
-                RotationSmoothTime);
+                RotationSmoothTime);*/
 
             // rotate to face input direction relative to camera position
-            transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+            //transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
 
-            if (rotationDirection.z == -1)
+            /*if (rotationDirection.z == -1)
             {
                 canTurn = false;
                 Invoke("ResetCanTurn", 0.75f);
-            }
+            }*/
         }
 
 
@@ -322,19 +322,19 @@ public class Player_Movement : MonoBehaviour
             anim.SetBool("isJump", false);
         }
 
-        Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+        //Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
         characterController.Move(moveDirection * Time.deltaTime);
 
-        /*
+        
         if (rotationDirection != Vector3.zero && canRotate)
         {
             Quaternion toRotation = Quaternion.LookRotation(rotationDirection, Vector3.up);
 
             playerTransform.rotation = Quaternion.RotateTowards(playerTransform.rotation, toRotation, rotationSpeed * Time.deltaTime);
         }
-        */
+        
         //Update cameraRoot rotation
-        cameraRoot.transform.localRotation = playerTransform.rotation;
+        //cameraRoot.transform.localRotation = playerTransform.rotation;
 
     }
 
