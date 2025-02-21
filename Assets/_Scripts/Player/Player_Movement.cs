@@ -269,6 +269,7 @@ public class Player_Movement : MonoBehaviour
             moveDirection = Vector3.zero;
             canRotate = false;
             isAttacking = true;
+            canMove = false;
         }
         else if (attack.WasPressedThisFrame() && isAttacking && isSpinAttack) //cancel attack
         {
@@ -287,7 +288,11 @@ public class Player_Movement : MonoBehaviour
             isAttacking = true;
             Debug.Log("spinAttack");
         }
-
+        if (anim.GetBool("isHurt"))
+        {
+            canMove = true;
+            Debug.Log("ishurting");
+        }
         if (jump.IsPressed() && canMove && characterController.isGrounded) //JUMP
         {
             if (thisGameSave.canJump == true)
