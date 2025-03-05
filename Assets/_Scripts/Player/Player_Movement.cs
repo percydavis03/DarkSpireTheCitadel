@@ -48,12 +48,10 @@ public class Player_Movement : MonoBehaviour
     public GameObject thisGameObject;
     public bool canRotate;
 
-    /*public GameObject cameraRoot;
-
     public Camera mainCamera;
     private float targetRotation = 0;
     private float rotationVelocity;
-    public float RotationSmoothTime = 0.12f;*/
+    public float RotationSmoothTime = 0.12f;
 
     public bool canTurn = true;
     private float prevRotation;
@@ -195,8 +193,18 @@ public class Player_Movement : MonoBehaviour
             float verticalInput = Input.GetAxis("Vertical");
             float horizontalInput = Input.GetAxis("Horizontal");
 
-            // Calculate target velocity in world space
-            targetVelocity = new Vector3(horizontalInput, 0, verticalInput).normalized * speed;
+            // Get camera forward and right vectors
+            Vector3 cameraForward = mainCamera.transform.forward;
+            Vector3 cameraRight = mainCamera.transform.right;
+            
+            // Project vectors onto the horizontal plane
+            cameraForward.y = 0;
+            cameraRight.y = 0;
+            cameraForward.Normalize();
+            cameraRight.Normalize();
+
+            // Calculate target velocity based on camera orientation
+            targetVelocity = (cameraForward * verticalInput + cameraRight * horizontalInput).normalized * speed;
 
             // Smoothly interpolate current velocity towards target velocity
             currentVelocity = Vector3.Lerp(
