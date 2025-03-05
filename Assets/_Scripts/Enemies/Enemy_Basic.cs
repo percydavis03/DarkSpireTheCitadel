@@ -12,6 +12,7 @@ public class Enemy_Basic : MonoBehaviour
     public PlayerSaveState thisGameSave;
 
     public bool isLock;
+    public bool isSpeartwo;
     public GameObject exit;
     //stats
     public float enemyHP = 30;
@@ -99,6 +100,10 @@ public class Enemy_Basic : MonoBehaviour
             StartCoroutine(Wait(0.5f));
         }
     }
+    public void Reposition()
+    {
+        transform.LookAt(player);
+    }
     public void StopHurt()
     {
         anim.SetBool("IsHurting", false);
@@ -129,6 +134,7 @@ public class Enemy_Basic : MonoBehaviour
     {
         spear_hitbox.SetActive(false);
         anim.SetBool("IsAttacking", false);
+        transform.LookAt(player);
         GetComponent<NavMeshAgent>().speed = setSpeed;
         print("stop attacking");
     }
@@ -258,14 +264,23 @@ public class Enemy_Basic : MonoBehaviour
     private void AttackPlayer()
     {
         agent.SetDestination(thisGuy.transform.position);
-        anim.SetBool("IsAttacking", true);
+        
+        if (isSpeartwo)
+        {
+            anim.SetBool("IsAttacking2", true);
+        }
+        if (!isSpeartwo)
+        {
+            anim.SetBool("IsAttacking", true);
+        }
+        
         GetComponent<NavMeshAgent>().speed = 0;
         //transform.LookAt(player);
 
         if (!alreadyAttacked)
         {
             alreadyAttacked = true;
-            StartCoroutine(NavWait(1.5f));
+            StartCoroutine(NavWait(1f));
         }
     }
 
