@@ -112,6 +112,8 @@ public class Player_Movement : MonoBehaviour
     {
         yield return new WaitForSeconds(seconds);
         anim.SetBool("isHurt", false);
+        anim.SetBool("isAttacking", false);
+        EndAttack();
     }
     public void Die()
     {
@@ -313,7 +315,7 @@ public class Player_Movement : MonoBehaviour
         if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack && !thisGameSave.inMenu) //ATTACK
         {
             anim.SetBool("isAttacking", true);
-           
+            StartCoroutine("WaitUntil", 2f);
             moveDirection = Vector3.zero;
             canRotate = false;
             isAttacking = true;
