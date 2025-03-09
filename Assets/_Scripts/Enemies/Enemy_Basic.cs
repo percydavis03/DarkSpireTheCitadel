@@ -156,7 +156,7 @@ public class Enemy_Basic : MonoBehaviour
     public void Death()
     {
         dead = true;
-        
+        setSpeed = 0;
         spear_hitbox.SetActive (false);
         Bleed();
         this.GetComponent<BoxCollider>().enabled = false; 
