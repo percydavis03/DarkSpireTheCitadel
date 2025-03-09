@@ -2052,6 +2052,9 @@ GameObject:
   - component: {fileID: 3363355706063113979}
   - component: {fileID: 1725520715847023989}
   - component: {fileID: 2005845451355772086}
+  - component: {fileID: 1302204275184489568}
+  - component: {fileID: 5590703173683751734}
+  - component: {fileID: 7555958891096510267}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -2202,10 +2205,11 @@ MonoBehaviour:
   animationSource: {fileID: 1154107589237833224}
   thisGameObject: {fileID: 1154107589237833224}
   canRotate: 0
-  cameraRoot: {fileID: 2423703012069392055}
   mainCamera: {fileID: 0}
   RotationSmoothTime: 0.12
   canTurn: 1
+  accelerationSpeed: 10
+  decelerationSpeed: 15
 --- !u!143 &856932804566754245
 CharacterController:
   m_ObjectHideFlags: 0
@@ -2413,6 +2417,77 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1302204275184489568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154107589237833224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 963d6358c55a0f44d8de57bee560f184, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useDefaultGUI: 1
+  guiSkin: {fileID: 0}
+  guiStyleName: label
+  alignment: 1
+  color: {r: 0.4415095, g: 0, b: 0.05524932, a: 1}
+  textStyle: 1
+  textStyleColor: {r: 0, g: 0, b: 0, a: 1}
+  m_defaultUseMessage: (X to interact)
+  useKey: 120
+  useButton: Fire2
+  enableTouch: 0
+  touchArea:
+    origin: 0
+    alignment: 0
+    x:
+      scale: 0
+      value: 0
+    y:
+      scale: 0
+      value: 0
+    width:
+      scale: 0
+      value: 0
+    height:
+      scale: 0
+      value: 0
+    minPixelWidth: 0
+    minPixelHeight: 0
+  broadcastToChildren: 1
+  actorTransform: {fileID: 0}
+  onSelectedUsable:
+    m_PersistentCalls:
+      m_Calls: []
+  onDeselectedUsable:
+    m_PersistentCalls:
+      m_Calls: []
+  usablesInRange: []
+--- !u!114 &5590703173683751734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154107589237833224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42f17d3292d455242a47944a59dea99c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tagSpecificElements: []
+  layerSpecificElements: []
+--- !u!81 &7555958891096510267
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154107589237833224}
+  m_Enabled: 1
 --- !u!1 &1233231036507952271
 GameObject:
   m_ObjectHideFlags: 0
