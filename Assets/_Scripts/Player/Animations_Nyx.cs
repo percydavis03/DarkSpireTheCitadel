@@ -18,7 +18,7 @@ public class Animations_Nyx : MonoBehaviour
     }
     public void ActivateAttack()
     {
-        //Player_Movement.instance.AttackFailSafe();
+        Player_Movement.instance.AttackFailSafe();
         
     }
     public void AttackAnimEnd()
