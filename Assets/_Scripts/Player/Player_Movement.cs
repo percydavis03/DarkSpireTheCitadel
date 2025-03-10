@@ -174,19 +174,27 @@ public class Player_Movement : MonoBehaviour
     }
     void Update()
     {
+        
+
         if (thisGameSave.inMenu)
         {
             canMove = false;
+           
         }
+       
         if (openInfoMenu.WasPressedThisFrame()) //INFO MENU
         {
             print("openmenu");
+            anim.SetBool("isRun", false);
             MenuScript.instance.InfoMenu();
+
         }
 
         if (openMainMenu.WasPressedThisFrame())
         {
+            anim.SetBool("isRun", false);
             MenuScript.instance.MainMenu();  //MAIN MENU
+
         }
 
         HandleInputs();
@@ -248,7 +256,7 @@ public class Player_Movement : MonoBehaviour
 
     private void HandleInputs()
     {
-        if (openInfoMenu.WasPressedThisFrame())
+        /*if (openInfoMenu.WasPressedThisFrame())
         {
             MenuScript.instance.InfoMenu();
         }
@@ -256,7 +264,7 @@ public class Player_Movement : MonoBehaviour
         if (openMainMenu.WasPressedThisFrame())
         {
             MenuScript.instance.MainMenu();
-        }
+        }*/
 
         // Handle sprint
         if (sprint.IsPressed() && !isAttacking)

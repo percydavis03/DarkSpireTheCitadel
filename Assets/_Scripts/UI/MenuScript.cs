@@ -48,7 +48,7 @@ public class MenuScript : MonoBehaviour
         {
             mainMenu.SetActive(false);
             Player_Movement.instance.canMove = true;
-            
+            thisGameSave.playerSpeed = Player_Movement.instance.speed;
             inMainMenu = false;
             thisGameSave.inMenu = false;
         }
@@ -74,7 +74,7 @@ public class MenuScript : MonoBehaviour
         if (infoMenu.activeInHierarchy)
         {
             infoMenu.SetActive(false);
-           
+            Player_Movement.instance.canMove = true;
             thisGameSave.playerSpeed = Player_Movement.instance.speed;
             thisGameSave.inMenu = false;
         }

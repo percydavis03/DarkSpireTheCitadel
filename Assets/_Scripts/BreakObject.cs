@@ -7,10 +7,14 @@ public class BreakObject : MonoBehaviour
     public Rigidbody rb;
     public bool isBroken;
     public MeshCollider mCollider;
+    public AudioSource breakSound;
+    public bool theSoundOne;
+    private bool isPlaying;
     // Start is called before the first frame update
     void Start()
     {
         rb.isKinematic = true;
+        isPlaying = false;
     }
 
     // Update is called once per frame
@@ -31,6 +35,11 @@ public class BreakObject : MonoBehaviour
     {
         if(other.gameObject.tag == "Weapon")
         {
+            if (theSoundOne && !isPlaying)
+            {
+                breakSound.Play();
+                isPlaying = true;
+            }
             isBroken = true;
         }
     }
