@@ -174,6 +174,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2777234564363134667}
+    - targetCorrespondingSourceObject: {fileID: -1646722587848141511, guid: b3695a0cb17f7c74b9daf21c05cec608,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3223426515179242862}
     - targetCorrespondingSourceObject: {fileID: -6645233674997552873, guid: b3695a0cb17f7c74b9daf21c05cec608,
         type: 3}
       insertIndex: -1
@@ -260,6 +264,8 @@ MonoBehaviour:
   rb: {fileID: 2666610737957014855}
   isBroken: 0
   mCollider: {fileID: 5397169360868330580}
+  breakSound: {fileID: 0}
+  theSoundOne: 0
 --- !u!54 &2666610737957014855
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -352,6 +358,8 @@ MonoBehaviour:
   rb: {fileID: 4704124854075454173}
   isBroken: 0
   mCollider: {fileID: 957221038445303170}
+  breakSound: {fileID: 0}
+  theSoundOne: 0
 --- !u!54 &4704124854075454173
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -444,6 +452,8 @@ MonoBehaviour:
   rb: {fileID: 2518620694189291868}
   isBroken: 0
   mCollider: {fileID: 8777134268221837762}
+  breakSound: {fileID: 3223426515179242862}
+  theSoundOne: 1
 --- !u!54 &2518620694189291868
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -515,6 +525,102 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 697903988925253736, guid: b3695a0cb17f7c74b9daf21c05cec608, type: 3}
+--- !u!82 &3223426515179242862
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3332398408718322391}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 0b1859c99f8ac3641882955b3a48b0aa, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &3662055861367570396 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8487200979332882482, guid: b3695a0cb17f7c74b9daf21c05cec608,
@@ -536,6 +642,8 @@ MonoBehaviour:
   rb: {fileID: 9129473410719081625}
   isBroken: 0
   mCollider: {fileID: 3884370604416509759}
+  breakSound: {fileID: 0}
+  theSoundOne: 0
 --- !u!54 &9129473410719081625
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -628,6 +736,8 @@ MonoBehaviour:
   rb: {fileID: 1726508034577476712}
   isBroken: 0
   mCollider: {fileID: 3018252251347177696}
+  breakSound: {fileID: 0}
+  theSoundOne: 0
 --- !u!54 &1726508034577476712
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -720,6 +830,8 @@ MonoBehaviour:
   rb: {fileID: 4225756624368844163}
   isBroken: 0
   mCollider: {fileID: 5095995500101822192}
+  breakSound: {fileID: 0}
+  theSoundOne: 0
 --- !u!54 &4225756624368844163
 Rigidbody:
   m_ObjectHideFlags: 0
