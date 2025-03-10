@@ -9,7 +9,7 @@ public class ItemPickup : MonoBehaviour
 {
     public Item Item;
     public bool canPickup = false;
-   
+    public AudioSource pickupSound;
 
 
     //TESTING
@@ -20,7 +20,7 @@ public class ItemPickup : MonoBehaviour
 
     void Pickup()
     {
-
+        pickupSound.Play();
         InventoryManager.Instance.Add(Item);
         InventoryManager.Instance.Popup(Item);
         
@@ -31,6 +31,7 @@ public class ItemPickup : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Pickup();
+        
         canPickup = true;
     }
 
