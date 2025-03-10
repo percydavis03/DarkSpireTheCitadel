@@ -62,6 +62,8 @@ public class Player_Movement : MonoBehaviour
     private Vector3 currentVelocity;
     private Vector3 targetVelocity;
 
+    public AudioSource attackSound;
+
     private void Awake()
     {
         if (instance == null)
@@ -161,6 +163,7 @@ public class Player_Movement : MonoBehaviour
     public void SwordOn()
     {
         swordHitbox.SetActive(true);
+        attackSound.Play();
     }
     public void SwordOff()
     {
