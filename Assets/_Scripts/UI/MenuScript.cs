@@ -38,6 +38,7 @@ public class MenuScript : MonoBehaviour
 
     public void MainMenu()
     {
+        SetFirstSelect.instance.SetPauseSelectButton();
         if (!mainMenu.activeInHierarchy && !infoMenu.activeInHierarchy)
         {
             Cursor.lockState = CursorLockMode.None;
@@ -46,12 +47,15 @@ public class MenuScript : MonoBehaviour
         if (mainMenu.activeInHierarchy)
         {
             mainMenu.SetActive(false);
+            Player_Movement.instance.canMove = true;
+            
             inMainMenu = false;
             thisGameSave.inMenu = false;
         }
         else if (!mainMenu.activeInHierarchy && !infoMenu.activeInHierarchy)
         {
            mainMenu.SetActive(true);
+           SetFirstSelect.instance.SetPauseSelectButton();
            thisGameSave.inMenu = true;
            inMainMenu = true;
         }
@@ -60,6 +64,7 @@ public class MenuScript : MonoBehaviour
     public void InfoMenu()
     {
         InventoryManager.Instance.ListItems();
+        SetFirstSelect.instance.SetInfoSelectButton();
 
         if (!infoMenu.activeInHierarchy && !mainMenu.activeInHierarchy)
         {
@@ -70,6 +75,7 @@ public class MenuScript : MonoBehaviour
         {
             infoMenu.SetActive(false);
            
+            thisGameSave.playerSpeed = Player_Movement.instance.speed;
             thisGameSave.inMenu = false;
         }
         else if (!infoMenu.activeInHierarchy && !mainMenu.activeInHierarchy)
