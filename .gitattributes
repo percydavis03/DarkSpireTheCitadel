@@ -1,8 +1,7 @@
 * text=auto
-
 # Unity files
 *.meta -text merge=unityyamlmerge diff
-*.unity -text merge=unityyamlmerge diff
+*.unity filter=lfs diff=lfs merge=lfs -text
 *.asset -text merge=unityyamlmerge diff
 *.prefab -text merge=unityyamlmerge diff
 *.mat -text merge=unityyamlmerge diff
@@ -23,14 +22,12 @@
 *.terrainlayer -text merge=unityyamlmerge diff
 *.mixer -text merge=unityyamlmerge diff
 *.shadervariants -text merge=unityyamlmerge diff
-
 # Unreal files
 *.locres filter=lfs diff=lfs merge=lfs -text
 *.locmeta filter=lfs diff=lfs merge=lfs -text
 *.ico filter=lfs diff=lfs merge=lfs -text
 *.uasset filter=lfs diff=lfs merge=lfs -text
 *.umap filter=lfs diff=lfs merge=lfs -text
-
 *.3DS filter=lfs diff=lfs merge=lfs -text 
 *.3ds filter=lfs diff=lfs merge=lfs -text 
 *.ABC filter=lfs diff=lfs merge=lfs -text 
@@ -167,3 +164,4 @@
 *.xls filter=lfs diff=lfs merge=lfs -text 
 *.xlsx filter=lfs diff=lfs merge=lfs -text 
 *.zip filter=lfs diff=lfs merge=lfs -text 
+*.unity.meta filter=lfs diff=lfs merge=lfs -text
