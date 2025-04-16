@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using FMODUnity;
+
 
 public class BreakObject : MonoBehaviour
 {
     public Rigidbody rb;
     public bool isBroken;
     public MeshCollider mCollider;
-    public AudioSource breakSound;
+    public StudioEventEmitter breakSound;
     public bool theSoundOne;
     private bool isPlaying;
     // Start is called before the first frame update
