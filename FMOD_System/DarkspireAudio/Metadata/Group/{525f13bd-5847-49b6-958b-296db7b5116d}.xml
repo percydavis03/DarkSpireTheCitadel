@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="MixerGroup" id="{525f13bd-5847-49b6-958b-296db7b5116d}">
+		<property name="name">
+			<value>Nyx</value>
+		</property>
+		<relationship name="effectChain">
+			<destination>{70ff31d5-e2ec-4980-a107-362b9c02fca1}</destination>
+		</relationship>
+		<relationship name="panner">
+			<destination>{1683931c-64ed-43bd-bb9b-d787a8e0073b}</destination>
+		</relationship>
+		<relationship name="output">
+			<destination>{7d9daf67-6e59-4d54-9c5f-123ba8cc9b19}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusEffectChain" id="{70ff31d5-e2ec-4980-a107-362b9c02fca1}">
+		<relationship name="effects">
+			<destination>{77fa958e-f8f4-4051-8472-de8579ee4eed}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusPanner" id="{1683931c-64ed-43bd-bb9b-d787a8e0073b}" />
+	<object class="MixerBusFader" id="{77fa958e-f8f4-4051-8472-de8579ee4eed}" />
+</objects>
