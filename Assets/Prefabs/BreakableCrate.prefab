@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7711343751059972366
+--- !u!1 &2838739350204694364
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,8 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4118796687050462786}
-  - component: {fileID: 8317626582237592060}
+  - component: {fileID: 3661135976300200100}
+  - component: {fileID: 6016359883965990684}
   m_Layer: 0
   m_Name: crateAudio
   m_TagString: Untagged
@@ -17,13 +17,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4118796687050462786
+--- !u!4 &3661135976300200100
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7711343751059972366}
+  m_GameObject: {fileID: 2838739350204694364}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.4087377, z: -0, w: 0.91265196}
   m_LocalPosition: {x: 0.0008, y: 0.0044, z: 0.0019}
@@ -32,13 +32,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4652250613985703941}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8317626582237592060
+--- !u!114 &6016359883965990684
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7711343751059972366}
+  m_GameObject: {fileID: 2838739350204694364}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
@@ -207,7 +207,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: b3695a0cb17f7c74b9daf21c05cec608,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4118796687050462786}
+      addedObject: {fileID: 3661135976300200100}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: -5633506002534656242, guid: b3695a0cb17f7c74b9daf21c05cec608,
         type: 3}
@@ -327,7 +327,7 @@ MonoBehaviour:
   rb: {fileID: 2666610737957014855}
   isBroken: 0
   mCollider: {fileID: 5397169360868330580}
-  breakSound: {fileID: 0}
+  breakSound: {fileID: 6016359883965990684}
   theSoundOne: 0
 --- !u!54 &2666610737957014855
 Rigidbody:
@@ -421,7 +421,7 @@ MonoBehaviour:
   rb: {fileID: 4704124854075454173}
   isBroken: 0
   mCollider: {fileID: 957221038445303170}
-  breakSound: {fileID: 0}
+  breakSound: {fileID: 6016359883965990684}
   theSoundOne: 0
 --- !u!54 &4704124854075454173
 Rigidbody:
@@ -515,7 +515,7 @@ MonoBehaviour:
   rb: {fileID: 2518620694189291868}
   isBroken: 0
   mCollider: {fileID: 8777134268221837762}
-  breakSound: {fileID: 0}
+  breakSound: {fileID: 6016359883965990684}
   theSoundOne: 1
 --- !u!54 &2518620694189291868
 Rigidbody:
@@ -609,7 +609,7 @@ MonoBehaviour:
   rb: {fileID: 9129473410719081625}
   isBroken: 0
   mCollider: {fileID: 3884370604416509759}
-  breakSound: {fileID: 0}
+  breakSound: {fileID: 6016359883965990684}
   theSoundOne: 0
 --- !u!54 &9129473410719081625
 Rigidbody:
@@ -709,7 +709,7 @@ MonoBehaviour:
   rb: {fileID: 1726508034577476712}
   isBroken: 0
   mCollider: {fileID: 3018252251347177696}
-  breakSound: {fileID: 0}
+  breakSound: {fileID: 6016359883965990684}
   theSoundOne: 0
 --- !u!54 &1726508034577476712
 Rigidbody:
@@ -803,7 +803,7 @@ MonoBehaviour:
   rb: {fileID: 4225756624368844163}
   isBroken: 0
   mCollider: {fileID: 5095995500101822192}
-  breakSound: {fileID: 0}
+  breakSound: {fileID: 6016359883965990684}
   theSoundOne: 0
 --- !u!54 &4225756624368844163
 Rigidbody:

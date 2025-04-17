@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using FMODUnity;
 //using UnityEngine.InputSystem;
 
 
@@ -9,7 +10,7 @@ public class ItemPickup : MonoBehaviour
 {
     public Item Item;
     public bool canPickup = false;
-    public AudioSource pickupSound;
+    public StudioEventEmitter pickupSound;
 
 
     //TESTING

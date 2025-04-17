@@ -5489,7 +5489,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Item: {fileID: 11400000, guid: 6fe59ec7659037940b538d9e3e4d4cc5, type: 2}
   canPickup: 1
-  pickupSound: {fileID: 0}
+  pickupSound: {fileID: 547469125}
 --- !u!4 &377627603 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 86e0443688dc2da47b871a0da0e53390,
@@ -7291,6 +7291,69 @@ Transform:
   - {fileID: 377627603}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &547469123
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 547469124}
+  - component: {fileID: 547469125}
+  m_Layer: 0
+  m_Name: SwordEquip
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &547469124
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547469123}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 377627603}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &547469125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547469123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: -1516393619
+      Data2: 1170769209
+      Data3: 1709040311
+      Data4: -300053413
+    Path: event:/SFX/Nyx/SwordEquipped
+  Event: 
+  EventPlayTrigger: 11
+  EventStopTrigger: 12
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 1
+  OverrideMinDistance: 3.1641178
+  OverrideMaxDistance: 20
 --- !u!4 &564072965 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 784456841512791255, guid: 1406c2d0c30ed0346aebe50fa1578e53,
@@ -10709,6 +10772,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 501474556}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 86e0443688dc2da47b871a0da0e53390,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 547469124}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 86e0443688dc2da47b871a0da0e53390,
         type: 3}
@@ -14597,6 +14664,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1934877474}
+  - {fileID: 1714848856}
   m_Father: {fileID: 541837671}
   m_LocalEulerAnglesHint: {x: 1.393, y: 210.91, z: 0}
 --- !u!65 &964872793
@@ -26725,6 +26793,69 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1714848855
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1714848856}
+  - component: {fileID: 1714848857}
+  m_Layer: 0
+  m_Name: PaperPickup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1714848856
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714848855}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 964872792}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1714848857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714848855}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: 820849301
+      Data2: 1289249779
+      Data3: 2010336669
+      Data4: 2034129004
+    Path: event:/SFX/Nyx/Collection/PaperCollect
+  Event: 
+  EventPlayTrigger: 11
+  EventStopTrigger: 12
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 1
+  OverrideMinDistance: 1.6749554
+  OverrideMaxDistance: 20
 --- !u!1 &1717321704
 GameObject:
   m_ObjectHideFlags: 0
@@ -27034,6 +27165,16 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[1]
       value: 
       objectReference: {fileID: 2100000, guid: 6b5e12b87200ba140ad0b6fc07fa6db0, type: 2}
+    - target: {fileID: 6665481449183478984, guid: 80217444ec9e57949b815c83ab755a1a,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.26
+      objectReference: {fileID: 0}
+    - target: {fileID: 6665481449183478984, guid: 80217444ec9e57949b815c83ab755a1a,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 8112388345021839701, guid: 80217444ec9e57949b815c83ab755a1a,
         type: 3}
       propertyPath: Item
@@ -27044,7 +27185,7 @@ PrefabInstance:
         type: 3}
       propertyPath: pickupSound
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1726638056}
     - target: {fileID: 9216975436614907263, guid: 80217444ec9e57949b815c83ab755a1a,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -27116,7 +27257,7 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 9216975436614907263, guid: 80217444ec9e57949b815c83ab755a1a,
         type: 3}
-      insertIndex: -1
+      insertIndex: 0
       addedObject: {fileID: 401846737}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 969761490993140290, guid: 80217444ec9e57949b815c83ab755a1a,
@@ -27127,7 +27268,48 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2073605724}
+    - targetCorrespondingSourceObject: {fileID: 4136806425990593680, guid: 80217444ec9e57949b815c83ab755a1a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1726638056}
   m_SourcePrefab: {fileID: 100100000, guid: 80217444ec9e57949b815c83ab755a1a, type: 3}
+--- !u!1 &1726638055 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4136806425990593680, guid: 80217444ec9e57949b815c83ab755a1a,
+    type: 3}
+  m_PrefabInstance: {fileID: 1726638054}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1726638056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726638055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: -258701239
+      Data2: 1194911660
+      Data3: -1672118853
+      Data4: 2101555580
+    Path: event:/SFX/Nyx/Collection/KeyCollect
+  Event: 
+  EventPlayTrigger: 11
+  EventStopTrigger: 12
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 1
+  OverrideMinDistance: 2.320259
+  OverrideMaxDistance: 20
 --- !u!4 &1728432315 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 052a003e2e2466e4d8655102a6193b51,

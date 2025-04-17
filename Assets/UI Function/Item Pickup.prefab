@@ -32,7 +32,8 @@ Transform:
   m_LocalPosition: {x: 13.03, y: 0.22, z: 12.17}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 6665481449183478984}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6159588495423403061
@@ -120,3 +121,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Item: {fileID: 11400000, guid: 6fe59ec7659037940b538d9e3e4d4cc5, type: 2}
   canPickup: 1
+  pickupSound: {fileID: 0}
+--- !u!1 &4136806425990593680
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6665481449183478984}
+  m_Layer: 0
+  m_Name: KeyPickup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6665481449183478984
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4136806425990593680}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.7152674, z: -0, w: 0.6988509}
+  m_LocalPosition: {x: -20.185005, y: 0.05528927, z: 12.118181}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9216975436614907263}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

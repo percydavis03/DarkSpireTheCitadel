@@ -5,7 +5,7 @@
 			<value>HallwayDrums</value>
 		</property>
 		<property name="outputFormat">
-			<value>2</value>
+			<value>1</value>
 		</property>
 		<relationship name="folder">
 			<destination>{a175f382-52d8-478c-8852-87c5a0774d80}</destination>
@@ -133,7 +133,6 @@
 	<object class="MixerBusEffectChain" id="{23f364b9-7b6f-4b08-850c-979ebcd405d6}">
 		<relationship name="effects">
 			<destination>{146dd9c4-0f48-43cb-8cf8-529483e79a9e}</destination>
-			<destination>{bfb1291c-58b9-4a40-bb60-015f608f8c0f}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{43500d29-b490-4b3d-aef5-1ea597187c45}" />
@@ -145,13 +144,5 @@
 	</object>
 	<object class="MixerBusPanner" id="{76544c65-3fcb-46d4-be98-7affc4f25a62}" />
 	<object class="MixerBusFader" id="{146dd9c4-0f48-43cb-8cf8-529483e79a9e}" />
-	<object class="SpatialiserEffect" id="{bfb1291c-58b9-4a40-bb60-015f608f8c0f}">
-		<property name="maximumDistance">
-			<value>1000</value>
-		</property>
-		<property name="overrideRange">
-			<value>true</value>
-		</property>
-	</object>
 	<object class="MixerBusFader" id="{d7469a3b-7fc5-4736-a367-f2e194699a5b}" />
 </objects>
