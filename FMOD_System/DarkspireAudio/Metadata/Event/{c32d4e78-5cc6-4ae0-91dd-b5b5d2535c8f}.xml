@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{c32d4e78-5cc6-4ae0-91dd-b5b5d2535c8f}">
 		<property name="name">
-			<value>LabAmbience</value>
+			<value>IndoorAmbience</value>
 		</property>
 		<property name="outputFormat">
 			<value>1</value>
@@ -107,7 +107,7 @@
 	</object>
 	<object class="EventMixerGroup" id="{82cc7293-9cca-486f-9ab2-d3f7b906ffda}">
 		<property name="volume">
-			<value>-7</value>
+			<value>-2</value>
 		</property>
 		<property name="name">
 			<value>Audio 1</value>
@@ -153,10 +153,22 @@
 	</object>
 	<object class="MixerBusEffectChain" id="{a156f4bd-5752-450a-834d-8a8a54d9ed67}">
 		<relationship name="effects">
+			<destination>{9e9c94fd-7f69-4335-9496-4b31c004eb2f}</destination>
 			<destination>{1c27a0cd-3bc0-463b-adf9-c8932f4b6265}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{259da32d-61a0-48c3-8f15-4304f0d55c35}" />
 	<object class="MixerBusFader" id="{2cf3ee0e-c19c-4002-a42a-3ac1a6929b09}" />
+	<object class="ThreeEQEffect" id="{9e9c94fd-7f69-4335-9496-4b31c004eb2f}">
+		<property name="lowGain">
+			<value>3.5</value>
+		</property>
+		<property name="midGain">
+			<value>-10.5</value>
+		</property>
+		<property name="highGain">
+			<value>-11</value>
+		</property>
+	</object>
 	<object class="MixerBusFader" id="{1c27a0cd-3bc0-463b-adf9-c8932f4b6265}" />
 </objects>
