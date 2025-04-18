@@ -5,7 +5,7 @@
 			<value>IndoorAmbience</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{9bacecec-af99-4864-ae16-828370e0a2c8}</destination>
@@ -139,6 +139,7 @@
 	<object class="MixerBusEffectChain" id="{602b3e17-b565-46da-86e9-712d0b80d942}">
 		<relationship name="effects">
 			<destination>{2cf3ee0e-c19c-4002-a42a-3ac1a6929b09}</destination>
+			<destination>{2ddc32b3-66b7-41cf-9a31-34bc9c0be712}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{49154e84-5d35-4b2d-9c59-19a1c2e895b7}" />
@@ -159,6 +160,7 @@
 	</object>
 	<object class="MixerBusPanner" id="{259da32d-61a0-48c3-8f15-4304f0d55c35}" />
 	<object class="MixerBusFader" id="{2cf3ee0e-c19c-4002-a42a-3ac1a6929b09}" />
+	<object class="SpatialiserEffect" id="{2ddc32b3-66b7-41cf-9a31-34bc9c0be712}" />
 	<object class="ThreeEQEffect" id="{9e9c94fd-7f69-4335-9496-4b31c004eb2f}">
 		<property name="lowGain">
 			<value>3.5</value>

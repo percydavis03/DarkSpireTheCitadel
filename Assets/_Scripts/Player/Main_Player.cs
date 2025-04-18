@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using FMODUnity;
 
 public class Main_Player : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class Main_Player : MonoBehaviour
     private bool isDead;
     
     [Header("Damage")] 
-    public AudioSource ough;
+    public StudioEventEmitter ough;
     public GameObject bloodSplat;
     public List<GameObject> bloodSplats = new List<GameObject>();
     public int randomListObject;
