@@ -17065,6 +17065,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -0.0003182811
       objectReference: {fileID: 0}
+    - target: {fileID: 2427458369210021597, guid: f041864c8b27c7248a1e1e012f3a3cc9,
+        type: 3}
+      propertyPath: attenuationObject
+      value: 
+      objectReference: {fileID: 906152998}
     - target: {fileID: 2738915245724698761, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -17354,14 +17359,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1039796191}
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1154107589237833224, guid: f041864c8b27c7248a1e1e012f3a3cc9,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 906153000}
-    - targetCorrespondingSourceObject: {fileID: 1154107589237833224, guid: f041864c8b27c7248a1e1e012f3a3cc9,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 906152999}
     - targetCorrespondingSourceObject: {fileID: 3357959993545823980, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       insertIndex: -1
@@ -17373,69 +17370,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 906152997}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &906152999
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 906152998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42f17d3292d455242a47944a59dea99c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagSpecificElements: []
-  layerSpecificElements: []
---- !u!114 &906153000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 906152998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 963d6358c55a0f44d8de57bee560f184, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  useDefaultGUI: 1
-  guiSkin: {fileID: 0}
-  guiStyleName: label
-  alignment: 1
-  color: {r: 0.4415095, g: 0, b: 0.05524932, a: 1}
-  textStyle: 1
-  textStyleColor: {r: 0, g: 0, b: 0, a: 1}
-  m_defaultUseMessage: (F to interact)
-  useKey: 102
-  useButton: Fire2
-  enableTouch: 0
-  touchArea:
-    origin: 0
-    alignment: 0
-    x:
-      scale: 0
-      value: 0
-    y:
-      scale: 0
-      value: 0
-    width:
-      scale: 0
-      value: 0
-    height:
-      scale: 0
-      value: 0
-    minPixelWidth: 0
-    minPixelHeight: 0
-  broadcastToChildren: 1
-  actorTransform: {fileID: 0}
-  onSelectedUsable:
-    m_PersistentCalls:
-      m_Calls: []
-  onDeselectedUsable:
-    m_PersistentCalls:
-      m_Calls: []
-  usablesInRange: []
 --- !u!1001 &910017202
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20605,7 +20539,7 @@ Transform:
   m_GameObject: {fileID: 1102980082}
   serializedVersion: 2
   m_LocalRotation: {x: 0.06676521, y: 0.6403416, z: -0.05602265, w: 0.7631295}
-  m_LocalPosition: {x: -14.173481, y: 9.047937, z: 1.6719484}
+  m_LocalPosition: {x: -14.173789, y: 9.047937, z: 1.6736925}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -40997,7 +40931,7 @@ Transform:
   m_GameObject: {fileID: 1988914833}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.71, y: 12.25, z: 54.61}
+  m_LocalPosition: {x: 34.89, y: 12.25, z: 54.61}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -41179,7 +41113,7 @@ Transform:
   m_GameObject: {fileID: 1990158910}
   serializedVersion: 2
   m_LocalRotation: {x: 0.06676521, y: 0.6403416, z: -0.05602265, w: 0.7631295}
-  m_LocalPosition: {x: -14.173481, y: 9.047937, z: 1.6719484}
+  m_LocalPosition: {x: -14.173789, y: 9.047937, z: 1.6736925}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
