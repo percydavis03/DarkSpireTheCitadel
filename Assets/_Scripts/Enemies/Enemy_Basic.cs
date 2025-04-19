@@ -63,7 +63,7 @@ public class Enemy_Basic : MonoBehaviour
     }
     private void Awake()
     {
-        player = GameObject.Find("Player").transform;
+        //player = GameObject.Find("Player").transform;
         damageTaken = thisGameSave.mainAttackDamage; 
         rb = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();

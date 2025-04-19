@@ -164,7 +164,7 @@ public class Player_Movement : MonoBehaviour
     public void SwordOn()
     {
         swordHitbox.SetActive(true);
-        attackSound.Play();
+        //attackSound.Play();
     }
     public void SwordOff()
     {

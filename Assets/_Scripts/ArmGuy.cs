@@ -7,6 +7,7 @@ public class ArmGuy : MonoBehaviour
     public float health;
     public GameObject hisArm;
     public GameObject yourNewArm;
+    public GameObject yourNewArmPicture;
     private bool dead;
     public GameObject bloodspawn;
 
@@ -45,7 +46,7 @@ public class ArmGuy : MonoBehaviour
             dead = true;
             hisArm.SetActive(false);
             yourNewArm.SetActive(true);
-        
+            yourNewArmPicture.SetActive(true);
     }
     // Update is called once per frame
     void Update()

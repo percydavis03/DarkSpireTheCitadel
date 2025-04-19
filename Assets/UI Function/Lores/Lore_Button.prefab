@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6753026936185277218}
   - component: {fileID: 5911649762729650484}
   - component: {fileID: 3585594683977102495}
+  - component: {fileID: 926429772601862180}
   m_Layer: 5
   m_Name: Lore_Button
   m_TagString: Untagged
@@ -70,7 +71,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: c5a51d9934889d44a8b37a62ecc70421, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2c63808025998eb4f82c0dc02e513c40, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -149,7 +150,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   thisOption: {fileID: 11400000, guid: ab138f50cb5bf4e4fb4ac3cb4289c0dd, type: 2}
-  buttonSound: {fileID: 3585594683977102495}
+  buttonSound: {fileID: 926429772601862180}
 --- !u!82 &3585594683977102495
 AudioSource:
   m_ObjectHideFlags: 0
@@ -157,7 +158,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 194418069010580602}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: f818f3f806aff5b45b655f8a72b342b0, type: 3}
@@ -246,6 +247,37 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &926429772601862180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 194418069010580602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: -730023082
+      Data2: 1229168655
+      Data3: -413876602
+      Data4: 392026696
+    Path: event:/SFX/Buttons/TitleButtonBegin
+  Event: 
+  EventPlayTrigger: 0
+  EventStopTrigger: 0
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 20
 --- !u!1 &2828741180755453064
 GameObject:
   m_ObjectHideFlags: 0
@@ -313,8 +345,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Lore
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 9b0f6cd6179c50948a5ca59cd7207944, type: 2}
-  m_sharedMaterial: {fileID: -7675950358580856806, guid: 9b0f6cd6179c50948a5ca59cd7207944,
+  m_fontAsset: {fileID: 11400000, guid: 33ebcf0004ba48a4382b22f7ad8c3129, type: 2}
+  m_sharedMaterial: {fileID: -4166367788820894786, guid: 33ebcf0004ba48a4382b22f7ad8c3129,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -450,8 +482,8 @@ MonoBehaviour:
 
 '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: bcba22996b9d352449ad885de0b1ac66, type: 2}
-  m_sharedMaterial: {fileID: 6943274766288057169, guid: bcba22996b9d352449ad885de0b1ac66,
+  m_fontAsset: {fileID: 11400000, guid: 33ebcf0004ba48a4382b22f7ad8c3129, type: 2}
+  m_sharedMaterial: {fileID: -4166367788820894786, guid: 33ebcf0004ba48a4382b22f7ad8c3129,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}

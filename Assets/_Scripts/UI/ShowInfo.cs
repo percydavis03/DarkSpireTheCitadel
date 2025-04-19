@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using FMODUnity;
+
 
 public class ShowInfo : MonoBehaviour
 {
     public static ShowInfo Instance;
     public Item thisOption;
     //public GameObject infoLocation;
-    public AudioSource buttonSound;
+    public StudioEventEmitter buttonSound;
     //weapons
     private TextMeshProUGUI weaponDescription;
     private Image weaponRightImage;
