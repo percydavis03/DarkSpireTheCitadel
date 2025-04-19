@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using FMODUnity;
 
 public class Player_Movement : MonoBehaviour
 {
@@ -62,7 +63,7 @@ public class Player_Movement : MonoBehaviour
     private Vector3 currentVelocity;
     private Vector3 targetVelocity;
 
-    public AudioSource attackSound;
+    public StudioEventEmitter attackSound;
 
     private void Awake()
     {
