@@ -7,7 +7,8 @@ using UnityEngine.SceneManagement;
 public class MenuFunction : MonoBehaviour
 {
     public GameObject theMenu;
-    
+    public GameObject instructions;
+
     public AudioSource buttonpress;
 
     public PlayerSaveState thisGameSave;
@@ -21,10 +22,14 @@ public class MenuFunction : MonoBehaviour
     {
         theMenu.SetActive(false);
     }
-
+    public void Controls()
+    {
+        instructions.SetActive(true);
+    }
     public void CloseMenu()
     {
         theMenu.SetActive(false);
+        instructions.SetActive(false);
     }
 
     public void QuitGame()
