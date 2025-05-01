@@ -17,6 +17,7 @@ public class Reset_Save : MonoBehaviour
         thisGameSave.Init();
         thisGameSave.canAttack = false;
         thisGameSave.canJump = false;
+        thisGameSave.hasArm  = false;
     }
 
     // Update is called once per frame

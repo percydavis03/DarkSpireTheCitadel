@@ -46,7 +46,7 @@ public class ArmGuy : MonoBehaviour
             dead = true;
             hisArm.SetActive(false);
             yourNewArm.SetActive(true);
-            yourNewArmPicture.SetActive(true);
+            //yourNewArmPicture.SetActive(true);
     }
     // Update is called once per frame
     void Update()

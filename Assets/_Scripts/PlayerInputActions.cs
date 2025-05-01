@@ -80,6 +80,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Slash"",
+                    ""type"": ""Button"",
+                    ""id"": ""71dee431-4049-4fe9-8002-e3957a2482ce"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -225,6 +234,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f0a725f2-6872-4e22-86c1-f75df22644d7"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Slash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -239,6 +259,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_General_PauseMenu = m_General.FindAction("PauseMenu", throwIfNotFound: true);
         m_General_Inventory = m_General.FindAction("Inventory", throwIfNotFound: true);
         m_General_Interact = m_General.FindAction("Interact", throwIfNotFound: true);
+        m_General_Slash = m_General.FindAction("Slash", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -306,6 +327,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_General_PauseMenu;
     private readonly InputAction m_General_Inventory;
     private readonly InputAction m_General_Interact;
+    private readonly InputAction m_General_Slash;
     public struct GeneralActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -316,6 +338,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @PauseMenu => m_Wrapper.m_General_PauseMenu;
         public InputAction @Inventory => m_Wrapper.m_General_Inventory;
         public InputAction @Interact => m_Wrapper.m_General_Interact;
+        public InputAction @Slash => m_Wrapper.m_General_Slash;
         public InputActionMap Get() { return m_Wrapper.m_General; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -343,6 +366,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
+            @Slash.started += instance.OnSlash;
+            @Slash.performed += instance.OnSlash;
+            @Slash.canceled += instance.OnSlash;
         }
 
         private void UnregisterCallbacks(IGeneralActions instance)
@@ -365,6 +391,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
+            @Slash.started -= instance.OnSlash;
+            @Slash.performed -= instance.OnSlash;
+            @Slash.canceled -= instance.OnSlash;
         }
 
         public void RemoveCallbacks(IGeneralActions instance)
@@ -390,5 +419,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnPauseMenu(InputAction.CallbackContext context);
         void OnInventory(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
+        void OnSlash(InputAction.CallbackContext context);
     }
 }
