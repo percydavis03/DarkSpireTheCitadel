@@ -18254,6 +18254,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1420305015}
   - component: {fileID: 1420305016}
+  - component: {fileID: 1420305017}
   m_Layer: 0
   m_Name: BossTheme
   m_TagString: Untagged
@@ -18270,7 +18271,7 @@ Transform:
   m_GameObject: {fileID: 1420305014}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 78.4, y: 0, z: 8.57}
+  m_LocalPosition: {x: 4.53, y: 0, z: -0.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -18288,7 +18289,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CollisionTag: 
+  CollisionTag: Player
   EventReference:
     Guid:
       Data1: 365465644
@@ -18297,7 +18298,7 @@ MonoBehaviour:
       Data4: -1045196052
     Path: event:/Music/BossTheme
   Event: 
-  EventPlayTrigger: 1
+  EventPlayTrigger: 3
   EventStopTrigger: 2
   AllowFadeout: 1
   TriggerOnce: 0
@@ -18307,6 +18308,27 @@ MonoBehaviour:
   OverrideAttenuation: 1
   OverrideMinDistance: 45.538033
   OverrideMaxDistance: 73.71093
+--- !u!65 &1420305017
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420305014}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3.4793396, y: 6.230634, z: 19.301643}
+  m_Center: {x: 1.2396698, y: -2.615317, z: 5.250202}
 --- !u!1 &1421453135
 GameObject:
   m_ObjectHideFlags: 0
@@ -19190,7 +19212,7 @@ PrefabInstance:
     - target: {fileID: 863808894874167816, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -102
+      value: -167
       objectReference: {fileID: 0}
     - target: {fileID: 863808894874167816, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -19200,7 +19222,7 @@ PrefabInstance:
     - target: {fileID: 863808894874167816, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 15
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 863808894874167816, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -19426,6 +19448,11 @@ PrefabInstance:
       propertyPath: m_AnchorMin.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5238447617857827461, guid: f041864c8b27c7248a1e1e012f3a3cc9,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5567133102647817099, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -19544,6 +19571,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 3be9a71338467fe4f8ff2f4147b064d2,
         type: 2}
+    - target: {fileID: 9079378174697838363, guid: f041864c8b27c7248a1e1e012f3a3cc9,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 8274661514244129934, guid: f041864c8b27c7248a1e1e012f3a3cc9, type: 3}
