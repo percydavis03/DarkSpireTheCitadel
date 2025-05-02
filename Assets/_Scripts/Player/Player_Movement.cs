@@ -404,6 +404,7 @@ public class Player_Movement : MonoBehaviour
         if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack && !thisGameSave.inMenu) //ATTACK
         {
             anim.SetBool("isAttacking", true);
+            anim.SetBool("isArmAttack", false);
             StartCoroutine("WaitUntil", 2f);
             moveDirection = Vector3.zero;
             canRotate = false;
@@ -431,6 +432,7 @@ public class Player_Movement : MonoBehaviour
         if (anim.GetBool("isHurt"))
         {
             canMove = true;
+            GauntletOff();
             Debug.Log("ishurting");
         }
     }
