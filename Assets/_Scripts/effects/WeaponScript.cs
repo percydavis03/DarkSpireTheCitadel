@@ -12,9 +12,9 @@ public class WeaponScript : MonoBehaviour
     }
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.CompareTag(attackTarget))
+        if (other.gameObject.CompareTag("attackTarget"))
         {
-            print(attackTarget);
+            print("attackTarget");
             if (other.gameObject.TryGetComponent(out IKnockbackable knockbackable))
             {
                 

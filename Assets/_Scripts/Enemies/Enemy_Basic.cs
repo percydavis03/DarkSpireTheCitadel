@@ -6,7 +6,7 @@ using UnityEngine.AI;
 using UnityEngine.UI;
  
 
-public class Enemy_Basic : MonoBehaviour
+public class Enemy_Basic : MonoBehaviour, IKnockbackable
 {
     
     public PlayerSaveState thisGameSave;
@@ -35,6 +35,7 @@ public class Enemy_Basic : MonoBehaviour
     public GameObject thisGuy;
     public Transform player;
     public Image healthFill;
+    public float waitThreshold = 0.05f;
     //combat
     public GameObject spear_hitbox;
     //AI
@@ -91,7 +92,8 @@ public class Enemy_Basic : MonoBehaviour
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsAttacking", false);
         KnockbackEntity(player);
-
+       
+        GetKnockedBack(new Vector3(100, 100, 100));
         if (enemyHP != 0)
         {
             anim.SetBool("IsHurting", true);
@@ -99,6 +101,40 @@ public class Enemy_Basic : MonoBehaviour
             print("literally take damage ");
             StartCoroutine(Wait(0.5f));
         }
+    }
+
+    public void GetKnockedBack(Vector3 force)
+    {
+        print("knockback");
+        StopMoving();
+        StartCoroutine(ApplyKnockback(force));
+    }
+
+    private IEnumerator ApplyKnockback(Vector3 force)
+    {
+        yield return null;
+        rb.useGravity = true;
+        rb.isKinematic = false;
+        rb.AddForce(force);
+
+        yield return new WaitForFixedUpdate();
+        yield return new WaitUntil(() => rb.velocity.magnitude < waitThreshold);
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.useGravity = false;
+        rb.isKinematic = true;
+        agent.Warp(transform.position);
+        agent.enabled = true;
+        GetComponent<NavMeshAgent>().speed = setSpeed;
+
+        yield return null;
+    }
+    public void StopMoving()
+    {
+            GetComponent<NavMeshAgent>().speed = 0;
+            agent.isStopped = true;
+            agent.enabled = false;
     }
     public void Reposition()
     {
