@@ -3160,6 +3160,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8024947198360438298}
   - component: {fileID: 5457035465116834977}
+  - component: {fileID: 8539683636975900928}
   m_Layer: 7
   m_Name: SWORD HITBOX
   m_TagString: Weapon
@@ -3206,6 +3207,19 @@ CapsuleCollider:
   m_Height: 0.35425404
   m_Direction: 1
   m_Center: {x: 0.0000028375532, y: 0.10680937, z: -0.0000005558419}
+--- !u!114 &8539683636975900928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658697661035905755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5183829a7927378439ff8d43ec69c204, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackTarget: Enemy
 --- !u!1 &1707337481270763488
 GameObject:
   m_ObjectHideFlags: 0

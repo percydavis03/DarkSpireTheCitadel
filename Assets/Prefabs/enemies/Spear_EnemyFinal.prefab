@@ -983,7 +983,7 @@ GameObject:
   - component: {fileID: 5062944618893276498}
   m_Layer: 0
   m_Name: Spear_EnemyFinal
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1052,8 +1052,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.03422342, y: 0.08779242, z: 0.024102943}
-  m_Center: {x: -0.00075375364, y: 0.043247163, z: 0.0025586337}
+  m_Size: {x: 0.024300098, y: 0.08779242, z: 0.021007597}
+  m_Center: {x: -0.0005284255, y: 0.043247156, z: 0.0010109668}
 --- !u!136 &7983241511544527535
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1061,7 +1061,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1814872507465041094}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: e6d9d70e4bb6b5a45b5a100ede2dc1bc, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1073,7 +1073,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.012
+  m_Radius: 0.01
   m_Height: 0.08878194
   m_Direction: 1
   m_Center: {x: 0, y: 0.04368209, z: -0}
@@ -1091,7 +1091,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 0
+  m_StoppingDistance: 0.2
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -1107,8 +1107,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1814872507465041094}
   serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
+  m_Mass: 30
+  m_Drag: 0.5
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -1121,8 +1121,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
