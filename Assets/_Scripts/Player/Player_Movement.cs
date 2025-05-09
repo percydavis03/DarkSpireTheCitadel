@@ -433,6 +433,7 @@ public class Player_Movement : MonoBehaviour
         {
             canMove = true;
             GauntletOff();
+            anim.SetBool("isArmAttack", false);
             Debug.Log("ishurting");
         }
     }

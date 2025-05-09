@@ -127,6 +127,8 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         agent.Warp(transform.position);
         agent.enabled = true;
         GetComponent<NavMeshAgent>().speed = setSpeed;
+        playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
+        playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
 
         yield return null;
     }
