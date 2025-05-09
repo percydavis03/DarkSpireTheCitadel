@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using FMODUnity;
+using Unity.VisualScripting;
 
 public class Main_Player : MonoBehaviour
 {
+    public GameObject Player;
     public static Main_Player instance;
     public PlayerSaveState thisGameSave;
     private bool isDead;
@@ -19,6 +21,7 @@ public class Main_Player : MonoBehaviour
     bool damageCooldown;
     public CanvasGroup hurtScreen;
     private bool isFaded;
+    [SerializeField] private float knockbackForce = 5f; // Force of the knockback
 
     [Header("Camera Shake")]
     [SerializeField] private CameraShakeController cameraShake;
@@ -51,7 +54,7 @@ public class Main_Player : MonoBehaviour
     {
         damageCooldown = true;
         GameManager.instance.DamagePlayer();
-        ough.Play();
+        //ough.Play();
         Player_Movement.instance.FailSafe();
         Fade();
         Debug.Log("ow");
@@ -60,11 +63,15 @@ public class Main_Player : MonoBehaviour
         StartCoroutine(Wait());
         Player_Movement.instance.GotHit();
 
+        // Apply knockback
+        Vector3 knockbackDirection = (transform.position - Player.transform.position).normalized;
+        knockbackDirection.y = 0; // Keep knockback horizontal
+        Player_Movement.instance.ApplyKnockback(knockbackDirection * knockbackForce);
+
         randomListObject = Random.Range(0, bloodSplats.Count);
         GameObject b = Instantiate(bloodSplats[randomListObject]);
         b.transform.position = new Vector3(transform.position.x, transform.position.y - 0.9f, transform.position.z);
         b.transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
-        
     }
 
     public void Fade()

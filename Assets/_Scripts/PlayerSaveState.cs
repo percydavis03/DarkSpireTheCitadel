@@ -14,7 +14,7 @@ public class PlayerSaveState : ScriptableObject
     public bool inMenu;
     public bool canAttack;
     public int mainAttackDamage;
-
+    public bool hasArm;
     public void Init()
     {
         hitpoints = 60;

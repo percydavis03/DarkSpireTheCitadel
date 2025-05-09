@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Boss : MonoBehaviour
@@ -66,8 +67,9 @@ public class Boss : MonoBehaviour
 
     void Dead()
     {
-        yippie.Play();
+        //yippie.Play();
         blockExit.SetActive(false);
+        SceneManager.LoadScene(7);
         Destroy(gameObject);
     }
     private void OnTriggerEnter(Collider other)

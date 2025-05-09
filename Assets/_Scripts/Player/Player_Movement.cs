@@ -8,18 +8,24 @@ public class Player_Movement : MonoBehaviour
 {
     public static Player_Movement instance;
     public PlayerSaveState thisGameSave;
-    //INPUT
+    //INPUTS
     public PlayerInputActions playerControls;
     private InputAction attack;
     private InputAction jump;
     private InputAction sprint;
     private InputAction openInfoMenu;
     private InputAction openMainMenu;
+    private InputAction slash;
+    private InputAction interact;
 
     //attacks
     public GameObject swordHitbox;
     private bool isAttacking;
+    private bool isSlashing;
     public float spinDistance;
+
+    //slash attack
+    public GameObject gauntletHitbox;
     //FOR THE MOVEMENT:
     //new:
     public int speed;
@@ -64,6 +70,8 @@ public class Player_Movement : MonoBehaviour
     private Vector3 targetVelocity;
 
     public StudioEventEmitter attackSound;
+    //arm
+    public bool inPickupZone;
 
     private void Awake()
     {
@@ -71,12 +79,13 @@ public class Player_Movement : MonoBehaviour
         {
             instance = this;
         }
-
+        canTurn = true;
         speed = thisGameSave.playerSpeed;
         playerControls = new PlayerInputActions();
     }
     void Start()
     {
+        inPickupZone = false;
         characterController = GetComponent<CharacterController>();
         //Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -101,6 +110,12 @@ public class Player_Movement : MonoBehaviour
 
         sprint = playerControls.General.Sprint;
         sprint.Enable();
+
+        slash = playerControls.General.Slash;
+        slash.Enable();
+
+        interact = playerControls.General.Interact;
+        interact.Enable();
     }
 
     private void OnDisable()//need for input system
@@ -110,6 +125,8 @@ public class Player_Movement : MonoBehaviour
         sprint.Disable();
         openInfoMenu.Disable();
         openMainMenu.Disable();
+        slash.Disable();
+        interact.Disable();
     }
     IEnumerator WaitUntil(float seconds)
     {
@@ -150,6 +167,14 @@ public class Player_Movement : MonoBehaviour
         isAttacking = false;
         canRotate = true;
     }
+    public void EndSlash()
+    {
+        anim.SetBool("isArmAttack", false);
+        gauntletHitbox.SetActive(false);
+        canMove = true;
+        isSlashing = false;
+        canRotate = true;
+    }
     public void GotHit()
     {
         anim.SetBool("isHurt", true);
@@ -169,17 +194,52 @@ public class Player_Movement : MonoBehaviour
     public void SwordOff()
     {
         swordHitbox.SetActive(false);
+        canRotate = true;
     }
 
+    public void GauntletOn()
+    {
+        gauntletHitbox.SetActive(true);
+    }
+
+    public void GauntletOff()
+    {
+        gauntletHitbox.SetActive(false);    
+    }
     public void StopMoving()
     {
         moveDirection = Vector3.zero;
         speed = thisGameSave.playerSpeed;
     }
+
+    public void ApplyKnockback(Vector3 knockbackForce)
+    {
+        // Apply the knockback force to the current movement
+        moveDirection = knockbackForce;
+        // Temporarily disable movement control but allow rotation
+        canMove = false;
+        canRotate = true;
+        // Re-enable movement after a short delay
+        StartCoroutine(EnableMovementAfterKnockback());
+    }
+
+    private IEnumerator EnableMovementAfterKnockback()
+    {
+        yield return new WaitForSeconds(0.3f);
+        canMove = true;
+        moveDirection = Vector3.zero;
+    }
+
     void Update()
     {
-        
-
+        if(inPickupZone)
+        {
+            if(interact.IsPressed())
+            {
+                print("got arm");
+                GetArm.instance.PickupArm();
+            }
+        }
         if (thisGameSave.inMenu)
         {
             canMove = false;
@@ -243,7 +303,7 @@ public class Player_Movement : MonoBehaviour
                 playerTransform.rotation = Quaternion.RotateTowards(
                     playerTransform.rotation,
                     toRotation,
-                    rotationSpeed * Time.deltaTime
+                    rotationSpeed * Time.deltaTime * 2f // Increased rotation speed for more responsive turning
                 );
             }
         }
@@ -324,9 +384,27 @@ public class Player_Movement : MonoBehaviour
 
     private void HandleAttackInputs()
     {
+        if (slash.WasPressedThisFrame()  && !isSlashing && thisGameSave.hasArm ) //slash attack
+        {
+            print("slash attack");
+            anim.SetBool("isArmAttack", true);
+            moveDirection = Vector3.zero;
+            canRotate = false;
+            isSlashing = true;
+            canMove = false;
+        }
+        else if (slash.WasPressedThisFrame() && isSlashing) //cancel slash
+        {
+            anim.SetBool("isArmAttack", false);
+            gauntletHitbox.SetActive(false);
+            canMove = true;
+            isSlashing = false;
+            canRotate = true;
+        }
         if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack && !thisGameSave.inMenu) //ATTACK
         {
             anim.SetBool("isAttacking", true);
+            anim.SetBool("isArmAttack", false);
             StartCoroutine("WaitUntil", 2f);
             moveDirection = Vector3.zero;
             canRotate = false;
@@ -339,6 +417,7 @@ public class Player_Movement : MonoBehaviour
             swordHitbox.SetActive(false);
             canMove = true;
             isAttacking = false;
+            canRotate = true;
         }
 
         if (attack.WasPressedThisFrame() && isSprint && !isAttacking && thisGameSave.canAttack && !thisGameSave.inMenu) //SPIN ATTACK
@@ -353,6 +432,8 @@ public class Player_Movement : MonoBehaviour
         if (anim.GetBool("isHurt"))
         {
             canMove = true;
+            GauntletOff();
+            anim.SetBool("isArmAttack", false);
             Debug.Log("ishurting");
         }
     }
