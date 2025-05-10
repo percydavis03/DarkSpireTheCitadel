@@ -229,9 +229,17 @@ public class Player_Movement : MonoBehaviour
         canMove = true;
         moveDirection = Vector3.zero;
     }
-
+    private void FixedUpdate()
+    {
+        if (thisGameSave.inMenu)
+        {
+            moveDirection = new Vector3(0, 0, 0);
+            anim.SetBool("isRun", false);
+        }
+    }
     void Update()
     {
+       
         if(inPickupZone)
         {
             if(interact.IsPressed())
@@ -243,7 +251,7 @@ public class Player_Movement : MonoBehaviour
         if (thisGameSave.inMenu)
         {
             canMove = false;
-           
+            anim.SetBool("isRun", false);
         }
        
         if (openInfoMenu.WasPressedThisFrame()) //INFO MENU
@@ -263,7 +271,7 @@ public class Player_Movement : MonoBehaviour
 
         HandleInputs();
         
-        if (canMove && canTurn)
+        if (canMove && canTurn && !thisGameSave.inMenu)
         {
             // Get input values
             float verticalInput = Input.GetAxis("Vertical");
@@ -368,6 +376,11 @@ public class Player_Movement : MonoBehaviour
 
     private void UpdateAnimations()
     {
+        if (thisGameSave.inMenu)
+        {
+            anim.SetBool("isRun", false);
+            return;
+        }
         // Use currentVelocity magnitude with a small threshold for more responsive detection
         bool isMoving = currentVelocity.magnitude > 0.05f;
         anim.SetBool("isRun", isMoving && !isJumping);
