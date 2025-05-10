@@ -69,8 +69,8 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         rb = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();
 
-        agent.angularSpeed = 0f;
-        agent.updateRotation = false;
+        //agent.angularSpeed = 0f;
+        //agent.updateRotation = false;
     }
 
     private void KnockbackEntity(Transform player)

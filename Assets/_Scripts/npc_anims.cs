@@ -13,11 +13,17 @@ public class npc_anims : MonoBehaviour
     public bool isDemure;
     public bool isOld;
 
-    public float delayTime;
+    
 
     // Start is called before the first frame update
     void Start()
     {
+        if (anim)
+        {
+            float randomOffset = Random.Range(0f, 1f);
+            anim.Play(0, -3, randomOffset);
+           
+        }
         if (isWrithing)
         {
             anim.SetBool("writhing", true);
@@ -28,24 +34,34 @@ public class npc_anims : MonoBehaviour
         }
         if (isSleeping)
         {
-            anim.SetBool("sleeping", true) ;
+            if (anim)
+            {
+                anim.SetBool("sleeping", true);
+                float randomOffset = Random.Range(0f, 1f);
+                anim.Play(0, -3, randomOffset);
+
+            }
+            
         }
         if (isLaying)
         {
-            anim.SetBool("sleeping", true);
+            anim.SetBool("laying", true);
         }
-    }
-    public void restartAnim()
-    {
-        anim.SetBool("writhing", false);
-        StartCoroutine(WaitUntil(delayTime));
-    }
-    IEnumerator WaitUntil(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        anim.SetBool("writhing", true);
+        if (isDemure)
+        {
+            anim.SetBool("demure", true);
+        }
+        if (isOld)
+        {
+            anim.SetBool("oldman", true);
+        }
+        if (isInjured)
+        {
+            anim.SetBool("injuredstanding", true);
+        }
 
     }
+    
     // Update is called once per frame
     void Update()
     {
