@@ -125,7 +125,11 @@ namespace PixelCrushers.DialogueSystem.DialogueEditor
             currentTemplateFoldout = foldoutName;
             EditorGUILayout.BeginHorizontal();
             foldout = EditorGUILayout.Foldout(foldout, foldoutName);
-            if (GUILayout.Button(new GUIContent(" ", "Add new field to template."), "OL Plus", GUILayout.Width(16))) fields.Add(new Field());
+            if (GUILayout.Button(new GUIContent(" ", "Add new field to template."), "OL Plus", GUILayout.Width(16)))
+            {
+                foldout = true;
+                fields.Add(new Field());
+            }
             EditorGUILayout.EndHorizontal();
             if (foldout)
             {

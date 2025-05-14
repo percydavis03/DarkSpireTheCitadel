@@ -41,9 +41,9 @@ namespace PixelCrushers.DialogueSystem
         {
             var window = GetWindow<WelcomeWindow>(false, "Welcome");
 #if EVALUATION_VERSION || ACADEMIC
-            window.minSize = new Vector2(370, 680);
+            window.minSize = new Vector2(370, 710);
 #else
-            window.minSize = new Vector2(370, 650);
+            window.minSize = new Vector2(370, 680);
 #endif
             window.showOnStart = true; // Can't check EditorPrefs when constructing window: showOnStartPrefs;
             return window;

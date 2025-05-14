@@ -65,8 +65,8 @@ namespace PixelCrushers.DialogueSystem.Articy
 
         #region Variables
 
-        protected const string ArticyIdFieldTitle = "Articy Id";
-        protected const string ArticyTechnicalNameFieldTitle = "Technical Name";
+        public const string ArticyIdFieldTitle = "Articy Id";
+        public const string ArticyTechnicalNameFieldTitle = "Technical Name";
         protected const string DestinationArticyIdFieldTitle = "destinationArticyId";
         protected const int StartEntryID = 0;
 
@@ -227,6 +227,7 @@ namespace PixelCrushers.DialogueSystem.Articy
             {
                 otherScriptFieldTitles.Add(otherScriptFieldTitle.Trim());
             }
+            ArticyTools.convertMarkupToRichText = prefs.ConvertMarkupToRichText;
             ResetArticyIdIndex();
             this.template = template;
         }
@@ -809,7 +810,7 @@ namespace PixelCrushers.DialogueSystem.Articy
             SetDialogueEntryParticipants(startEntry, conversation.ActorID, conversation.ConversantID);
             Field.SetValue(startEntry.fields, ArticyIdFieldTitle, articyFlowFragment.id, FieldType.Text);
             IndexDialogueEntryByArticyId(startEntry, articyFlowFragment.id);
-            ConvertPinExpressionsToConditionsAndScripts(startEntry, articyFlowFragment.pins);
+            ConvertPinExpressionsToConditionsAndScripts(startEntry, articyFlowFragment.pins, true, false);
             startEntry.outgoingLinks = new List<Link>();
             var conversationSequenceField = Field.Lookup(conversation.fields, "Sequence");
             if (conversationSequenceField != null && !string.IsNullOrEmpty(conversationSequenceField.value))
@@ -823,7 +824,7 @@ namespace PixelCrushers.DialogueSystem.Articy
             }
             conversation.dialogueEntries.Add(startEntry);
 
-            // Convert dialogue's in and out pins to passthrough group entries:
+            // Convert flow fragment's in and out pins to passthrough group entries:
             for (int i = 0; i < articyFlowFragment.pins.Count; i++)
             {
                 var pin = articyFlowFragment.pins[i];
@@ -1710,13 +1711,13 @@ namespace PixelCrushers.DialogueSystem.Articy
                 switch (pin.semantic)
                 {
                     case ArticyData.SemanticType.Input:
-                        if (convertInput)
+                        if (convertInput && entry.Title != "output")
                         {
                             entry.conditionsString = AddToConditions(entry.conditionsString, ConvertExpression(pin.expression, true));
                         }
                         break;
                     case ArticyData.SemanticType.Output:
-                        if (convertOutput)
+                        if (convertOutput && entry.Title != "input")
                         {
                             entry.userScript = AddToUserScript(entry.userScript, ConvertExpression(pin.expression, false));
                             if (!string.IsNullOrEmpty(entry.userScript) && prefs.ConvertInstructionsAs != ConverterPrefs.CodeNodeMode.GroupEntry)

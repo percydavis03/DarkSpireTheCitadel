@@ -149,6 +149,7 @@ namespace PixelCrushers.DialogueSystem
             CheckAssignments();
             DestroyInstantiatedMessages(); // Start with clean slate.
             dialogueActorCache.Clear();
+            shouldShowContinueButton = false;
 
             if (headingText != null)
             {
@@ -168,7 +169,7 @@ namespace PixelCrushers.DialogueSystem
             StopAllCoroutines();
             base.Close();
             if (!isLoadingGame) ClearRecords();
-
+            shouldShowContinueButton = false;
         }
 
         public override void ShowSubtitle(Subtitle subtitle)
@@ -240,7 +241,7 @@ namespace PixelCrushers.DialogueSystem
         {
             var panelNumber = (dialogueActor != null) ? dialogueActor.GetSubtitlePanelNumber() : SubtitlePanelNumber.Default;
             return (panelNumber == SubtitlePanelNumber.Default)
-                ? (subtitle.speakerInfo.IsNPC ? conversationUIElements.defaultNPCSubtitlePanel : conversationUIElements.defaultPCSubtitlePanel)
+                ? conversationUIElements.standardSubtitleControls.GetPanel(subtitle, out var dialogueActor2)
                 : conversationUIElements.subtitlePanels[PanelNumberUtility.GetSubtitlePanelIndex(panelNumber)];
         }
 
@@ -318,6 +319,7 @@ namespace PixelCrushers.DialogueSystem
         public override void OnContinueConversation()
         {
             if (continueButton != null) continueButton.gameObject.SetActive(false);
+            shouldShowContinueButton = false;
             base.OnContinueConversation();
         }
 

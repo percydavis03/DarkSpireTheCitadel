@@ -477,23 +477,36 @@ namespace PixelCrushers.DialogueSystem.DialogueEditor
             return false;
         }
 
-        private void DrawNewLinkConnector()
+        private void DrawNewLinkConnector() // Draw from selected or multinode selection.
         {
-            if (isMakingLink && (linkSourceEntry != null))
+            if (!isMakingLink) return;
+            if (multinodeSelection.nodes.Count > 1)
             {
-                Vector3 start = new Vector3(linkSourceEntry.canvasRect.center.x, linkSourceEntry.canvasRect.center.y, 0);
-                if ((linkTargetEntry != null) && Event.current.isMouse)
+                foreach (var node in multinodeSelection.nodes)
                 {
-                    if (!linkTargetEntry.canvasRect.Contains(Event.current.mousePosition))
-                    {
-                        linkTargetEntry = null;
-                    }
+                    DrawNewLinkConnectorFrom(node);
                 }
-                Vector3 end = (linkTargetEntry != null)
-                    ? new Vector3(linkTargetEntry.canvasRect.center.x, linkTargetEntry.canvasRect.center.y, 0)
-                    : new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y, 0);
-                DrawLink(start, end, Color.white, false);
             }
+            else if (linkSourceEntry != null)
+            {
+                DrawNewLinkConnectorFrom(linkSourceEntry);
+            }
+        }
+
+        private void DrawNewLinkConnectorFrom(DialogueEntry linkSourceEntry)
+        {
+            Vector3 start = new Vector3(linkSourceEntry.canvasRect.center.x, linkSourceEntry.canvasRect.center.y, 0);
+            if ((linkTargetEntry != null) && Event.current.isMouse)
+            {
+                if (!linkTargetEntry.canvasRect.Contains(Event.current.mousePosition))
+                {
+                    linkTargetEntry = null;
+                }
+            }
+            Vector3 end = (linkTargetEntry != null)
+                ? new Vector3(linkTargetEntry.canvasRect.center.x, linkTargetEntry.canvasRect.center.y, 0)
+                : new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y, 0);
+            DrawLink(start, end, Color.white, false);
         }
 
         private void HandleNodeEditorScrollWheelEvents()
@@ -885,7 +898,7 @@ namespace PixelCrushers.DialogueSystem.DialogueEditor
             if (currentEntry == null) return;
             GUI.SetNextControlName("QuickDialogueText");
             EditorGUI.BeginChangeCheck();
-            currentEntry.DialogueText = GUI.TextArea(GetQuickDialogueTextRect(), currentEntry.DialogueText);
+            currentEntry.DialogueText = EditorGUI.TextArea(GetQuickDialogueTextRect(), currentEntry.DialogueText);
             if (EditorGUI.EndChangeCheck())
             {
                 dialogueEntryNodeText[currentEntry.id] = BuildDialogueEntryNodeText(currentEntry);
@@ -1900,6 +1913,31 @@ namespace PixelCrushers.DialogueSystem.DialogueEditor
 
         private void FinishMakingLink()
         {
+            if (multinodeSelection.nodes.Count > 1)
+            {
+                // Link from all selected nodes to target:
+                foreach (var node in multinodeSelection.nodes)
+                {
+                    MakeSingleLinkFrom(node);
+                }
+            }
+            else
+            {
+                // Link from selected node to target:
+                MakeSingleLinkFrom(linkSourceEntry);
+            }
+            isMakingLink = false;
+            linkSourceEntry = null;
+            linkTargetEntry = null;
+            multinodeSelection.Clear();
+            InitializeDialogueTree();
+            ResetDialogueEntryText();
+            Repaint();
+            SetDatabaseDirty("Make Link");
+        }
+
+        private void MakeSingleLinkFrom(DialogueEntry linkSourceEntry)
+        {
             if ((linkSourceEntry != null) && (linkTargetEntry != null) &&
                 (linkSourceEntry != linkTargetEntry) &&
                 !LinkExists(linkSourceEntry, linkTargetEntry))
@@ -1910,14 +1948,7 @@ namespace PixelCrushers.DialogueSystem.DialogueEditor
                 link.destinationConversationID = currentConversation.id;
                 link.destinationDialogueID = linkTargetEntry.id;
                 linkSourceEntry.outgoingLinks.Add(link);
-                InitializeDialogueTree();
-                ResetDialogueEntryText();
-                Repaint();
             }
-            isMakingLink = false;
-            linkSourceEntry = null;
-            linkTargetEntry = null;
-            SetDatabaseDirty("Make Link");
         }
 
         private void DeleteEntryCallback(object o)
@@ -2228,7 +2259,7 @@ namespace PixelCrushers.DialogueSystem.DialogueEditor
 
         private void DuplicateEntrySceneEventIfPresent(DialogueEntry entry)
         {
-            var sceneEventGuidField = Field.Lookup(entry.fields, DialogueEntry.SceneEventGuidFieldName);
+            var sceneEventGuidField = Field.Lookup(entry.fields, DialogueSystemFields.SceneEventGuidFieldName);
 
             // If no scene event, we can end here:
             if (sceneEventGuidField == null) return;

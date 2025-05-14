@@ -277,7 +277,7 @@ namespace PixelCrushers.DialogueSystem
                     {
                         AddForcedLink(npcResponses, pcResponses);
                     }
-                    else
+                    else if (!useLinearGroupMode) // In linear group mode, links are evaluated after subtitle finishes.
                     {
                         EvaluateLinks(entry, npcResponses, pcResponses, 0, new List<DialogueEntry>(), null, stopAtFirstValid, skipExecution);
                     }
@@ -562,7 +562,7 @@ namespace PixelCrushers.DialogueSystem
         private bool DoesEntryRandomizeNextEntry(DialogueEntry entry)
         {
             return entry != null &&
-                ((!string.IsNullOrEmpty(entry.conditionsString) && entry.conditionsString.Contains("RandomizeNextEntry()")) ||
+                ((!string.IsNullOrEmpty(entry.userScript) && entry.userScript.Contains("RandomizeNextEntry()")) ||
                  (!string.IsNullOrEmpty(entry.Sequence) && entry.Sequence.Contains("RandomizeNextEntry()")));
         }
 
@@ -656,6 +656,25 @@ namespace PixelCrushers.DialogueSystem
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Clears the entire character info cache for this conversation.
+        /// </summary>
+        public void ClearAllCharacterInfo()
+        {
+            m_characterInfoCache.Clear();
+        }
+
+        /// <summary>
+        /// Removes a character's cached info from the conversation model.
+        /// Used by DialogueActor to clear info when DialogueActor's
+        /// GameObject is destroyed mid-conversation.
+        /// </summary>
+        /// <param name="id"></param>
+        public void ClearCharacterInfo(int id)
+        {
+            m_characterInfoCache.Remove(id);
         }
 
         /// <summary>

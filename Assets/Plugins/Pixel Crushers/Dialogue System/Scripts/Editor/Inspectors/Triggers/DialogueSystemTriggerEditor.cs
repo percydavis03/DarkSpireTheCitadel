@@ -138,6 +138,14 @@ namespace PixelCrushers.DialogueSystem
             EditorGUILayout.PropertyField(triggerProperty, true);
 
             // HelpBox for OnTrigger/Collision:
+            var isStartTypeEvent =
+                triggerProperty.enumValueIndex == 4 || //DialogueSystemTriggerEvent.OnStart
+                triggerProperty.enumValueIndex == 6 || //DialogueSystemTriggerEvent.OnEnable
+                triggerProperty.enumValueIndex == 16;   //DialogueSystemTriggerEvent.OnSaveDataApplied
+            if (isStartTypeEvent)
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("delayOneFrame"), true);
+            }
             var isPhysicsEvent =
                 triggerProperty.enumValueIndex == 3 || //DialogueSystemTriggerEvent.OnTriggerEnter
                 triggerProperty.enumValueIndex == 7 || //DialogueSystemTriggerEvent.OnTriggerExit
@@ -323,6 +331,12 @@ namespace PixelCrushers.DialogueSystem
             foldouts.unityEventFoldout = true;
         }
 
+        protected void MarkSceneDirtyIfNotPrefab()
+        {
+            if (PrefabUtility.IsPartOfPrefabAsset(trigger)) return;
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(trigger.gameObject.scene);
+        }
+
         protected virtual void DrawQuestAction()
         {
             foldouts.questFoldout = EditorWindowTools.EditorGUILayoutFoldout("Set Quest State", "Set quest states.", foldouts.questFoldout, false);
@@ -335,6 +349,7 @@ namespace PixelCrushers.DialogueSystem
                     if (questPicker != null)
                     {
                         serializedObject.ApplyModifiedProperties();
+                        var prevQuestName = trigger.questName;
                         if (string.IsNullOrEmpty(trigger.questName)) GUI.color = Color.red;
                         questPicker.Draw();
                         GUI.color = originalColor;
@@ -344,7 +359,12 @@ namespace PixelCrushers.DialogueSystem
                         trigger.selectedDatabase = questPicker.database;
                         if (EditorTools.selectedDatabase == null) EditorTools.selectedDatabase = trigger.selectedDatabase;
                         if (hadQuestName && string.IsNullOrEmpty(trigger.questName)) showSetQuestStateAction = false;
-                        serializedObject.Update();
+                        if (trigger.questName != prevQuestName)
+                        {
+                            var questNameProperty = serializedObject.FindProperty(nameof(DialogueSystemTrigger.questName));
+                            questNameProperty.stringValue = trigger.questName;
+                            MarkSceneDirtyIfNotPrefab();
+                        }
                     }
 
                     // Quest state:
@@ -394,8 +414,11 @@ namespace PixelCrushers.DialogueSystem
                     EditorGUI.BeginChangeCheck();
                     var newLuaCode = luaScriptWizard.Draw(new GUIContent("Lua Code", "The Lua code to run when the condition is true."), trigger.luaCode);
                     var changed = EditorGUI.EndChangeCheck();
-                    serializedObject.Update();
-                    if (changed) serializedObject.FindProperty("luaCode").stringValue = newLuaCode;
+                    if (changed)
+                    {
+                        serializedObject.FindProperty("luaCode").stringValue = newLuaCode;
+                        MarkSceneDirtyIfNotPrefab();
+                    }
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.FlexibleSpace();
                     if (GUILayout.Button("x", GUILayout.Width(18), GUILayout.Height(14)))
@@ -437,8 +460,11 @@ namespace PixelCrushers.DialogueSystem
                     EditorGUI.BeginChangeCheck();
                     var newSequence = SequenceEditorTools.DrawLayout(new GUIContent("Sequence"), trigger.sequence, ref sequenceRect, ref sequenceSyntaxState);
                     var changed = EditorGUI.EndChangeCheck();
-                    serializedObject.Update();
-                    if (changed) serializedObject.FindProperty("sequence").stringValue = newSequence;
+                    if (changed)
+                    {
+                        serializedObject.FindProperty("sequence").stringValue = newSequence;
+                        MarkSceneDirtyIfNotPrefab();
+                    }
 
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("sequenceSpeaker"), true);
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("sequenceListener"), true);
