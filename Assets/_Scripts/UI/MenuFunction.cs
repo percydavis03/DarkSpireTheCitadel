@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using FMODUnity;
 
 
 public class MenuFunction : MonoBehaviour
@@ -9,7 +10,8 @@ public class MenuFunction : MonoBehaviour
     public GameObject theMenu;
     public GameObject instructions;
 
-    public AudioSource buttonpress;
+    
+    public StudioEventEmitter buttonpress;
 
     public PlayerSaveState thisGameSave;
     

@@ -8,6 +8,6 @@ public class ToBoss : MonoBehaviour
 {
     void OnEnable()
     {
-        SceneManager.LoadScene("Lvl", LoadSceneMode.Single);
+        SceneManager.LoadScene("HeartBoss", LoadSceneMode.Single);
     }
 }

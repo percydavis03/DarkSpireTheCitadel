@@ -54,7 +54,7 @@ public class Boss : MonoBehaviour
         
         inRing = false;
         isFire = false;
-        currentHealth = 300;
+        currentHealth = 400;
         //currentHealth = hurtManager.Health;
     }
     private void Awake()
@@ -114,7 +114,7 @@ public class Boss : MonoBehaviour
         {
             inRing = true;
             ringOfFire.SetActive(true);
-            currentHealth -= 10;
+            currentHealth -= 3;
             //Rigidbody rb = hit.GetComponent<Rigidbody>();
             Invoke("DoKnock", 3);
             //print("uhh");
