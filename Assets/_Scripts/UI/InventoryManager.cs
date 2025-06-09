@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using FMODUnity;
 using UnityEditor.Rendering;
 
 public class InventoryManager : MonoBehaviour
@@ -11,7 +12,7 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager Instance;
     public List<Item> Items = new List<Item>();
     public int listCount;
-    public AudioSource grab;
+    public StudioEventEmitter grab;
     //popup
     public GameObject popupBox;
     public TextMeshProUGUI popupText;
@@ -65,7 +66,7 @@ public class InventoryManager : MonoBehaviour
     public void Add(Item item) 
     {
         Items.Add(item);
-        grab.Play();
+        //grab.Play();
     }
 
     public void Remove(Item item)

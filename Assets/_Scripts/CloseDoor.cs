@@ -1,0 +1,21 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CloseDoor : MonoBehaviour
+{
+    
+    public Animator anim;
+    public GameObject door;
+    private void Start()
+    {
+        anim = door.GetComponent<Animator>();
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            anim.SetBool("CloseDoor", true);
+        }
+    }
+}

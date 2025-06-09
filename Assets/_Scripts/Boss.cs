@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Boss : MonoBehaviour
 {
+    public static Boss instance;    
     public UnityEngine.AI.NavMeshAgent boss;
     public Transform player;
     public HurtManager hurtManager;
-    public AudioSource yippie;
+    //public AudioSource yippie;
+    public Animator anim;
 
     [SerializeField] private float projectileSpeed;
     [SerializeField] public projectile projectilePrefab;
@@ -18,6 +22,7 @@ public class Boss : MonoBehaviour
     public Transform spawnPoint;
     public Transform spawnPoint2;
     public float enemySpeed;
+    public GameObject blockExit;
 
     //EXPLODE
     public float radius = 5f;
@@ -27,18 +32,40 @@ public class Boss : MonoBehaviour
 
     public GameObject ringOfFire;
     private bool inRing;
+
+    //hp
     public float currentHealth;
-    // Start is called before the first frame update
+    public float maxHP;
+    public Image healthFill;
+
+    //so sorry about this i have no brain cells left
+    public GameObject fireSpawn1;
+    public GameObject fireSpawn2;
+    public GameObject fireSpawn3;
+    public GameObject fireSpawn4;
+    public GameObject fireSpawn5;
+    public GameObject fireSpawn6;
+    public GameObject fireSpawn7;
+    public GameObject fireSpawn8;
+    public bool isFire;
     void Start()
     {
-         explosionPos = transform.position;
-        rb = GetComponent<Rigidbody>();
+        explosionPos = transform.position;
+        
         inRing = false;
-        currentHealth = 300;
+        isFire = false;
+        currentHealth = 400;
         //currentHealth = hurtManager.Health;
     }
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        rb = GetComponent<Rigidbody>();
+    }
 
-    
 
     // Update is called once per frame
     void Update()
@@ -46,7 +73,8 @@ public class Boss : MonoBehaviour
         transform.LookAt(player);
         boss.SetDestination(player.position);
         ShootAtPlayer();
-        
+        healthFill.fillAmount = currentHealth / maxHP;
+
         //currentHealth = hurtManager.Health;
         if (currentHealth <= 0)
         {
@@ -56,12 +84,29 @@ public class Boss : MonoBehaviour
         {
             ShootAtPlayer2();
         }
+        if(!isFire)
+        {
+            StartCoroutine(WaitUntil(20));
+        }
     }
-
+    IEnumerator WaitUntil(float seconds)
+    {
+        isFire = true;
+        yield return new WaitForSeconds(seconds);
+        anim.SetBool("isAttacking", false);
+        if(anim.GetBool("wasHit") == false)
+        {
+            anim.SetBool("isBigAttack", true);
+            print("fire time");
+            
+        }
+    }
     void Dead()
     {
-        yippie.Play();
-        Destroy(gameObject);
+        //yippie.Play();
+        //blockExit.SetActive(false);
+        anim.SetBool("isDead", true);
+        
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -69,7 +114,7 @@ public class Boss : MonoBehaviour
         {
             inRing = true;
             ringOfFire.SetActive(true);
-            currentHealth -= 10;
+            currentHealth -= 3;
             //Rigidbody rb = hit.GetComponent<Rigidbody>();
             Invoke("DoKnock", 3);
             //print("uhh");
@@ -100,6 +145,7 @@ public class Boss : MonoBehaviour
     }
     void ShootAtPlayer()
     {
+        anim.SetBool("isAttacking", true);
         projectileTime -= Time.deltaTime;
 
         if (projectileTime > 0) return;
@@ -124,8 +170,25 @@ public class Boss : MonoBehaviour
         var rotation = spawnPoint2.transform.rotation;
         var projectile = Instantiate(projectilePrefab, position, rotation);
         projectile.Fire(projectileSpeed, spawnPoint2.transform.forward);
-
-    
     }
-
+    public void FireRingAttack()
+    {
+        StartCoroutine(RingOfFIreAttack(fireSpawn1));
+        StartCoroutine(RingOfFIreAttack(fireSpawn2));
+        StartCoroutine(RingOfFIreAttack(fireSpawn3));
+        StartCoroutine(RingOfFIreAttack(fireSpawn4));
+        StartCoroutine(RingOfFIreAttack(fireSpawn5));
+        StartCoroutine(RingOfFIreAttack(fireSpawn6));
+        StartCoroutine(RingOfFIreAttack(fireSpawn7));
+        StartCoroutine(RingOfFIreAttack(fireSpawn8));
+    }
+    IEnumerator RingOfFIreAttack(GameObject spawnPoint)
+    {
+        var position = spawnPoint.transform.position + transform.forward;
+        var rotation = spawnPoint.transform.rotation;
+        var projectile = Instantiate(projectilePrefab, position, rotation);
+        projectile.Fire(projectileSpeed, spawnPoint.transform.forward);
+        yield return new WaitForSeconds(1f);
+    }
+    
 }

@@ -2,27 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using FMODUnity;
 
 
 public class MenuFunction : MonoBehaviour
 {
     public GameObject theMenu;
-    
-    public AudioSource buttonpress;
+    public GameObject instructions;
 
-  
-
-    // Start is called before the first frame update
-    void Start()
-    {
-       
-    }
     
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public StudioEventEmitter buttonpress;
+
+    public PlayerSaveState thisGameSave;
+    
+    
     public void ButtonSound()
     {
         buttonpress.Play();
@@ -31,11 +24,14 @@ public class MenuFunction : MonoBehaviour
     {
         theMenu.SetActive(false);
     }
-
+    public void Controls()
+    {
+        instructions.SetActive(true);
+    }
     public void CloseMenu()
     {
         theMenu.SetActive(false);
-        //Cursor.visible = false;
+        instructions.SetActive(false);
     }
 
     public void QuitGame()
@@ -53,4 +49,6 @@ public class MenuFunction : MonoBehaviour
     {
         SceneManager.LoadScene("Title");
     }
+
+   
 }

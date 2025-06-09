@@ -2,22 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using FMODUnity;
 
 public class Player_Movement : MonoBehaviour
 {
     public static Player_Movement instance;
     public PlayerSaveState thisGameSave;
-    //INPUT
+    //INPUTS
     public PlayerInputActions playerControls;
     private InputAction attack;
     private InputAction jump;
     private InputAction sprint;
     private InputAction openInfoMenu;
+    private InputAction openMainMenu;
+    private InputAction slash;
+    private InputAction interact;
 
     //attacks
     public GameObject swordHitbox;
     private bool isAttacking;
+    private bool isSlashing;
     public float spinDistance;
+
+    //slash attack
+    public GameObject gauntletHitbox;
     //FOR THE MOVEMENT:
     //new:
     public int speed;
@@ -28,7 +36,7 @@ public class Player_Movement : MonoBehaviour
     //public Camera playerCamera;
     //public float walkSpeed = 6f;
     //public float runSpeed = 12f;
-    public float jumpPower = 0f;
+    public float jumpPower;
     public float gravity = 10f;
     public float lookSpeed = 2f;
     public float lookXLimit = 45f;
@@ -38,14 +46,32 @@ public class Player_Movement : MonoBehaviour
     private Vector3 moveDirection = Vector3.zero;
     private float rotationX = 0;
     private CharacterController characterController;
-    private bool canMove = true;
+    public bool canMove = true;
     bool isSprint = false;
+    bool isJumping = false;
     public bool isSpinAttack = false;
 
     public GameObject animationSource;
     public GameObject thisGameObject;
     public bool canRotate;
-   
+
+    public Camera mainCamera;
+    private float targetRotation = 0;
+    private float rotationVelocity;
+    public float RotationSmoothTime = 0.12f;
+
+    public bool canTurn = true;
+    private float prevRotation;
+
+    [Header("Movement Settings")]
+    public float accelerationSpeed = 10f;
+    public float decelerationSpeed = 15f;
+    private Vector3 currentVelocity;
+    private Vector3 targetVelocity;
+
+    public StudioEventEmitter attackSound;
+    //arm
+    public bool inPickupZone;
 
     private void Awake()
     {
@@ -53,12 +79,13 @@ public class Player_Movement : MonoBehaviour
         {
             instance = this;
         }
-
+        canTurn = true;
         speed = thisGameSave.playerSpeed;
         playerControls = new PlayerInputActions();
     }
     void Start()
     {
+        inPickupZone = false;
         characterController = GetComponent<CharacterController>();
         //Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -72,6 +99,9 @@ public class Player_Movement : MonoBehaviour
         openInfoMenu = playerControls.General.Inventory;
         openInfoMenu.Enable();
 
+        openMainMenu = playerControls.General.PauseMenu;
+        openMainMenu.Enable();
+
         attack = playerControls.General.Attack;
         attack.Enable();
 
@@ -80,6 +110,12 @@ public class Player_Movement : MonoBehaviour
 
         sprint = playerControls.General.Sprint;
         sprint.Enable();
+
+        slash = playerControls.General.Slash;
+        slash.Enable();
+
+        interact = playerControls.General.Interact;
+        interact.Enable();
     }
 
     private void OnDisable()//need for input system
@@ -88,12 +124,40 @@ public class Player_Movement : MonoBehaviour
         jump.Disable();
         sprint.Disable();
         openInfoMenu.Disable();
+        openMainMenu.Disable();
+        slash.Disable();
+        interact.Disable();
     }
     IEnumerator WaitUntil(float seconds)
     {
         yield return new WaitForSeconds(seconds);
+        anim.SetBool("isHurt", false);
+        anim.SetBool("isAttacking", false);
+        EndAttack();
+    }
+    public void Die()
+    {
+        if (GameManager.instance.justDied == true)
+        {
+            GameManager.instance.justDied = false;
+            //anim.SetBool("isDead", true);
+        }
+
     }
 
+    public void FailSafe()
+    {
+        StartCoroutine("WaitUntil", 0.5f);
+       if(!canMove)
+        {
+            canMove = true;
+        }
+
+      /*if (canMove)
+        {
+            canMove = false;
+        }*/
+    }
     public void EndAttack()
     {
         anim.SetBool("isAttacking", false);
@@ -103,105 +167,273 @@ public class Player_Movement : MonoBehaviour
         isAttacking = false;
         canRotate = true;
     }
-
-    public void Reposition()
+    public void EndSlash()
     {
-        //thisGameObject.transform.position = new Vector3 (animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z);
-        //Vector3 currentPos = new Vector3(thisGameObject.transform.position.x, transform.position.y, thisGameObject.transform.position.z);
-        //Vector3 posOffset = new Vector3(animationSource.transform.position.x, transform.position.y, animationSource.transform.position.z) - thisGameObject.transform.position;
-        //transform.position = currentPos + posOffset;
-        print("move");
-        speed = 1;
-        Vector3 target = new Vector3(transform.position.x, transform.position.y, transform.position.z + 5.78f);
-        thisGameObject.transform.position = Vector3.MoveTowards(transform.position, target, Time.deltaTime * 0.5f);
-        
-        //transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + 5.78f);
+        anim.SetBool("isArmAttack", false);
+        gauntletHitbox.SetActive(false);
+        canMove = true;
+        isSlashing = false;
+        canRotate = true;
     }
+    public void GotHit()
+    {
+        anim.SetBool("isHurt", true);
+    }
+
+    public void Recover()
+    {
+        anim.SetBool("isHurt", false);
+    }
+
 
     public void SwordOn()
     {
         swordHitbox.SetActive(true);
+        //attackSound.Play();
     }
     public void SwordOff()
     {
         swordHitbox.SetActive(false);
+        canRotate = true;
     }
 
+    public void GauntletOn()
+    {
+        gauntletHitbox.SetActive(true);
+    }
+
+    public void GauntletOff()
+    {
+        gauntletHitbox.SetActive(false);    
+    }
     public void StopMoving()
     {
         moveDirection = Vector3.zero;
         speed = thisGameSave.playerSpeed;
     }
-    void Update()
+
+    public void ApplyKnockback(Vector3 knockbackForce)
     {
-        if (openInfoMenu.IsPressed())
-        {
-            print("openmenu");
-        }
+        // Apply the knockback force to the current movement
+        moveDirection = knockbackForce;
+        // Temporarily disable movement control but allow rotation
+        canMove = false;
+        canRotate = true;
+        // Re-enable movement after a short delay
+        StartCoroutine(EnableMovementAfterKnockback());
+    }
 
-        if (canMove)
+    private IEnumerator EnableMovementAfterKnockback()
+    {
+        yield return new WaitForSeconds(0.3f);
+        canMove = true;
+        moveDirection = Vector3.zero;
+    }
+    private void FixedUpdate()
+    {
+        if (thisGameSave.inMenu)
         {
-            Vector3 forward = transform.TransformDirection(Vector3.forward);
-            Vector3 right = transform.TransformDirection(Vector3.right);
-            float curSpeedX = canMove ? (speed) * Input.GetAxis("Vertical") : 0;
-            float curSpeedY = canMove ? (speed) * Input.GetAxis("Horizontal") : 0;
-            
-            moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-           
-        }
-        float movementDirectionY = moveDirection.y;
-        //for making the character face forwards
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-        Vector3 rotationDirection = new Vector3(horizontalInput, 0, verticalInput);
-        rotationDirection.Normalize();
-
-        if (moveDirection.x != 0)
-        {
-            anim.SetBool("isRun", true);
-            canRotate = true;
-        }
-
-        if (moveDirection.z != 0)
-        {
-            anim.SetBool("isRun", true);
-            canRotate = true;
-        }
-
-        if(moveDirection.x == 0 && moveDirection.y == 0 && moveDirection.z == 0)
-        {
+            moveDirection = new Vector3(0, 0, 0);
             anim.SetBool("isRun", false);
         }
-
-        if (sprint.IsPressed())
+    }
+    void Update()
+    {
+       
+        if(inPickupZone)
         {
-            speed = thisGameSave.sprintSpeed;
-            isSprint = true;    
+            if(interact.IsPressed())
+            {
+                print("got arm");
+                GetArm.instance.PickupArm();
+            }
+        }
+        if (thisGameSave.inMenu)
+        {
+            canMove = false;
+            anim.SetBool("isRun", false);
+        }
+       
+        if (openInfoMenu.WasPressedThisFrame()) //INFO MENU
+        {
+            print("openmenu");
+            anim.SetBool("isRun", false);
+            MenuScript.instance.InfoMenu();
+
         }
 
-        if (!sprint.IsPressed())
+        if (openMainMenu.WasPressedThisFrame())
+        {
+            anim.SetBool("isRun", false);
+            MenuScript.instance.MainMenu();  //MAIN MENU
+
+        }
+
+        HandleInputs();
+        
+        if (canMove && canTurn && !thisGameSave.inMenu)
+        {
+            // Get input values
+            float verticalInput = Input.GetAxis("Vertical");
+            float horizontalInput = Input.GetAxis("Horizontal");
+
+            // Get camera forward and right vectors
+            Vector3 cameraForward = mainCamera.transform.forward;
+            Vector3 cameraRight = mainCamera.transform.right;
+            
+            // Project vectors onto the horizontal plane
+            cameraForward.y = 0;
+            cameraRight.y = 0;
+            cameraForward.Normalize();
+            cameraRight.Normalize();
+
+            // Calculate target velocity based on camera orientation
+            targetVelocity = (cameraForward * verticalInput + cameraRight * horizontalInput).normalized * speed;
+
+            // Smoothly interpolate current velocity towards target velocity
+            currentVelocity = Vector3.Lerp(
+                currentVelocity,
+                targetVelocity,
+                Time.deltaTime * (targetVelocity.magnitude > 0.1f ? accelerationSpeed : decelerationSpeed)
+            );
+
+            // Apply movement
+            moveDirection = new Vector3(currentVelocity.x, moveDirection.y, currentVelocity.z);
+        }
+
+        // Handle rotation
+        if (moveDirection.magnitude > 0.1f && canRotate)
+        {
+            Vector3 rotationDirection = new Vector3(moveDirection.x, 0, moveDirection.z).normalized;
+            if (rotationDirection != Vector3.zero)
+            {
+                Quaternion toRotation = Quaternion.LookRotation(rotationDirection, Vector3.up);
+                playerTransform.rotation = Quaternion.RotateTowards(
+                    playerTransform.rotation,
+                    toRotation,
+                    rotationSpeed * Time.deltaTime * 2f // Increased rotation speed for more responsive turning
+                );
+            }
+        }
+
+        // Handle gravity and jumping
+        HandleGravityAndJump();
+
+        // Apply final movement
+        characterController.Move(moveDirection * Time.deltaTime);
+
+        // Update animation states
+        UpdateAnimations();
+    }
+
+    private void HandleInputs()
+    {
+        /*if (openInfoMenu.WasPressedThisFrame())
+        {
+            MenuScript.instance.InfoMenu();
+        }
+
+        if (openMainMenu.WasPressedThisFrame())
+        {
+            MenuScript.instance.MainMenu();
+        }*/
+
+        // Handle sprint
+        if (sprint.IsPressed() && !isAttacking)
+        {
+            speed = thisGameSave.sprintSpeed;
+            isSprint = true;
+        }
+        else
         {
             speed = thisGameSave.playerSpeed;
             isSprint = false;
         }
 
-        if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack) //ATTACK
-            {
-            anim.SetBool("isAttacking", true);
+        // Handle attack inputs
+        HandleAttackInputs();
+    }
+
+    private void HandleGravityAndJump()
+    {
+        if (jump.IsPressed() && canMove && characterController.isGrounded && thisGameSave.canJump)
+        {
+            isJumping = true;
+            moveDirection.y = jumpPower;
+            anim.SetBool("isJump", true);
+        }
+        else if (!characterController.isGrounded)
+        {
+            moveDirection.y -= gravity * Time.deltaTime;
+            isJumping = false;
+        }
+
+        if (characterController.isGrounded)
+        {
+            anim.SetBool("isJump", false);
+        }
+    }
+
+    private void UpdateAnimations()
+    {
+        if (thisGameSave.inMenu)
+        {
+            anim.SetBool("isRun", false);
+            return;
+        }
+        // Use currentVelocity magnitude with a small threshold for more responsive detection
+        bool isMoving = currentVelocity.magnitude > 0.05f;
+        anim.SetBool("isRun", isMoving && !isJumping);
+        if (!isMoving)
+        {
+            anim.SetBool("isRun", false);
+        }
+    }
+
+    public void ResetCanTurn()
+    {
+        canTurn = true;
+    }
+
+    private void HandleAttackInputs()
+    {
+        if (slash.WasPressedThisFrame()  && !isSlashing && thisGameSave.hasArm ) //slash attack
+        {
+            print("slash attack");
+            anim.SetBool("isArmAttack", true);
+            moveDirection = Vector3.zero;
+            canRotate = false;
+            isSlashing = true;
             canMove = false;
+        }
+        else if (slash.WasPressedThisFrame() && isSlashing) //cancel slash
+        {
+            anim.SetBool("isArmAttack", false);
+            gauntletHitbox.SetActive(false);
+            canMove = true;
+            isSlashing = false;
+            canRotate = true;
+        }
+        if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack && !thisGameSave.inMenu) //ATTACK
+        {
+            anim.SetBool("isAttacking", true);
+            anim.SetBool("isArmAttack", false);
+            StartCoroutine("WaitUntil", 2f);
             moveDirection = Vector3.zero;
             canRotate = false;
             isAttacking = true;
-            }
+            canMove = false;
+        }
         else if (attack.WasPressedThisFrame() && isAttacking && isSpinAttack) //cancel attack
         {
             anim.SetBool("isAttacking", false);
             swordHitbox.SetActive(false);
             canMove = true;
             isAttacking = false;
+            canRotate = true;
         }
-       
-        if (attack.WasPressedThisFrame() && isSprint && !isAttacking && thisGameSave.canAttack) //SPIN ATTACK
+
+        if (attack.WasPressedThisFrame() && isSprint && !isAttacking && thisGameSave.canAttack && !thisGameSave.inMenu) //SPIN ATTACK
         {
             isSpinAttack = true;
             anim.SetBool("isSpinAttack", true);
@@ -210,45 +442,12 @@ public class Player_Movement : MonoBehaviour
             isAttacking = true;
             Debug.Log("spinAttack");
         }
-
-        if (jump.IsPressed() && canMove && characterController.isGrounded) //JUMP
+        if (anim.GetBool("isHurt"))
         {
-            if (thisGameSave.canJump == true)
-            {
-                moveDirection.y = jumpPower;
-                anim.SetBool("isJump", true);
-            }
-            else if (thisGameSave.canJump == false)
-            {
-                moveDirection.y = 0;
-                anim.SetBool("isJump", false);
-                print("loser cant jump :(");
-            }
-            
+            canMove = true;
+            GauntletOff();
+            anim.SetBool("isArmAttack", false);
+            Debug.Log("ishurting");
         }
-        else
-        {
-            moveDirection.y = movementDirectionY;
-        }
-
-        if (!characterController.isGrounded)
-        {
-            moveDirection.y -= gravity * Time.deltaTime;
-        }
-
-        if (characterController.isGrounded == true)
-        {
-            anim.SetBool("isJump", false);
-        }
-
-        characterController.Move(moveDirection * Time.deltaTime);
-
-
-        if (rotationDirection != Vector3.zero && canRotate)
-       {
-           Quaternion toRotation = Quaternion.LookRotation(rotationDirection, Vector3.up);
-
-            playerTransform.rotation = Quaternion.RotateTowards(playerTransform.rotation, toRotation, rotationSpeed * Time.deltaTime);
-       }
     }
 }

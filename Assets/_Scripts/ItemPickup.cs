@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using FMODUnity;
 //using UnityEngine.InputSystem;
 
 
@@ -9,7 +10,7 @@ public class ItemPickup : MonoBehaviour
 {
     public Item Item;
     public bool canPickup = false;
-   
+    public StudioEventEmitter pickupSound;
 
 
     //TESTING
@@ -20,7 +21,7 @@ public class ItemPickup : MonoBehaviour
 
     void Pickup()
     {
-
+        pickupSound.Play();
         InventoryManager.Instance.Add(Item);
         InventoryManager.Instance.Popup(Item);
         
@@ -31,6 +32,7 @@ public class ItemPickup : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Pickup();
+        
         canPickup = true;
     }
 

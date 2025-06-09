@@ -7,13 +7,18 @@ public class LockedDoor : MonoBehaviour
 {
     public int index;
     public GameObject doorKey;
-    public GameObject sword;
-
+    //public GameObject sword;
+    public Animator anim;
+    public GameObject door;
+    private void Start()
+    {
+        anim = door.GetComponent<Animator>();
+    }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player") && doorKey.activeInHierarchy && sword.activeInHierarchy) 
+        if (other.gameObject.CompareTag("Player") && doorKey.activeInHierarchy) 
         {
-            SceneManager.LoadScene(index);
+            anim.SetBool("OpenDoor", true);
         }
     }
 }

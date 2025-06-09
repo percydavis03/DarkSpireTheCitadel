@@ -5,6 +5,7 @@ using UnityEngine;
 public class Text_Popup : MonoBehaviour
 {
     public GameObject textBox;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -21,6 +22,7 @@ public class Text_Popup : MonoBehaviour
             textBox.SetActive(true);
             StartCoroutine(Wait());
         }
+        
     }
 
     IEnumerator Wait()

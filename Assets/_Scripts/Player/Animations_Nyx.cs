@@ -4,12 +4,24 @@ using UnityEngine;
 
 public class Animations_Nyx : MonoBehaviour
 {
+
     // Start is called before the first frame update
     void Start()
     {
         
     }
-  
+    
+    
+
+    public void Recover()
+    {
+
+    }
+    public void ActivateAttack()
+    {
+        //Player_Movement.instance.AttackFailSafe();
+        
+    }
     public void AttackAnimEnd()
     {
         Player_Movement.instance.EndAttack();
@@ -29,7 +41,7 @@ public class Animations_Nyx : MonoBehaviour
     public void StartSpinAttack()
     {
         //Player_Movement.instance.isSpinAttack = true;
-        Player_Movement.instance.Reposition();
+       
     }
 
     public void ActivateSword()
