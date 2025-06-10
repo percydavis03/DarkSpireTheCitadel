@@ -89,6 +89,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Roll"",
+                    ""type"": ""Button"",
+                    ""id"": ""b827638c-8d45-4dc7-b766-277ba03ef810"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -256,6 +265,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Slash"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fbf24352-8d0b-4048-be20-11121e7e107e"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Roll"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -271,6 +291,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_General_Inventory = m_General.FindAction("Inventory", throwIfNotFound: true);
         m_General_Interact = m_General.FindAction("Interact", throwIfNotFound: true);
         m_General_Slash = m_General.FindAction("Slash", throwIfNotFound: true);
+        m_General_Roll = m_General.FindAction("Roll", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -339,6 +360,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_General_Inventory;
     private readonly InputAction m_General_Interact;
     private readonly InputAction m_General_Slash;
+    private readonly InputAction m_General_Roll;
     public struct GeneralActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -350,6 +372,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Inventory => m_Wrapper.m_General_Inventory;
         public InputAction @Interact => m_Wrapper.m_General_Interact;
         public InputAction @Slash => m_Wrapper.m_General_Slash;
+        public InputAction @Roll => m_Wrapper.m_General_Roll;
         public InputActionMap Get() { return m_Wrapper.m_General; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -380,6 +403,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Slash.started += instance.OnSlash;
             @Slash.performed += instance.OnSlash;
             @Slash.canceled += instance.OnSlash;
+            @Roll.started += instance.OnRoll;
+            @Roll.performed += instance.OnRoll;
+            @Roll.canceled += instance.OnRoll;
         }
 
         private void UnregisterCallbacks(IGeneralActions instance)
@@ -405,6 +431,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Slash.started -= instance.OnSlash;
             @Slash.performed -= instance.OnSlash;
             @Slash.canceled -= instance.OnSlash;
+            @Roll.started -= instance.OnRoll;
+            @Roll.performed -= instance.OnRoll;
+            @Roll.canceled -= instance.OnRoll;
         }
 
         public void RemoveCallbacks(IGeneralActions instance)
@@ -431,5 +460,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnInventory(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
         void OnSlash(InputAction.CallbackContext context);
+        void OnRoll(InputAction.CallbackContext context);
     }
 }

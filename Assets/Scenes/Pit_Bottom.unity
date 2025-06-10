@@ -32667,7 +32667,7 @@ Transform:
   m_GameObject: {fileID: 1102980082}
   serializedVersion: 2
   m_LocalRotation: {x: 0.12910034, y: 0.14614268, z: -0.019240042, w: 0.9806148}
-  m_LocalPosition: {x: -5.9748273, y: 8.987265, z: -13.209087}
+  m_LocalPosition: {x: -5.015751, y: 7.5527425, z: -13.903288}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -32792,7 +32792,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60.000004
+  field of view: 40
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -33213,7 +33213,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 607360266}
   m_Lens:
-    FieldOfView: 60.000004
+    FieldOfView: 40
     OrthographicSize: 5
     NearClipPlane: 0.3
     FarClipPlane: 1000
@@ -35323,14 +35323,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1197758081}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.015134441, y: 0.98106027, z: -0.17298737, w: -0.085831694}
+  m_LocalRotation: {x: -0.011376109, y: 0.98767215, z: -0.13002947, w: -0.08641016}
   m_LocalPosition: {x: 3.1939878, y: 6.7275186, z: 8.817917}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1973591989}
   m_Father: {fileID: 79615405}
-  m_LocalEulerAnglesHint: {x: 20, y: 190, z: 0}
+  m_LocalEulerAnglesHint: {x: 15, y: 190, z: 0}
 --- !u!114 &1197758083
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -35394,7 +35394,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 79615405}
   m_Follow: {fileID: 79615405}
   m_Lens:
-    FieldOfView: 60.000004
+    FieldOfView: 40
     OrthographicSize: 5
     NearClipPlane: 0.3
     FarClipPlane: 1000
@@ -66015,8 +66015,8 @@ MonoBehaviour:
   m_YDamping: 1.9
   m_ZDamping: 1.63
   m_TargetMovementOnly: 1
-  m_ScreenX: 0.532
-  m_ScreenY: 0.496
+  m_ScreenX: 0.35
+  m_ScreenY: 0.25
   m_CameraDistance: 7
   m_DeadZoneWidth: 0
   m_DeadZoneHeight: 0
@@ -66928,7 +66928,7 @@ Transform:
   m_GameObject: {fileID: 1990158910}
   serializedVersion: 2
   m_LocalRotation: {x: 0.12910034, y: 0.14614268, z: -0.019240042, w: 0.9806148}
-  m_LocalPosition: {x: -5.9748273, y: 8.987265, z: -13.209087}
+  m_LocalPosition: {x: -5.015751, y: 7.5527425, z: -13.903288}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -66998,7 +66998,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 79615405}
   m_Follow: {fileID: 79615405}
   m_Lens:
-    FieldOfView: 60.000004
+    FieldOfView: 40
     OrthographicSize: 5
     NearClipPlane: 0.3
     FarClipPlane: 1000
@@ -71329,6 +71329,11 @@ PrefabInstance:
       propertyPath: m_Follow
       value: 
       objectReference: {fileID: 607360266}
+    - target: {fileID: 42528167486052305, guid: 60360fea9ff5f0947b4193c1224407f4,
+        type: 3}
+      propertyPath: m_Lens.FieldOfView
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 151595709283059865, guid: 60360fea9ff5f0947b4193c1224407f4,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -71559,11 +71564,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3729205552400583337, guid: 60360fea9ff5f0947b4193c1224407f4,
+        type: 3}
+      propertyPath: m_Lens.FieldOfView
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 3925674056803932397, guid: 60360fea9ff5f0947b4193c1224407f4,
         type: 3}
       propertyPath: m_Follow
       value: 
       objectReference: {fileID: 607360266}
+    - target: {fileID: 3925674056803932397, guid: 60360fea9ff5f0947b4193c1224407f4,
+        type: 3}
+      propertyPath: m_Lens.FieldOfView
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 4625319422241483832, guid: 60360fea9ff5f0947b4193c1224407f4,
         type: 3}
       propertyPath: m_IsActive
@@ -71644,6 +71659,16 @@ PrefabInstance:
       propertyPath: m_Follow
       value: 
       objectReference: {fileID: 607360266}
+    - target: {fileID: 7209069932144966089, guid: 60360fea9ff5f0947b4193c1224407f4,
+        type: 3}
+      propertyPath: m_Lens.FieldOfView
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 7377503602171084432, guid: 60360fea9ff5f0947b4193c1224407f4,
+        type: 3}
+      propertyPath: m_Lens.FieldOfView
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 7455041217021007790, guid: 60360fea9ff5f0947b4193c1224407f4,
         type: 3}
       propertyPath: m_IsActive
@@ -71664,6 +71689,11 @@ PrefabInstance:
       propertyPath: m_LookAt
       value: 
       objectReference: {fileID: 607360266}
+    - target: {fileID: 8033563571007845187, guid: 60360fea9ff5f0947b4193c1224407f4,
+        type: 3}
+      propertyPath: m_Lens.FieldOfView
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 8122462166838190723, guid: 60360fea9ff5f0947b4193c1224407f4,
         type: 3}
       propertyPath: sceneLight

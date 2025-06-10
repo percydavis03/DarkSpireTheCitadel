@@ -8,6 +8,8 @@ public class Player_Movement : MonoBehaviour
 {
     public static Player_Movement instance;
     public PlayerSaveState thisGameSave;
+    
+
     //INPUTS
     public PlayerInputActions playerControls;
     private InputAction attack;
@@ -17,6 +19,7 @@ public class Player_Movement : MonoBehaviour
     private InputAction openMainMenu;
     private InputAction slash;
     private InputAction interact;
+    private InputAction roll;
 
     //attacks
     public GameObject swordHitbox;
@@ -31,6 +34,7 @@ public class Player_Movement : MonoBehaviour
     public int speed;
     public Transform playerTransform;
     public float rotationSpeed;
+    private bool rolling;
 
     public Animator anim;
     //public Camera playerCamera;
@@ -116,6 +120,9 @@ public class Player_Movement : MonoBehaviour
 
         interact = playerControls.General.Interact;
         interact.Enable();
+
+        roll = playerControls.General.Roll;
+        roll.Enable();
     }
 
     private void OnDisable()//need for input system
@@ -127,6 +134,7 @@ public class Player_Movement : MonoBehaviour
         openMainMenu.Disable();
         slash.Disable();
         interact.Disable();
+        roll.Disable();
     }
     IEnumerator WaitUntil(float seconds)
     {
@@ -210,6 +218,13 @@ public class Player_Movement : MonoBehaviour
     {
         moveDirection = Vector3.zero;
         speed = thisGameSave.playerSpeed;
+    }
+
+    public void StopRolling()
+    {
+        rolling = false;
+        anim.SetBool("isRolling", false);
+        Main_Player.instance.canTakeDamage = true;
     }
 
     public void ApplyKnockback(Vector3 knockbackForce)
@@ -337,7 +352,14 @@ public class Player_Movement : MonoBehaviour
         {
             MenuScript.instance.MainMenu();
         }*/
-
+        // Roll Dodge
+        if (roll.IsPressed() && !rolling)
+        {
+            rolling = true;
+            isAttacking = false;
+            Main_Player.instance.canTakeDamage = false;
+            anim.SetBool("isRolling", true);
+        }
         // Handle sprint
         if (sprint.IsPressed() && !isAttacking)
         {

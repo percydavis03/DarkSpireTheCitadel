@@ -11,6 +11,7 @@ public class Main_Player : MonoBehaviour
     public static Main_Player instance;
     public PlayerSaveState thisGameSave;
     private bool isDead;
+    public bool canTakeDamage;
     
     [Header("Damage")] 
     public StudioEventEmitter ough;
@@ -97,7 +98,7 @@ public class Main_Player : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Enemy"))
         {
-           if (!damageCooldown && !isDead)
+           if (!damageCooldown && !isDead && canTakeDamage)
             {
                 TakeDamage();
                 
