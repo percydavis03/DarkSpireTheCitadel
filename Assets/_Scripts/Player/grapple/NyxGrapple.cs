@@ -34,6 +34,16 @@ public class NyxGrapple : MonoBehaviour
     public Color debugRayColor = Color.red;
     public Color debugHitColor = Color.green;
     
+    [Header("Grapple Joint Settings")]
+    public Transform grappleJoint; // The joint transform that will move to connect with grappled objects
+    public float jointMoveSpeed = 100f; // How fast the joint moves to/from the target
+    public bool useJointAttachment = true; // Toggle for the joint attachment system
+    
+    [Header("Grapple Unlock Requirement")]
+    public GameObject armObject; // The "Arm" object that must be active for grappling to work
+    [Tooltip("If true, will automatically find GameObject named 'Arm' if armObject is not assigned")]
+    public bool autoFindArmObject = true;
+    
     private RaycastHit lastHit;
     private bool lastHitDetected;
     private bool isGrappling = false;
@@ -41,6 +51,10 @@ public class NyxGrapple : MonoBehaviour
     private Vector3 grappleStartPosition;
     private Rigidbody currentTargetRigidbody;
     private SpringJoint currentSpringJoint;
+    private Vector3 originalJointPosition;
+    private Quaternion originalJointRotation;
+    private Transform originalJointParent;
+    private bool isJointAttached = false;
 
     // Start is called before the first frame update
     void Start()
@@ -51,6 +65,28 @@ public class NyxGrapple : MonoBehaviour
         // If no grapple origin is set, use this transform
         else if (grappleOrigin == null)
             grappleOrigin = transform;
+            
+        // Store original joint position and rotation if joint is assigned
+        if (grappleJoint != null)
+        {
+            originalJointPosition = grappleJoint.localPosition;
+            originalJointRotation = grappleJoint.localRotation;
+            originalJointParent = grappleJoint.parent;
+        }
+        
+        // Auto-find Arm object if not assigned but auto-find is enabled
+        if (armObject == null && autoFindArmObject)
+        {
+            armObject = GameObject.Find("Arm");
+            if (armObject != null)
+            {
+                Debug.Log("Auto-found Arm object for grapple unlock requirement");
+            }
+            else
+            {
+                Debug.LogWarning("Could not find GameObject named 'Arm' - grappling will be disabled until Arm object is assigned or activated");
+            }
+        }
     }
 
     // Update is called once per frame
@@ -114,16 +150,31 @@ public class NyxGrapple : MonoBehaviour
         cooldownTimer = grappleCooldown;
     }
     
+    bool IsGrappleUnlocked()
+    {
+        // If no arm object is assigned, grappling is always unlocked (backwards compatibility)
+        if (armObject == null)
+        {
+            return true;
+        }
+        
+        // Check if the Arm object is active
+        bool isUnlocked = armObject.activeInHierarchy;
+        
+        return isUnlocked;
+    }
+    
     void HandleGrappleInput()
     {
         // Only allow new grapple if:
-        // 1. Not in cooldown
-        // 2. Key wasn't already pressed
-        // 3. Have a valid target
-        // 4. Not currently grappling
-        if (canGrapple && !wasGrappleKeyPressed && Input.GetKeyDown(grappleKey) && lastHitDetected && !isGrappling)
+        // 1. Grapple is unlocked (Arm object is active)
+        // 2. Not in cooldown
+        // 3. Key wasn't already pressed
+        // 4. Have a valid target
+        // 5. Not currently grappling
+        if (IsGrappleUnlocked() && canGrapple && !wasGrappleKeyPressed && Input.GetKeyDown(grappleKey) && lastHitDetected && !isGrappling)
         {
-            Debug.Log($"Grapple conditions met - canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
+            Debug.Log($"Grapple conditions met - isUnlocked:{IsGrappleUnlocked()}, canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
             // Check if hit object has the "CanBeGrappled" tag
             if (lastHit.collider.CompareTag("CanBeGrappled"))
             {
@@ -146,7 +197,7 @@ public class NyxGrapple : MonoBehaviour
         }
         else if (Input.GetKeyDown(grappleKey))
         {
-            Debug.Log($"Grapple conditions NOT met - canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
+            Debug.Log($"Grapple conditions NOT met - isUnlocked:{IsGrappleUnlocked()}, canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
         }
         
         // Check if grapple key is released and we're currently grappling
@@ -200,8 +251,18 @@ public class NyxGrapple : MonoBehaviour
             CreateSpringJoint();
         }
         
-        // Start the physics-based grapple coroutine
-        StartCoroutine(PhysicsGrappleCoroutine());
+        // Start joint attachment if enabled, then start pulling after attachment
+        if (useJointAttachment && grappleJoint != null)
+        {
+            // Get the grapple point from the target, or use the target's transform if no grapple point is set
+            Transform attachPoint = target.grapplePoint != null ? target.grapplePoint : target.transform;
+            StartCoroutine(AttachJointAndStartPull(attachPoint));
+        }
+        else
+        {
+            // If no joint attachment, start pull immediately
+            StartCoroutine(PhysicsGrappleCoroutine());
+        }
     }
     
     void ReleaseGrapple()
@@ -215,6 +276,12 @@ public class NyxGrapple : MonoBehaviour
             {
                 Destroy(currentSpringJoint);
                 currentSpringJoint = null;
+            }
+            
+            // Start joint detachment if enabled
+            if (useJointAttachment && grappleJoint != null && isJointAttached)
+            {
+                StartCoroutine(DetachJointFromTarget());
             }
             
             // Notify the grappleable object
@@ -305,6 +372,150 @@ public class NyxGrapple : MonoBehaviour
         currentSpringJoint.maxDistance = 0f; // Force tight connection
         
         Debug.Log("Spring joint created for dynamic grappling");
+    }
+    
+    IEnumerator AttachJointAndStartPull(Transform attachPoint)
+    {
+        if (grappleJoint == null || !useJointAttachment) 
+        {
+            // Fallback to immediate pull if no joint
+            StartCoroutine(PhysicsGrappleCoroutine());
+            yield break;
+        }
+        
+        Debug.Log("Moving joint to grapple point, then starting pull");
+        
+        Vector3 startPosition = grappleJoint.position;
+        Quaternion startRotation = grappleJoint.rotation;
+        Vector3 targetPosition = attachPoint.position;
+        
+        float journeyLength = Vector3.Distance(startPosition, targetPosition);
+        float journeyTime = journeyLength / jointMoveSpeed;
+        
+        float elapsedTime = 0;
+        
+        // Move joint to attach point
+        while (elapsedTime < journeyTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float fractionOfJourney = elapsedTime / journeyTime;
+            
+            // Move joint towards target
+            grappleJoint.position = Vector3.Lerp(startPosition, targetPosition, fractionOfJourney);
+            
+            // Look at the target
+            Vector3 directionToTarget = (targetPosition - grappleJoint.position).normalized;
+            if (directionToTarget != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+                grappleJoint.rotation = Quaternion.Slerp(startRotation, targetRotation, fractionOfJourney);
+            }
+            
+            yield return null;
+        }
+        
+        // Snap to final position
+        grappleJoint.position = targetPosition;
+        
+        // Attach joint to target
+        grappleJoint.SetParent(attachPoint);
+        isJointAttached = true;
+        
+        Debug.Log("Joint attached - now starting pull");
+        
+        // Now start the physics-based grapple coroutine
+        StartCoroutine(PhysicsGrappleCoroutine());
+    }
+    
+    IEnumerator AttachJointToTarget(Transform target)
+    {
+        if (grappleJoint == null || !useJointAttachment) 
+        {
+            yield break;
+        }
+        
+        Debug.Log("Moving joint to target position");
+        
+        Vector3 startPosition = grappleJoint.position;
+        Quaternion startRotation = grappleJoint.rotation;
+        Vector3 targetPosition = target.position;
+        
+        float journeyLength = Vector3.Distance(startPosition, targetPosition);
+        float journeyTime = journeyLength / jointMoveSpeed;
+        
+        float elapsedTime = 0;
+        
+        while (elapsedTime < journeyTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float fractionOfJourney = elapsedTime / journeyTime;
+            
+            // Move joint towards target
+            grappleJoint.position = Vector3.Lerp(startPosition, targetPosition, fractionOfJourney);
+            
+            // Look at the target
+            Vector3 directionToTarget = (targetPosition - grappleJoint.position).normalized;
+            if (directionToTarget != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+                grappleJoint.rotation = Quaternion.Slerp(startRotation, targetRotation, fractionOfJourney);
+            }
+            
+            yield return null;
+        }
+        
+        // Snap to final position
+        grappleJoint.position = targetPosition;
+        
+        // Attach joint to target
+        grappleJoint.SetParent(target);
+        isJointAttached = true;
+        
+        Debug.Log("Joint attached to target");
+    }
+    
+    IEnumerator DetachJointFromTarget()
+    {
+        if (grappleJoint == null || !isJointAttached) 
+        {
+            yield break;
+        }
+        
+        Debug.Log("Returning joint to original position");
+        
+        // Detach from target first
+        grappleJoint.SetParent(originalJointParent);
+        isJointAttached = false;
+        
+        Vector3 startPosition = grappleJoint.position;
+        Quaternion startRotation = grappleJoint.rotation;
+        
+        // Calculate world position of original location
+        Vector3 targetPosition = originalJointParent.TransformPoint(originalJointPosition);
+        Quaternion targetRotation = originalJointParent.rotation * originalJointRotation;
+        
+        float journeyLength = Vector3.Distance(startPosition, targetPosition);
+        float journeyTime = journeyLength / jointMoveSpeed;
+        
+        float elapsedTime = 0;
+        
+        while (elapsedTime < journeyTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float fractionOfJourney = elapsedTime / journeyTime;
+            
+            // Move joint back to original position
+            grappleJoint.position = Vector3.Lerp(startPosition, targetPosition, fractionOfJourney);
+            grappleJoint.rotation = Quaternion.Slerp(startRotation, targetRotation, fractionOfJourney);
+            
+            yield return null;
+        }
+        
+        // Snap to final position and rotation
+        grappleJoint.localPosition = originalJointPosition;
+        grappleJoint.localRotation = originalJointRotation;
+        
+        Debug.Log("Joint returned to original position");
     }
     
     void PerformGrappleRaycast()
@@ -517,3 +728,4 @@ public class NyxGrapple : MonoBehaviour
         }
     }
 }
+

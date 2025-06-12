@@ -10,6 +10,7 @@ public class Grappleable : MonoBehaviour
     public bool canBeGrappled = true;
     public bool isEnemy = false;
     public Animator animator;
+    public Transform grapplePoint; // The specific point where the grapple wrist will attach
     
     [Header("Enemy Settings")]
     private NavMeshAgent navAgent;
