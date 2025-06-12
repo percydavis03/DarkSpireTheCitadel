@@ -93,8 +93,7 @@ public class Grappleable : MonoBehaviour
             // Resume NavMeshAgent movement
             if (navAgent != null)
             {
-                navAgent.speed = 0;
-                navAgent.isStopped = true;
+                navAgent.enabled = false; // keep disabled during stun
                 StartCoroutine(ResumeMovementAfterDelay());
             }
             
@@ -116,8 +115,12 @@ public class Grappleable : MonoBehaviour
         
         if (isEnemy && navAgent != null)
         {
-            navAgent.speed = originalSpeed;
-            navAgent.isStopped = false;
+            navAgent.enabled = navAgentWasEnabled;
+            if (navAgent.enabled)
+            {
+                navAgent.speed = originalSpeed;
+                navAgent.isStopped = false;
+            }
         }
     }
 }
