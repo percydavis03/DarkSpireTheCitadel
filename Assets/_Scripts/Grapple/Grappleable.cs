@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Grappleable : MonoBehaviour
@@ -14,6 +15,8 @@ public class Grappleable : MonoBehaviour
     private NavMeshAgent navAgent;
     private Worker workerScript;
     private float originalSpeed;
+    [Tooltip("Seconds the enemy remains stunned after being released from grapple before regaining movement.")]
+    public float postReleaseStunDuration = 1f;
     
     [Header("Events")]
     public UnityEngine.Events.UnityEvent OnGrappleStarted;
@@ -89,8 +92,9 @@ public class Grappleable : MonoBehaviour
             // Resume NavMeshAgent movement
             if (navAgent != null)
             {
-                navAgent.speed = originalSpeed;
-                navAgent.isStopped = false;
+                navAgent.speed = 0;
+                navAgent.isStopped = true;
+                StartCoroutine(ResumeMovementAfterDelay());
             }
             
             // Resume Worker script behaviors
@@ -103,5 +107,16 @@ public class Grappleable : MonoBehaviour
         
         OnGrappleReleased?.Invoke();
         Debug.Log($"{gameObject.name} grapple released");
+    }
+
+    private IEnumerator ResumeMovementAfterDelay()
+    {
+        yield return new WaitForSeconds(postReleaseStunDuration);
+        
+        if (isEnemy && navAgent != null)
+        {
+            navAgent.speed = originalSpeed;
+            navAgent.isStopped = false;
+        }
     }
 }
