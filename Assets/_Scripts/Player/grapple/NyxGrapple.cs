@@ -14,7 +14,11 @@ public class NyxGrapple : MonoBehaviour
     [Header("Grapple Pull Settings")]
     public KeyCode grappleKey = KeyCode.E;
     public float minDistanceFromOrigin = 2f;
-    public float pullTime = 1f;
+    public float pullForce = 1000f;
+    public float maxPullSpeed = 10f;
+    public bool useSpringJoint = false;
+    public float springStrength = 50f;
+    public float springDamper = 5f;
     
     [Header("Debug")]
     public bool showDebugRay = true;
@@ -27,6 +31,8 @@ public class NyxGrapple : MonoBehaviour
     private bool isGrappling = false;
     private Grappleable currentGrappleTarget;
     private Vector3 grappleStartPosition;
+    private Rigidbody currentTargetRigidbody;
+    private SpringJoint currentSpringJoint;
 
     // Start is called before the first frame update
     void Start()
@@ -74,7 +80,26 @@ public class NyxGrapple : MonoBehaviour
     {
         if (!target.canBeGrappled) return;
         
+        // Check if target has a Rigidbody
+        Rigidbody targetRigidbody = target.GetComponent<Rigidbody>();
+        if (targetRigidbody == null)
+        {
+            Debug.LogWarning($"Cannot grapple {target.name} - no Rigidbody found!");
+            return;
+        }
+        
+        // Check if rigidbody is kinematic
+        if (targetRigidbody.isKinematic)
+        {
+            Debug.LogWarning($"Cannot grapple {target.name} - Rigidbody is kinematic!");
+            return;
+        }
+        
+        // Debug rigidbody properties
+        Debug.Log($"Grappling {target.name} - Mass: {targetRigidbody.mass}, Drag: {targetRigidbody.drag}, Kinematic: {targetRigidbody.isKinematic}");
+        
         currentGrappleTarget = target;
+        currentTargetRigidbody = targetRigidbody;
         isGrappling = true;
         grappleStartPosition = target.transform.position;
         
@@ -83,8 +108,14 @@ public class NyxGrapple : MonoBehaviour
         
         Debug.Log($"Started grappling: {target.name}");
         
-        // Start the grapple coroutine
-        StartCoroutine(GrappleCoroutine());
+        // Create spring joint if enabled
+        if (useSpringJoint)
+        {
+            CreateSpringJoint();
+        }
+        
+        // Start the physics-based grapple coroutine
+        StartCoroutine(PhysicsGrappleCoroutine());
     }
     
     void ReleaseGrapple()
@@ -92,6 +123,13 @@ public class NyxGrapple : MonoBehaviour
         if (isGrappling)
         {
             Debug.Log("Grapple released");
+            
+            // Destroy spring joint if it exists
+            if (currentSpringJoint != null)
+            {
+                Destroy(currentSpringJoint);
+                currentSpringJoint = null;
+            }
             
             // Notify the grappleable object
             if (currentGrappleTarget != null)
@@ -101,16 +139,14 @@ public class NyxGrapple : MonoBehaviour
             
             isGrappling = false;
             currentGrappleTarget = null;
+            currentTargetRigidbody = null;
             StopAllCoroutines();
         }
     }
     
-    IEnumerator GrappleCoroutine()
+    IEnumerator PhysicsGrappleCoroutine()
     {
-        float elapsedTime = 0f;
-        Vector3 startPos = currentGrappleTarget.transform.position;
-        
-        while (elapsedTime < pullTime && isGrappling)
+        while (isGrappling && currentTargetRigidbody != null)
         {
             // Check if grapple key is still held
             if (!Input.GetKey(grappleKey))
@@ -130,28 +166,74 @@ public class NyxGrapple : MonoBehaviour
                 yield break;
             }
             
-            // Calculate direction from object to grapple origin
-            Vector3 directionToOrigin = (grappleOrigin.position - currentGrappleTarget.transform.position).normalized;
+            // Only apply forces if not using spring joint
+            if (!useSpringJoint)
+            {
+                // Check if rigidbody is kinematic
+                if (currentTargetRigidbody.isKinematic)
+                {
+                    Debug.LogWarning($"Cannot grapple {currentGrappleTarget.name} - Rigidbody is kinematic!");
+                    ReleaseGrapple();
+                    yield break;
+                }
+                
+                // Calculate direction from object to grapple origin
+                Vector3 directionToOrigin = (grappleOrigin.position - currentGrappleTarget.transform.position).normalized;
+                
+                // Calculate distance factor (stronger pull when farther away)
+                float distanceFactor = Mathf.Clamp01((currentDistance - minDistanceFromOrigin) / grappleRange);
+                
+                // Apply force toward grapple origin (don't multiply by Time.fixedDeltaTime - AddForce handles timing)
+                Vector3 pullForceVector = directionToOrigin * pullForce * distanceFactor;
+                currentTargetRigidbody.AddForce(pullForceVector, ForceMode.Force);
+                
+                // Debug force application
+                Debug.DrawRay(currentGrappleTarget.transform.position, pullForceVector.normalized * 2f, Color.yellow);
+                
+                // Limit maximum velocity to prevent objects flying too fast
+                if (currentTargetRigidbody.velocity.magnitude > maxPullSpeed)
+                {
+                    currentTargetRigidbody.velocity = currentTargetRigidbody.velocity.normalized * maxPullSpeed;
+                }
+                
+                // Add some drag to make the motion feel more controlled
+                currentTargetRigidbody.velocity *= 0.98f;
+                
+                // Debug info every few frames
+                if (Time.fixedTime % 0.2f < Time.fixedDeltaTime)
+                {
+                    Debug.Log($"Grapple Force: {pullForceVector.magnitude:F1}, Distance: {currentDistance:F2}, Velocity: {currentTargetRigidbody.velocity.magnitude:F2}");
+                }
+            }
             
-            // Calculate target position at minimum distance from origin
-            Vector3 targetPos = grappleOrigin.position - directionToOrigin * minDistanceFromOrigin;
-            
-            elapsedTime += Time.deltaTime;
-            float progress = elapsedTime / pullTime;
-            
-            // Smooth interpolation toward target position
-            Vector3 newPosition = Vector3.Lerp(startPos, targetPos, progress);
-            currentGrappleTarget.transform.position = newPosition;
-            
-            yield return null;
+            yield return new WaitForFixedUpdate();
+        }
+    }
+    
+    void CreateSpringJoint()
+    {
+        // Add a Rigidbody to the grapple origin if it doesn't have one
+        Rigidbody grappleOriginRigidbody = grappleOrigin.GetComponent<Rigidbody>();
+        if (grappleOriginRigidbody == null)
+        {
+            grappleOriginRigidbody = grappleOrigin.gameObject.AddComponent<Rigidbody>();
+            grappleOriginRigidbody.isKinematic = true; // Keep it stationary
         }
         
-        // Auto-release when pull time is reached
-        if (isGrappling)
-        {
-            Debug.Log("Pull time completed - auto releasing grapple");
-            ReleaseGrapple();
-        }
+        // Create spring joint on the target object
+        currentSpringJoint = currentTargetRigidbody.gameObject.AddComponent<SpringJoint>();
+        currentSpringJoint.connectedBody = grappleOriginRigidbody;
+        currentSpringJoint.autoConfigureConnectedAnchor = false;
+        currentSpringJoint.anchor = Vector3.zero;
+        currentSpringJoint.connectedAnchor = Vector3.zero;
+        
+        // Set spring properties
+        currentSpringJoint.spring = springStrength;
+        currentSpringJoint.damper = springDamper;
+        currentSpringJoint.minDistance = minDistanceFromOrigin;
+        currentSpringJoint.maxDistance = minDistanceFromOrigin + 1f; // Small buffer for natural motion
+        
+        Debug.Log("Spring joint created for dynamic grappling");
     }
     
     void PerformGrappleRaycast()
