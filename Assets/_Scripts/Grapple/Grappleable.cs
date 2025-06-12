@@ -15,6 +15,7 @@ public class Grappleable : MonoBehaviour
     private NavMeshAgent navAgent;
     private Worker workerScript;
     private float originalSpeed;
+    private bool navAgentWasEnabled;
     [Tooltip("Seconds the enemy remains stunned after being released from grapple before regaining movement.")]
     public float postReleaseStunDuration = 1f;
     
@@ -58,8 +59,8 @@ public class Grappleable : MonoBehaviour
             // Stop NavMeshAgent movement
             if (navAgent != null)
             {
-                navAgent.speed = 0;
-                navAgent.isStopped = true;
+                navAgentWasEnabled = navAgent.enabled;
+                navAgent.enabled = false; // fully disables navigation but keeps animator running
             }
             
             // Stop Worker script behaviors
