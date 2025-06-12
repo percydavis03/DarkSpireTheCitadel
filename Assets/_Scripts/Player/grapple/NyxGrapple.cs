@@ -10,6 +10,8 @@ public class NyxGrapple : MonoBehaviour
     public LayerMask grappleLayerMask = -1;
     public Transform nyxTransform;
     public Transform grappleOrigin;
+    public Animator nyxAnimator;
+    public string grappleLayerName = "Grapple"; // The name of the animator layer for grappling
     
     [Header("Grapple Pull Settings")]
     public KeyCode grappleKey = KeyCode.E;
@@ -50,6 +52,12 @@ public class NyxGrapple : MonoBehaviour
     {
         PerformGrappleRaycast();
         HandleGrappleInput();
+        
+        // Update animator based on key press
+        if (nyxAnimator != null)
+        {
+            nyxAnimator.SetBool("isGrappling", Input.GetKey(grappleKey));
+        }
     }
     
     void HandleGrappleInput()
@@ -88,20 +96,16 @@ public class NyxGrapple : MonoBehaviour
             return;
         }
         
-        // Check if rigidbody is kinematic
-        if (targetRigidbody.isKinematic)
-        {
-            Debug.LogWarning($"Cannot grapple {target.name} - Rigidbody is kinematic!");
-            return;
-        }
-        
-        // Debug rigidbody properties
-        Debug.Log($"Grappling {target.name} - Mass: {targetRigidbody.mass}, Drag: {targetRigidbody.drag}, Kinematic: {targetRigidbody.isKinematic}");
-        
         currentGrappleTarget = target;
         currentTargetRigidbody = targetRigidbody;
         isGrappling = true;
         grappleStartPosition = target.transform.position;
+        
+        // Set Nyx's animator state
+        if (nyxAnimator != null)
+        {
+            nyxAnimator.SetBool("isGrappling", true);
+        }
         
         // Notify the grappleable object
         target.StartGrapple();
@@ -169,26 +173,15 @@ public class NyxGrapple : MonoBehaviour
             // Only apply forces if not using spring joint
             if (!useSpringJoint)
             {
-                // Check if rigidbody is kinematic
-                if (currentTargetRigidbody.isKinematic)
-                {
-                    Debug.LogWarning($"Cannot grapple {currentGrappleTarget.name} - Rigidbody is kinematic!");
-                    ReleaseGrapple();
-                    yield break;
-                }
-                
                 // Calculate direction from object to grapple origin
                 Vector3 directionToOrigin = (grappleOrigin.position - currentGrappleTarget.transform.position).normalized;
                 
                 // Calculate distance factor (stronger pull when farther away)
                 float distanceFactor = Mathf.Clamp01((currentDistance - minDistanceFromOrigin) / grappleRange);
                 
-                // Apply force toward grapple origin (don't multiply by Time.fixedDeltaTime - AddForce handles timing)
+                // Apply force toward grapple origin
                 Vector3 pullForceVector = directionToOrigin * pullForce * distanceFactor;
-                currentTargetRigidbody.AddForce(pullForceVector, ForceMode.Force);
-                
-                // Debug force application
-                Debug.DrawRay(currentGrappleTarget.transform.position, pullForceVector.normalized * 2f, Color.yellow);
+                currentTargetRigidbody.AddForce(pullForceVector * Time.fixedDeltaTime);
                 
                 // Limit maximum velocity to prevent objects flying too fast
                 if (currentTargetRigidbody.velocity.magnitude > maxPullSpeed)
@@ -198,12 +191,6 @@ public class NyxGrapple : MonoBehaviour
                 
                 // Add some drag to make the motion feel more controlled
                 currentTargetRigidbody.velocity *= 0.98f;
-                
-                // Debug info every few frames
-                if (Time.fixedTime % 0.2f < Time.fixedDeltaTime)
-                {
-                    Debug.Log($"Grapple Force: {pullForceVector.magnitude:F1}, Distance: {currentDistance:F2}, Velocity: {currentTargetRigidbody.velocity.magnitude:F2}");
-                }
             }
             
             yield return new WaitForFixedUpdate();
@@ -257,15 +244,25 @@ public class NyxGrapple : MonoBehaviour
             // Check if target is within our cone angle
             if (angleToTarget <= grappleAngle)
             {
-                // Perform raycast to get proper hit information
-                RaycastHit hit;
-                if (Physics.Raycast(rayOrigin, directionToTarget, out hit, grappleRange, grappleLayerMask))
+                // Check if this collider is grappleable before doing expensive raycast
+                if (!collider.CompareTag("CanBeGrappled"))
+                    continue;
+                
+                // Perform raycast, but ignore non-grappleable objects
+                RaycastHit[] hits = Physics.RaycastAll(rayOrigin, directionToTarget, grappleRange, grappleLayerMask);
+                
+                foreach (RaycastHit hit in hits)
                 {
-                    if (hit.collider == collider && hit.distance < closestDistance)
+                    // Only consider hits on grappleable objects
+                    if (hit.collider.CompareTag("CanBeGrappled") && hit.collider == collider)
                     {
-                        closestDistance = hit.distance;
-                        closestHit = hit;
-                        hitDetected = true;
+                        if (hit.distance < closestDistance)
+                        {
+                            closestDistance = hit.distance;
+                            closestHit = hit;
+                            hitDetected = true;
+                        }
+                        break; // Found our target, no need to check other hits
                     }
                 }
             }

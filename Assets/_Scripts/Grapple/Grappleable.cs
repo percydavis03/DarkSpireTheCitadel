@@ -10,6 +10,11 @@ public class Grappleable : MonoBehaviour
     public bool isEnemy = false;
     public Animator animator;
     
+    [Header("Enemy Settings")]
+    private NavMeshAgent navAgent;
+    private Worker workerScript;
+    private float originalSpeed;
+    
     [Header("Events")]
     public UnityEngine.Events.UnityEvent OnGrappleStarted;
     public UnityEngine.Events.UnityEvent OnGrappleReleased;
@@ -18,6 +23,19 @@ public class Grappleable : MonoBehaviour
     
     public bool IsBeingGrappled => isBeingGrappled;
     
+    void Start()
+    {
+        if (isEnemy)
+        {
+            navAgent = GetComponent<NavMeshAgent>();
+            workerScript = GetComponent<Worker>();
+            if (navAgent != null)
+            {
+                originalSpeed = navAgent.speed;
+            }
+        }
+    }
+    
     // Called when this object starts being grappled
     public void StartGrapple()
     {
@@ -25,10 +43,29 @@ public class Grappleable : MonoBehaviour
         
         isBeingGrappled = true;
         
-        // Set animator parameter if this is an enemy and has an animator
-        if (isEnemy && animator != null)
+        // Handle enemy-specific behavior
+        if (isEnemy)
         {
-            animator.SetBool("isGrappled", true);
+            // Set animator parameter
+            if (animator != null)
+            {
+                animator.SetBool("isGrappled", true);
+            }
+            
+            // Stop NavMeshAgent movement
+            if (navAgent != null)
+            {
+                navAgent.speed = 0;
+                navAgent.isStopped = true;
+            }
+            
+            // Stop Worker script behaviors
+            if (workerScript != null)
+            {
+                workerScript.isHit = true;  // Use the existing hit state to prevent attacks
+                workerScript.anim.SetBool("IsRunning", false);
+                workerScript.anim.SetBool("IsAttacking", false);
+            }
         }
         
         OnGrappleStarted?.Invoke();
@@ -40,10 +77,28 @@ public class Grappleable : MonoBehaviour
     {
         isBeingGrappled = false;
         
-        // Set animator parameter if this is an enemy and has an animator
-        if (isEnemy && animator != null)
+        // Handle enemy-specific behavior
+        if (isEnemy)
         {
-            animator.SetBool("isGrappled", false);
+            // Reset animator parameter
+            if (animator != null)
+            {
+                animator.SetBool("isGrappled", false);
+            }
+            
+            // Resume NavMeshAgent movement
+            if (navAgent != null)
+            {
+                navAgent.speed = originalSpeed;
+                navAgent.isStopped = false;
+            }
+            
+            // Resume Worker script behaviors
+            if (workerScript != null)
+            {
+                workerScript.isHit = false;  // Allow attacks again
+                // Note: Don't need to set running/attacking - Worker script will handle these states
+            }
         }
         
         OnGrappleReleased?.Invoke();
