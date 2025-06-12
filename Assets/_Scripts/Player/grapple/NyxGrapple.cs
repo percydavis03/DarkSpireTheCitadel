@@ -40,10 +40,7 @@ public class NyxGrapple : MonoBehaviour
     public float jointMoveSpeed = 100f; // How fast the joint moves to/from the target
     public bool useJointAttachment = true; // Toggle for the joint attachment system
     
-    [Header("Grapple Unlock Requirement")]
-    public GameObject armObject; // The "Arm" object that must be active for grappling to work
-    [Tooltip("If true, will automatically find GameObject named 'Arm' if armObject is not assigned")]
-    public bool autoFindArmObject = true;
+
     
     private RaycastHit lastHit;
     private bool lastHitDetected;
@@ -57,8 +54,8 @@ public class NyxGrapple : MonoBehaviour
     private Transform originalJointParent;
     private bool isJointAttached = false;
 
-    // Start is called before the first frame update
-    void Start()
+    // Awake is called when the script instance is being loaded (even if object is inactive)
+    void Awake()
     {
         // If Nyx transform is set, use it as the grapple origin
         if (nyxTransform != null)
@@ -74,20 +71,44 @@ public class NyxGrapple : MonoBehaviour
             originalJointRotation = grappleJoint.localRotation;
             originalJointParent = grappleJoint.parent;
         }
+    }
+    
+    // OnEnable is called when the object becomes active and enabled
+    void OnEnable()
+    {
+        // Reset any state when the object becomes active
+        isGrappling = false;
+        currentGrappleTarget = null;
+        currentTargetRigidbody = null;
+        canGrapple = true;
+        cooldownTimer = 0f;
+        wasGrappleKeyPressed = false;
+        isJointAttached = false;
         
-        // Auto-find Arm object if not assigned but auto-find is enabled
-        if (armObject == null && autoFindArmObject)
+        // Clean up any existing spring joint
+        if (currentSpringJoint != null)
         {
-            armObject = GameObject.Find("Arm");
-            if (armObject != null)
-            {
-                if (enableDebugLogs) Debug.Log("Auto-found Arm object for grapple unlock requirement");
-            }
-            else
-            {
-                if (enableDebugLogs) Debug.LogWarning("Could not find GameObject named 'Arm' - grappling will be disabled until Arm object is assigned or activated");
-            }
+            Destroy(currentSpringJoint);
+            currentSpringJoint = null;
         }
+        
+        // Reset joint position if it exists
+        if (grappleJoint != null && originalJointParent != null)
+        {
+            grappleJoint.SetParent(originalJointParent);
+            grappleJoint.localPosition = originalJointPosition;
+            grappleJoint.localRotation = originalJointRotation;
+        }
+        
+        if (enableDebugLogs) Debug.Log("NyxGrapple enabled and initialized");
+    }
+    
+    // Start is called before the first frame update
+    void Start()
+    {
+        // Additional setup that needs to happen after all objects are initialized
+        
+
     }
 
     // Update is called once per frame
@@ -151,54 +172,52 @@ public class NyxGrapple : MonoBehaviour
         cooldownTimer = grappleCooldown;
     }
     
-    bool IsGrappleUnlocked()
-    {
-        // If no arm object is assigned, grappling is always unlocked (backwards compatibility)
-        if (armObject == null)
-        {
-            return true;
-        }
-        
-        // Check if the Arm object is active
-        bool isUnlocked = armObject.activeInHierarchy;
-        
-        return isUnlocked;
-    }
+
     
     void HandleGrappleInput()
     {
-        // Only allow new grapple if:
-        // 1. Grapple is unlocked (Arm object is active)
-        // 2. Not in cooldown
-        // 3. Key wasn't already pressed
-        // 4. Have a valid target
-        // 5. Not currently grappling
-        if (IsGrappleUnlocked() && canGrapple && !wasGrappleKeyPressed && Input.GetKeyDown(grappleKey) && lastHitDetected && !isGrappling)
+        // Check for grapple key press
+        if (Input.GetKeyDown(grappleKey) && !wasGrappleKeyPressed && !isGrappling)
         {
-            if (enableDebugLogs) Debug.Log($"Grapple conditions met - isUnlocked:{IsGrappleUnlocked()}, canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
-            // Check if hit object has the "CanBeGrappled" tag
-            if (lastHit.collider.CompareTag("CanBeGrappled"))
+            // Always trigger animation for at least 1 second when grapple key is pressed
+            if (nyxAnimator != null)
             {
-                // Check if the object has a Grappleable script
-                Grappleable grappleable = lastHit.collider.GetComponent<Grappleable>();
-                if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
+                nyxAnimator.SetBool("isGrappling", true);
+            }
+            isGrappling = true;
+            wasGrappleKeyPressed = true;
+            
+                         // Only allow actual grapple if all conditions are met
+             if (canGrapple && lastHitDetected)
+             {
+                 if (enableDebugLogs) Debug.Log($"Grapple conditions met - canGrapple:{canGrapple}, lastHitDetected:{lastHitDetected}");
+                // Check if hit object has the "CanBeGrappled" tag
+                if (lastHit.collider.CompareTag("CanBeGrappled"))
                 {
-                    StartGrapple(grappleable);
-                    wasGrappleKeyPressed = true;
+                    // Check if the object has a Grappleable script
+                    Grappleable grappleable = lastHit.collider.GetComponent<Grappleable>();
+                    if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
+                    {
+                        StartGrapple(grappleable);
+                        return; // Exit early as StartGrapple handles everything
+                    }
+                    else
+                    {
+                        if (enableDebugLogs) Debug.Log($"Grappleable check failed - hasComponent:{grappleable != null}, canBeGrappled:{grappleable?.canBeGrappled}, isBeingGrappled:{grappleable?.IsBeingGrappled}");
+                    }
                 }
                 else
                 {
-                    if (enableDebugLogs) Debug.Log($"Grappleable check failed - hasComponent:{grappleable != null}, canBeGrappled:{grappleable?.canBeGrappled}, isBeingGrappled:{grappleable?.IsBeingGrappled}");
+                    if (enableDebugLogs) Debug.Log("Hit object does not have CanBeGrappled tag");
                 }
             }
-            else
-            {
-                if (enableDebugLogs) Debug.Log("Hit object does not have CanBeGrappled tag");
-            }
-        }
-        else if (Input.GetKeyDown(grappleKey))
-        {
-            if (enableDebugLogs) Debug.Log($"Grapple conditions NOT met - isUnlocked:{IsGrappleUnlocked()}, canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
+                         else
+             {
+                 if (enableDebugLogs) Debug.Log($"Grapple conditions NOT met - canGrapple:{canGrapple}, lastHitDetected:{lastHitDetected}");
+             }
+            
+            // If we reach here, no valid grapple was started, so just play animation for 1 second
+            StartCoroutine(BriefGrappleCoroutine());
         }
         
         // Check if grapple key is released and we're currently grappling
@@ -341,8 +360,8 @@ public class NyxGrapple : MonoBehaviour
     
     IEnumerator BriefGrappleCoroutine()
     {
-        // Wait for a brief moment to allow animation and effects to play
-        yield return new WaitForSeconds(0.3f);
+        // Wait for at least 1 second to allow animation and effects to play
+        yield return new WaitForSeconds(1.0f);
         
         // Release the grapple and start cooldown
         ReleaseGrapple();

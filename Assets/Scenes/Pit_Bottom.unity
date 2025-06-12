@@ -3684,6 +3684,12 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.016809411, y: 0.014356789, z: 0.014522908}
   m_Center: {x: 0.0016433222, y: 0.0021783873, z: 0.0022614335}
+--- !u!4 &142458276 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4873705864671679646, guid: 60360fea9ff5f0947b4193c1224407f4,
+    type: 3}
+  m_PrefabInstance: {fileID: 2099149668}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &144651713 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -2864647557028998523, guid: 54e2e5ba6ebacbf45a226c1bba70ff9b,
@@ -18080,6 +18086,49 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 2099149668}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &607360268 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 6983627457691035600, guid: 60360fea9ff5f0947b4193c1224407f4,
+    type: 3}
+  m_PrefabInstance: {fileID: 2099149668}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &607360278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 607360254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17fb9868d2c18c843aa2db628fab4eb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grappleRange: 10
+  grappleAngle: 60
+  grappleLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  nyxTransform: {fileID: 33213790}
+  grappleOrigin: {fileID: 607360266}
+  nyxAnimator: {fileID: 607360268}
+  grappleLayerName: Grapple
+  grappleKey: 103
+  minDistanceFromOrigin: 2
+  pullForce: 10
+  maxPullSpeed: 20
+  useSpringJoint: 1
+  springStrength: 5
+  springDamper: 5
+  grappleCooldown: 0.1
+  showDebugRay: 1
+  useGizmos: 1
+  debugRayColor: {r: 1, g: 0, b: 0, a: 1}
+  debugHitColor: {r: 0, g: 1, b: 0, a: 1}
+  enableDebugLogs: 1
+  grappleJoint: {fileID: 142458276}
+  jointMoveSpeed: 100
+  useJointAttachment: 1
 --- !u!1 &609081477
 GameObject:
   m_ObjectHideFlags: 0
@@ -24126,7 +24175,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_NoiseProfile: {fileID: 11400000, guid: e9ce97b7a206dc64d90931ea044e0c72, type: 2}
   m_PivotOffset: {x: 0, y: 0, z: 0}
-  m_AmplitudeGain: 1
+  m_AmplitudeGain: 0
   m_FrequencyGain: 1
   mNoiseOffsets: {x: 725.4255, y: 891.6028, z: 494.8258}
 --- !u!114 &860084534
@@ -26029,6 +26078,11 @@ PrefabInstance:
       propertyPath: m_LocalScale.y
       value: 3.8
       objectReference: {fileID: 0}
+    - target: {fileID: 537819778210344382, guid: f041864c8b27c7248a1e1e012f3a3cc9,
+        type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     - target: {fileID: 863808894874167816, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -26205,6 +26259,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3219593577239183429, guid: f041864c8b27c7248a1e1e012f3a3cc9,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3355915545059623022, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_IsActive
@@ -26213,13 +26272,7 @@ PrefabInstance:
     - target: {fileID: 3363355706063113979, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_WarningMessage
-      value: "\nBinding warning: Some generic clip(s) animate transforms that are
-        already bound by a Humanoid avatar. These transforms can only be changed
-        by Humanoid clips.\n\tTransform 'mixamorig:Hips'\n\tTransform 'mixamorig:LeftFoot'\n\tTransform
-        'mixamorig:LeftHandThumb2'\n\tTransform 'mixamorig:LeftHandIndex1'\n\tTransform
-        'mixamorig:LeftHandPinky2'\n\tTransform 'mixamorig:RightHandRing2'\n\tTransform
-        'mixamorig:Spine1'\n\tTransform 'mixamorig:LeftToeBase'\n\tTransform 'mixamorig:RightArm'\n\tTransform
-        'mixamorig:LeftLeg'\n\tand more ...\n\tFrom animation clip 'Roll'"
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 3687381326745871689, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -26235,6 +26288,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMin.y
       value: 0.66863066
+      objectReference: {fileID: 0}
+    - target: {fileID: 4002511507799737118, guid: f041864c8b27c7248a1e1e012f3a3cc9,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4049437064243010551, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -26255,13 +26313,7 @@ PrefabInstance:
     - target: {fileID: 4125292494416574615, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_WarningMessage
-      value: "\nBinding warning: Some generic clip(s) animate transforms that are
-        already bound by a Humanoid avatar. These transforms can only be changed
-        by Humanoid clips.\n\tTransform 'mixamorig:Hips'\n\tTransform 'mixamorig:LeftFoot'\n\tTransform
-        'mixamorig:LeftHandThumb2'\n\tTransform 'mixamorig:LeftHandIndex1'\n\tTransform
-        'mixamorig:LeftHandPinky2'\n\tTransform 'mixamorig:RightHandRing2'\n\tTransform
-        'mixamorig:Spine1'\n\tTransform 'mixamorig:LeftToeBase'\n\tTransform 'mixamorig:RightArm'\n\tTransform
-        'mixamorig:LeftLeg'\n\tand more ...\n\tFrom animation clip 'Roll'"
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4257460664115855817, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -32783,7 +32835,7 @@ Transform:
   m_GameObject: {fileID: 1102980082}
   serializedVersion: 2
   m_LocalRotation: {x: 0.12910034, y: 0.14614268, z: -0.019240042, w: 0.9806148}
-  m_LocalPosition: {x: -5.015751, y: 7.5527425, z: -13.903288}
+  m_LocalPosition: {x: -10.032649, y: 7.5527425, z: -12.373967}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -46385,7 +46437,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_NoiseProfile: {fileID: 11400000, guid: e9ce97b7a206dc64d90931ea044e0c72, type: 2}
   m_PivotOffset: {x: 0, y: 0, z: 0}
-  m_AmplitudeGain: 1
+  m_AmplitudeGain: 0
   m_FrequencyGain: 1
   mNoiseOffsets: {x: 725.4255, y: 891.6028, z: 494.8258}
 --- !u!114 &1469033289
@@ -66214,7 +66266,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_NoiseProfile: {fileID: 11400000, guid: e9ce97b7a206dc64d90931ea044e0c72, type: 2}
   m_PivotOffset: {x: 0, y: 0, z: 0}
-  m_AmplitudeGain: 1
+  m_AmplitudeGain: 0
   m_FrequencyGain: 1
   mNoiseOffsets: {x: 725.4255, y: 891.6028, z: 494.8258}
 --- !u!114 &1973591991
@@ -67150,7 +67202,7 @@ Transform:
   m_GameObject: {fileID: 1990158910}
   serializedVersion: 2
   m_LocalRotation: {x: 0.12910034, y: 0.14614268, z: -0.019240042, w: 0.9806148}
-  m_LocalPosition: {x: -5.015751, y: 7.5527425, z: -13.903288}
+  m_LocalPosition: {x: -10.032649, y: 7.5527425, z: -12.373967}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -71711,6 +71763,11 @@ PrefabInstance:
       propertyPath: m_CameraDistance
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 2389457255631337114, guid: 60360fea9ff5f0947b4193c1224407f4,
+        type: 3}
+      propertyPath: m_AmplitudeGain
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2691760234565966873, guid: 60360fea9ff5f0947b4193c1224407f4,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -71921,6 +71978,11 @@ PrefabInstance:
       propertyPath: m_Lens.FieldOfView
       value: 40
       objectReference: {fileID: 0}
+    - target: {fileID: 8048244419388752574, guid: 60360fea9ff5f0947b4193c1224407f4,
+        type: 3}
+      propertyPath: m_AmplitudeGain
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8122462166838190723, guid: 60360fea9ff5f0947b4193c1224407f4,
         type: 3}
       propertyPath: sceneLight
@@ -71947,7 +72009,11 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2065870129}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 995717491695908943, guid: 60360fea9ff5f0947b4193c1224407f4,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 607360278}
   m_SourcePrefab: {fileID: 100100000, guid: 60360fea9ff5f0947b4193c1224407f4, type: 3}
 --- !u!1 &2099149669 stripped
 GameObject:
