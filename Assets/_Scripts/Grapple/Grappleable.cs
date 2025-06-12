@@ -7,6 +7,8 @@ public class Grappleable : MonoBehaviour
 {
     [Header("Grappleable Settings")]
     public bool canBeGrappled = true;
+    public bool isEnemy = false;
+    public Animator animator;
     
     [Header("Events")]
     public UnityEngine.Events.UnityEvent OnGrappleStarted;
@@ -22,6 +24,13 @@ public class Grappleable : MonoBehaviour
         if (!canBeGrappled) return;
         
         isBeingGrappled = true;
+        
+        // Set animator parameter if this is an enemy and has an animator
+        if (isEnemy && animator != null)
+        {
+            animator.SetBool("isGrappled", true);
+        }
+        
         OnGrappleStarted?.Invoke();
         Debug.Log($"{gameObject.name} is being grappled");
     }
@@ -30,6 +39,13 @@ public class Grappleable : MonoBehaviour
     public void ReleaseGrapple()
     {
         isBeingGrappled = false;
+        
+        // Set animator parameter if this is an enemy and has an animator
+        if (isEnemy && animator != null)
+        {
+            animator.SetBool("isGrappled", false);
+        }
+        
         OnGrappleReleased?.Invoke();
         Debug.Log($"{gameObject.name} grapple released");
     }
