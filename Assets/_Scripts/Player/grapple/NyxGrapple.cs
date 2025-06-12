@@ -22,6 +22,12 @@ public class NyxGrapple : MonoBehaviour
     public float springStrength = 50f;
     public float springDamper = 5f;
     
+    [Header("Grapple Cooldown")]
+    public float grappleCooldown = 0.5f;  // Adjustable in Inspector
+    private float cooldownTimer = 0f;
+    private bool canGrapple = true;
+    private bool wasGrappleKeyPressed = false;
+    
     [Header("Debug")]
     public bool showDebugRay = true;
     public bool useGizmos = true;
@@ -51,20 +57,73 @@ public class NyxGrapple : MonoBehaviour
     void Update()
     {
         PerformGrappleRaycast();
+        
+        // Handle cooldown
+        if (!canGrapple)
+        {
+            cooldownTimer -= Time.deltaTime;
+            if (cooldownTimer <= 0)
+            {
+                canGrapple = true;
+                cooldownTimer = 0;
+            }
+        }
+        
+        // Track key state for requiring new press
+        bool isGrappleKeyDown = Input.GetKey(grappleKey);
+        
+        // If key was released, allow new grapple on next press
+        if (!isGrappleKeyDown && wasGrappleKeyPressed)
+        {
+            wasGrappleKeyPressed = false;
+        }
+        
         HandleGrappleInput();
         
-        // Update animator based on key press
+        // Check if grappled object has reached minimum distance
+        if (isGrappling && currentGrappleTarget != null)
+        {
+            float currentDistance = Vector3.Distance(currentGrappleTarget.transform.position, grappleOrigin.position);
+            if (currentDistance <= minDistanceFromOrigin)
+            {
+                Debug.Log("Minimum distance reached - auto releasing grapple");
+                // Stop the grappling animation
+                if (nyxAnimator != null)
+                {
+                    nyxAnimator.SetBool("isGrappling", false);
+                }
+                ReleaseGrapple();
+                StartCooldown();
+            }
+        }
+        
+        // Update animator based on grappling state
         if (nyxAnimator != null)
         {
-            nyxAnimator.SetBool("isGrappling", Input.GetKey(grappleKey));
+            nyxAnimator.SetBool("isGrappling", isGrappling);
         }
+        
+        // Store key state for next frame
+        wasGrappleKeyPressed = isGrappleKeyDown;
+    }
+    
+    void StartCooldown()
+    {
+        Debug.Log($"Starting cooldown - duration: {grappleCooldown}");
+        canGrapple = false;
+        cooldownTimer = grappleCooldown;
     }
     
     void HandleGrappleInput()
     {
-        // Check if grapple key is pressed and we can start grappling
-        if (Input.GetKeyDown(grappleKey) && lastHitDetected && !isGrappling)
+        // Only allow new grapple if:
+        // 1. Not in cooldown
+        // 2. Key wasn't already pressed
+        // 3. Have a valid target
+        // 4. Not currently grappling
+        if (canGrapple && !wasGrappleKeyPressed && Input.GetKeyDown(grappleKey) && lastHitDetected && !isGrappling)
         {
+            Debug.Log($"Grapple conditions met - canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
             // Check if hit object has the "CanBeGrappled" tag
             if (lastHit.collider.CompareTag("CanBeGrappled"))
             {
@@ -73,14 +132,28 @@ public class NyxGrapple : MonoBehaviour
                 if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
                 {
                     StartGrapple(grappleable);
+                    wasGrappleKeyPressed = true;
+                }
+                else
+                {
+                    Debug.Log($"Grappleable check failed - hasComponent:{grappleable != null}, canBeGrappled:{grappleable?.canBeGrappled}, isBeingGrappled:{grappleable?.IsBeingGrappled}");
                 }
             }
+            else
+            {
+                Debug.Log("Hit object does not have CanBeGrappled tag");
+            }
+        }
+        else if (Input.GetKeyDown(grappleKey))
+        {
+            Debug.Log($"Grapple conditions NOT met - canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
         }
         
         // Check if grapple key is released and we're currently grappling
         if (Input.GetKeyUp(grappleKey) && isGrappling)
         {
             ReleaseGrapple();
+            StartCooldown();
         }
     }
     
@@ -112,6 +185,15 @@ public class NyxGrapple : MonoBehaviour
         
         Debug.Log($"Started grappling: {target.name}");
         
+        // Check if target is already at minimum distance
+        float currentDistance = Vector3.Distance(target.transform.position, grappleOrigin.position);
+        if (currentDistance <= minDistanceFromOrigin)
+        {
+            Debug.Log("Target already at minimum distance - brief grapple");
+            StartCoroutine(BriefGrappleCoroutine());
+            return;
+        }
+        
         // Create spring joint if enabled
         if (useSpringJoint)
         {
@@ -126,7 +208,7 @@ public class NyxGrapple : MonoBehaviour
     {
         if (isGrappling)
         {
-            Debug.Log("Grapple released");
+            Debug.Log("Grapple released - resetting state");
             
             // Destroy spring joint if it exists
             if (currentSpringJoint != null)
@@ -162,14 +244,6 @@ public class NyxGrapple : MonoBehaviour
             // Calculate current distance from grapple origin
             float currentDistance = Vector3.Distance(currentGrappleTarget.transform.position, grappleOrigin.position);
             
-            // If we've reached the minimum distance, auto-release
-            if (currentDistance <= minDistanceFromOrigin)
-            {
-                Debug.Log("Minimum distance reached - auto releasing grapple");
-                ReleaseGrapple();
-                yield break;
-            }
-            
             // Only apply forces if not using spring joint
             if (!useSpringJoint)
             {
@@ -197,6 +271,16 @@ public class NyxGrapple : MonoBehaviour
         }
     }
     
+    IEnumerator BriefGrappleCoroutine()
+    {
+        // Wait for a brief moment to allow animation and effects to play
+        yield return new WaitForSeconds(0.3f);
+        
+        // Release the grapple and start cooldown
+        ReleaseGrapple();
+        StartCooldown();
+    }
+    
     void CreateSpringJoint()
     {
         // Add a Rigidbody to the grapple origin if it doesn't have one
@@ -217,8 +301,8 @@ public class NyxGrapple : MonoBehaviour
         // Set spring properties
         currentSpringJoint.spring = springStrength;
         currentSpringJoint.damper = springDamper;
-        currentSpringJoint.minDistance = minDistanceFromOrigin;
-        currentSpringJoint.maxDistance = minDistanceFromOrigin + 1f; // Small buffer for natural motion
+        currentSpringJoint.minDistance = 0f; // Allow object to get close
+        currentSpringJoint.maxDistance = 0f; // Force tight connection
         
         Debug.Log("Spring joint created for dynamic grappling");
     }
