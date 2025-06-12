@@ -6,7 +6,7 @@ public class NyxGrapple : MonoBehaviour
 {
     [Header("Grapple Settings")]
     public float grappleRange = 10f;
-    public float grappleRadius = 1f;
+    public float grappleAngle = 30f; // Half angle of the cone in degrees
     public LayerMask grappleLayerMask = -1;
     public Transform nyxTransform;
     public Transform grappleOrigin;
@@ -160,12 +160,37 @@ public class NyxGrapple : MonoBehaviour
         Vector3 rayDirection = grappleOrigin.forward;
         Vector3 rayOrigin = grappleOrigin.position;
         
-        // Perform the raycast
-        RaycastHit hit;
-        bool hitDetected = Physics.Raycast(rayOrigin, rayDirection, out hit, grappleRange, grappleLayerMask);
+        // Find all colliders within range
+        Collider[] colliders = Physics.OverlapSphere(rayOrigin, grappleRange, grappleLayerMask);
+        
+        float closestDistance = float.MaxValue;
+        RaycastHit closestHit = new RaycastHit();
+        bool hitDetected = false;
+        
+        foreach (Collider collider in colliders)
+        {
+            Vector3 directionToTarget = (collider.transform.position - rayOrigin).normalized;
+            float angleToTarget = Vector3.Angle(rayDirection, directionToTarget);
+            
+            // Check if target is within our cone angle
+            if (angleToTarget <= grappleAngle)
+            {
+                // Perform raycast to get proper hit information
+                RaycastHit hit;
+                if (Physics.Raycast(rayOrigin, directionToTarget, out hit, grappleRange, grappleLayerMask))
+                {
+                    if (hit.collider == collider && hit.distance < closestDistance)
+                    {
+                        closestDistance = hit.distance;
+                        closestHit = hit;
+                        hitDetected = true;
+                    }
+                }
+            }
+        }
         
         // Store for Gizmos
-        lastHit = hit;
+        lastHit = closestHit;
         lastHitDetected = hitDetected;
         
         // Debug visualization
@@ -174,9 +199,9 @@ public class NyxGrapple : MonoBehaviour
             Color rayColor = debugRayColor;
             
             // Change color if we can grapple this object
-            if (hitDetected && hit.collider.CompareTag("CanBeGrappled"))
+            if (hitDetected && lastHit.collider.CompareTag("CanBeGrappled"))
             {
-                Grappleable grappleable = hit.collider.GetComponent<Grappleable>();
+                Grappleable grappleable = lastHit.collider.GetComponent<Grappleable>();
                 if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
                 {
                     rayColor = debugHitColor;
@@ -186,16 +211,93 @@ public class NyxGrapple : MonoBehaviour
             if (hitDetected)
             {
                 // Draw ray to hit point
-                Debug.DrawLine(rayOrigin, hit.point, rayColor);
+                Debug.DrawLine(rayOrigin, lastHit.point, rayColor);
                 // Draw a small cross at hit point
-                Vector3 hitPoint = hit.point;
+                Vector3 hitPoint = lastHit.point;
                 Debug.DrawLine(hitPoint + Vector3.up * 0.1f, hitPoint + Vector3.down * 0.1f, rayColor);
                 Debug.DrawLine(hitPoint + Vector3.left * 0.1f, hitPoint + Vector3.right * 0.1f, rayColor);
             }
-            else
+            
+            // Draw cone visualization
+            DrawDebugCone(rayOrigin, rayDirection, grappleRange, grappleAngle, rayColor);
+        }
+    }
+    
+    void DrawDebugCone(Vector3 origin, Vector3 direction, float range, float angle, Color color)
+    {
+        // Draw center line
+        Debug.DrawRay(origin, direction * range, color);
+        
+        // Draw cone edges
+        int segments = 8;
+        float angleStep = 360f / segments;
+        
+        for (int i = 0; i < segments; i++)
+        {
+            float currentAngle = i * angleStep;
+            Vector3 coneDirection = GetConeDirection(direction, angle, currentAngle);
+            Debug.DrawRay(origin, coneDirection * range, color);
+        }
+        
+        // Draw cone circles at different distances
+        float[] distances = { range * 0.33f, range * 0.66f, range };
+        foreach (float distance in distances)
+        {
+            for (int i = 0; i < segments; i++)
             {
-                // Draw full length ray when no hit
-                Debug.DrawRay(rayOrigin, rayDirection * grappleRange, rayColor);
+                float angle1 = i * angleStep;
+                float angle2 = (i + 1) * angleStep;
+                
+                Vector3 point1 = origin + GetConeDirection(direction, angle, angle1) * distance;
+                Vector3 point2 = origin + GetConeDirection(direction, angle, angle2) * distance;
+                
+                Debug.DrawLine(point1, point2, color);
+            }
+        }
+    }
+    
+    Vector3 GetConeDirection(Vector3 forward, float coneAngle, float rotationAngle)
+    {
+        // Create a vector at the cone angle
+        Vector3 right = Vector3.Cross(forward, Vector3.up).normalized;
+        Vector3 up = Vector3.Cross(right, forward).normalized;
+        
+        // Calculate the direction at the edge of the cone
+        float rad = coneAngle * Mathf.Deg2Rad;
+        float rotRad = rotationAngle * Mathf.Deg2Rad;
+        
+        Vector3 coneDirection = forward * Mathf.Cos(rad) + 
+                               (right * Mathf.Cos(rotRad) + up * Mathf.Sin(rotRad)) * Mathf.Sin(rad);
+        
+        return coneDirection.normalized;
+    }
+    
+    void DrawGizmoCone(Vector3 origin, Vector3 direction, float range, float angle)
+    {
+        // Draw cone edges
+        int segments = 12;
+        float angleStep = 360f / segments;
+        
+        for (int i = 0; i < segments; i++)
+        {
+            float currentAngle = i * angleStep;
+            Vector3 coneDirection = GetConeDirection(direction, angle, currentAngle);
+            Gizmos.DrawLine(origin, origin + coneDirection * range);
+        }
+        
+        // Draw cone circles at different distances
+        float[] distances = { range * 0.5f, range };
+        foreach (float distance in distances)
+        {
+            for (int i = 0; i < segments; i++)
+            {
+                float angle1 = i * angleStep;
+                float angle2 = (i + 1) * angleStep;
+                
+                Vector3 point1 = origin + GetConeDirection(direction, angle, angle1) * distance;
+                Vector3 point2 = origin + GetConeDirection(direction, angle, angle2) * distance;
+                
+                Gizmos.DrawLine(point1, point2);
             }
         }
     }
@@ -231,9 +333,12 @@ public class NyxGrapple : MonoBehaviour
         }
         else
         {
-            // Draw full length ray when no hit
+            // Draw center line when no hit
             Gizmos.DrawLine(rayOrigin, rayOrigin + rayDirection * grappleRange);
         }
+        
+        // Draw cone visualization with Gizmos
+        DrawGizmoCone(rayOrigin, rayDirection, grappleRange, grappleAngle);
         
         // Draw small sphere at origin
         Gizmos.color = Color.white;
