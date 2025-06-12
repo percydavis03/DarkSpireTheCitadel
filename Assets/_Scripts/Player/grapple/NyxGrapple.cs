@@ -33,6 +33,7 @@ public class NyxGrapple : MonoBehaviour
     public bool useGizmos = true;
     public Color debugRayColor = Color.red;
     public Color debugHitColor = Color.green;
+    public bool enableDebugLogs = true; // Toggle to enable/disable all debug text
     
     [Header("Grapple Joint Settings")]
     public Transform grappleJoint; // The joint transform that will move to connect with grappled objects
@@ -80,11 +81,11 @@ public class NyxGrapple : MonoBehaviour
             armObject = GameObject.Find("Arm");
             if (armObject != null)
             {
-                Debug.Log("Auto-found Arm object for grapple unlock requirement");
+                if (enableDebugLogs) Debug.Log("Auto-found Arm object for grapple unlock requirement");
             }
             else
             {
-                Debug.LogWarning("Could not find GameObject named 'Arm' - grappling will be disabled until Arm object is assigned or activated");
+                if (enableDebugLogs) Debug.LogWarning("Could not find GameObject named 'Arm' - grappling will be disabled until Arm object is assigned or activated");
             }
         }
     }
@@ -122,7 +123,7 @@ public class NyxGrapple : MonoBehaviour
             float currentDistance = Vector3.Distance(currentGrappleTarget.transform.position, grappleOrigin.position);
             if (currentDistance <= minDistanceFromOrigin)
             {
-                Debug.Log("Minimum distance reached - auto releasing grapple");
+                if (enableDebugLogs) Debug.Log("Minimum distance reached - auto releasing grapple");
                 // Stop the grappling animation
                 if (nyxAnimator != null)
                 {
@@ -145,7 +146,7 @@ public class NyxGrapple : MonoBehaviour
     
     void StartCooldown()
     {
-        Debug.Log($"Starting cooldown - duration: {grappleCooldown}");
+        if (enableDebugLogs) Debug.Log($"Starting cooldown - duration: {grappleCooldown}");
         canGrapple = false;
         cooldownTimer = grappleCooldown;
     }
@@ -174,7 +175,7 @@ public class NyxGrapple : MonoBehaviour
         // 5. Not currently grappling
         if (IsGrappleUnlocked() && canGrapple && !wasGrappleKeyPressed && Input.GetKeyDown(grappleKey) && lastHitDetected && !isGrappling)
         {
-            Debug.Log($"Grapple conditions met - isUnlocked:{IsGrappleUnlocked()}, canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
+            if (enableDebugLogs) Debug.Log($"Grapple conditions met - isUnlocked:{IsGrappleUnlocked()}, canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
             // Check if hit object has the "CanBeGrappled" tag
             if (lastHit.collider.CompareTag("CanBeGrappled"))
             {
@@ -187,17 +188,17 @@ public class NyxGrapple : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log($"Grappleable check failed - hasComponent:{grappleable != null}, canBeGrappled:{grappleable?.canBeGrappled}, isBeingGrappled:{grappleable?.IsBeingGrappled}");
+                    if (enableDebugLogs) Debug.Log($"Grappleable check failed - hasComponent:{grappleable != null}, canBeGrappled:{grappleable?.canBeGrappled}, isBeingGrappled:{grappleable?.IsBeingGrappled}");
                 }
             }
             else
             {
-                Debug.Log("Hit object does not have CanBeGrappled tag");
+                if (enableDebugLogs) Debug.Log("Hit object does not have CanBeGrappled tag");
             }
         }
         else if (Input.GetKeyDown(grappleKey))
         {
-            Debug.Log($"Grapple conditions NOT met - isUnlocked:{IsGrappleUnlocked()}, canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
+            if (enableDebugLogs) Debug.Log($"Grapple conditions NOT met - isUnlocked:{IsGrappleUnlocked()}, canGrapple:{canGrapple}, wasGrappleKeyPressed:{wasGrappleKeyPressed}, lastHitDetected:{lastHitDetected}, isGrappling:{isGrappling}");
         }
         
         // Check if grapple key is released and we're currently grappling
@@ -216,7 +217,7 @@ public class NyxGrapple : MonoBehaviour
         Rigidbody targetRigidbody = target.GetComponent<Rigidbody>();
         if (targetRigidbody == null)
         {
-            Debug.LogWarning($"Cannot grapple {target.name} - no Rigidbody found!");
+            if (enableDebugLogs) Debug.LogWarning($"Cannot grapple {target.name} - no Rigidbody found!");
             return;
         }
         
@@ -234,13 +235,13 @@ public class NyxGrapple : MonoBehaviour
         // Notify the grappleable object
         target.StartGrapple();
         
-        Debug.Log($"Started grappling: {target.name}");
+        if (enableDebugLogs) Debug.Log($"Started grappling: {target.name}");
         
         // Check if target is already at minimum distance
         float currentDistance = Vector3.Distance(target.transform.position, grappleOrigin.position);
         if (currentDistance <= minDistanceFromOrigin)
         {
-            Debug.Log("Target already at minimum distance - brief grapple");
+            if (enableDebugLogs) Debug.Log("Target already at minimum distance - brief grapple");
             StartCoroutine(BriefGrappleCoroutine());
             return;
         }
@@ -269,7 +270,7 @@ public class NyxGrapple : MonoBehaviour
     {
         if (isGrappling)
         {
-            Debug.Log("Grapple released - resetting state");
+            if (enableDebugLogs) Debug.Log("Grapple released - resetting state");
             
             // Destroy spring joint if it exists
             if (currentSpringJoint != null)
@@ -371,7 +372,7 @@ public class NyxGrapple : MonoBehaviour
         currentSpringJoint.minDistance = 0f; // Allow object to get close
         currentSpringJoint.maxDistance = 0f; // Force tight connection
         
-        Debug.Log("Spring joint created for dynamic grappling");
+        if (enableDebugLogs) Debug.Log("Spring joint created for dynamic grappling");
     }
     
     IEnumerator AttachJointAndStartPull(Transform attachPoint)
@@ -383,7 +384,7 @@ public class NyxGrapple : MonoBehaviour
             yield break;
         }
         
-        Debug.Log("Moving joint to grapple point, then starting pull");
+        if (enableDebugLogs) Debug.Log("Moving joint to grapple point, then starting pull");
         
         Vector3 startPosition = grappleJoint.position;
         Quaternion startRotation = grappleJoint.rotation;
@@ -421,7 +422,7 @@ public class NyxGrapple : MonoBehaviour
         grappleJoint.SetParent(attachPoint);
         isJointAttached = true;
         
-        Debug.Log("Joint attached - now starting pull");
+        if (enableDebugLogs) Debug.Log("Joint attached - now starting pull");
         
         // Now start the physics-based grapple coroutine
         StartCoroutine(PhysicsGrappleCoroutine());
@@ -434,7 +435,7 @@ public class NyxGrapple : MonoBehaviour
             yield break;
         }
         
-        Debug.Log("Moving joint to target position");
+        if (enableDebugLogs) Debug.Log("Moving joint to target position");
         
         Vector3 startPosition = grappleJoint.position;
         Quaternion startRotation = grappleJoint.rotation;
@@ -471,7 +472,7 @@ public class NyxGrapple : MonoBehaviour
         grappleJoint.SetParent(target);
         isJointAttached = true;
         
-        Debug.Log("Joint attached to target");
+        if (enableDebugLogs) Debug.Log("Joint attached to target");
     }
     
     IEnumerator DetachJointFromTarget()
@@ -481,7 +482,7 @@ public class NyxGrapple : MonoBehaviour
             yield break;
         }
         
-        Debug.Log("Returning joint to original position");
+        if (enableDebugLogs) Debug.Log("Returning joint to original position");
         
         // Detach from target first
         grappleJoint.SetParent(originalJointParent);
@@ -515,7 +516,7 @@ public class NyxGrapple : MonoBehaviour
         grappleJoint.localPosition = originalJointPosition;
         grappleJoint.localRotation = originalJointRotation;
         
-        Debug.Log("Joint returned to original position");
+        if (enableDebugLogs) Debug.Log("Joint returned to original position");
     }
     
     void PerformGrappleRaycast()
