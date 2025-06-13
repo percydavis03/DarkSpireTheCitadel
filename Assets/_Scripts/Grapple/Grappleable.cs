@@ -24,7 +24,7 @@ public class Grappleable : MonoBehaviour
     public UnityEngine.Events.UnityEvent OnGrappleStarted;
     public UnityEngine.Events.UnityEvent OnGrappleReleased;
     
-    private bool isBeingGrappled = false;
+    protected bool isBeingGrappled = false;
     
     public bool IsBeingGrappled => isBeingGrappled;
     
@@ -42,7 +42,7 @@ public class Grappleable : MonoBehaviour
     }
     
     // Called when this object starts being grappled
-    public void StartGrapple()
+    public virtual void StartGrapple()
     {
         if (!canBeGrappled) return;
         
@@ -78,7 +78,7 @@ public class Grappleable : MonoBehaviour
     }
     
     // Called when this object is released from grapple
-    public void ReleaseGrapple()
+    public virtual void ReleaseGrapple()
     {
         isBeingGrappled = false;
         

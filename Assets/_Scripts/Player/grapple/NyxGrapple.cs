@@ -6,15 +6,19 @@ public class NyxGrapple : MonoBehaviour
 {
     [Header("Grapple Settings")]
     public float grappleRange = 10f;
-    public float grappleAngle = 30f; // Half angle of the cone in degrees
+    public float grappleAngle = 30f;
     public LayerMask grappleLayerMask = -1;
     public Transform nyxTransform;
     public Transform grappleOrigin;
     public Animator nyxAnimator;
-    public string grappleLayerName = "Grapple"; // The name of the animator layer for grappling
-    
-    [Header("Grapple Pull Settings")]
     public KeyCode grappleKey = KeyCode.E;
+    
+    [Header("Hand/Joint Settings")]
+    public Transform grappleJoint; // The hand/joint that reaches to targets
+    public float jointMoveSpeed = 100f;
+    public Collider jointTrigger; // Collider on the joint to detect when it reaches targets
+    
+    [Header("Pull Settings")]
     public float minDistanceFromOrigin = 2f;
     public float pullForce = 1000f;
     public float maxPullSpeed = 10f;
@@ -22,49 +26,69 @@ public class NyxGrapple : MonoBehaviour
     public float springStrength = 50f;
     public float springDamper = 5f;
     
-    [Header("Grapple Cooldown")]
-    public float grappleCooldown = 0.5f;  // Adjustable in Inspector
-    private float cooldownTimer = 0f;
-    private bool canGrapple = true;
-    private bool wasGrappleKeyPressed = false;
-    
-    [Header("Debug")]
+    [Header("Debug Settings")]
+    public bool enableDebugLogs = true;
     public bool showDebugRay = true;
     public bool useGizmos = true;
     public Color debugRayColor = Color.red;
     public Color debugHitColor = Color.green;
-    public bool enableDebugLogs = true; // Toggle to enable/disable all debug text
     
-    [Header("Grapple Joint Settings")]
-    public Transform grappleJoint; // The joint transform that will move to connect with grappled objects
-    public float jointMoveSpeed = 100f; // How fast the joint moves to/from the target
-    public bool useJointAttachment = true; // Toggle for the joint attachment system
+    // State Variables
+    private bool isGrappling = false;           // Animation is playing
+    private bool isGrappleableInRange = false;  // Valid target detected
+    private bool isHandReaching = false;        // Hand moving to target
+    private bool isPulling = false;             // Actively pulling target
     
-
-    
-    private RaycastHit lastHit;
-    private bool lastHitDetected;
-    private bool isGrappling = false;
-    private Grappleable currentGrappleTarget;
-    private Vector3 grappleStartPosition;
+    // Target Information
+    private Grappleable currentTarget;
     private Rigidbody currentTargetRigidbody;
-    private SpringJoint currentSpringJoint;
+    private RaycastHit lastHit;
     private Vector3 originalJointPosition;
     private Quaternion originalJointRotation;
     private Transform originalJointParent;
-    private bool isJointAttached = false;
+    private SpringJoint currentSpringJoint;
 
-    // Awake is called when the script instance is being loaded (even if object is inactive)
     void Awake()
     {
-        // If Nyx transform is set, use it as the grapple origin
+        SetupReferences();
+        StoreOriginalJointTransform();
+    }
+    
+    void OnEnable()
+    {
+        ResetAllStates();
+    }
+    
+    void Update()
+    {
+        DetectGrappleableInRange();
+        HandleGrappleInput();
+        UpdateAnimator();
+        CheckPullingConditions();
+    }
+    
+    void SetupReferences()
+    {
         if (nyxTransform != null)
             grappleOrigin = nyxTransform;
-        // If no grapple origin is set, use this transform
         else if (grappleOrigin == null)
             grappleOrigin = transform;
             
-        // Store original joint position and rotation if joint is assigned
+        // Setup joint trigger if it exists
+        if (jointTrigger != null)
+        {
+            jointTrigger.isTrigger = true;
+            // Add GrappleJointTrigger component if it doesn't exist
+            if (jointTrigger.GetComponent<GrappleJointTrigger>() == null)
+            {
+                GrappleJointTrigger triggerScript = jointTrigger.gameObject.AddComponent<GrappleJointTrigger>();
+                triggerScript.Initialize(this);
+            }
+        }
+    }
+    
+    void StoreOriginalJointTransform()
+    {
         if (grappleJoint != null)
         {
             originalJointPosition = grappleJoint.localPosition;
@@ -73,602 +97,356 @@ public class NyxGrapple : MonoBehaviour
         }
     }
     
-    // OnEnable is called when the object becomes active and enabled
-    void OnEnable()
+    void ResetAllStates()
     {
-        // Reset any state when the object becomes active
         isGrappling = false;
-        currentGrappleTarget = null;
+        isGrappleableInRange = false;
+        isHandReaching = false;
+        isPulling = false;
+        currentTarget = null;
         currentTargetRigidbody = null;
-        canGrapple = true;
-        cooldownTimer = 0f;
-        wasGrappleKeyPressed = false;
-        isJointAttached = false;
         
-        // Clean up any existing spring joint
-        if (currentSpringJoint != null)
-        {
-            Destroy(currentSpringJoint);
-            currentSpringJoint = null;
-        }
+        CleanupSpringJoint();
+        ResetJointPosition();
         
-        // Reset joint position if it exists
-        if (grappleJoint != null && originalJointParent != null)
-        {
-            grappleJoint.SetParent(originalJointParent);
-            grappleJoint.localPosition = originalJointPosition;
-            grappleJoint.localRotation = originalJointRotation;
-        }
-        
-        if (enableDebugLogs) Debug.Log("NyxGrapple enabled and initialized");
+        if (enableDebugLogs) Debug.Log("NyxGrapple: All states reset");
     }
     
-    // Start is called before the first frame update
-    void Start()
+    void DetectGrappleableInRange()
     {
-        // Additional setup that needs to happen after all objects are initialized
-        
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        PerformGrappleRaycast();
-        
-        // Handle cooldown
-        if (!canGrapple)
-        {
-            cooldownTimer -= Time.deltaTime;
-            if (cooldownTimer <= 0)
-            {
-                canGrapple = true;
-                cooldownTimer = 0;
-            }
-        }
-        
-        // Track key state for requiring new press
-        bool isGrappleKeyDown = Input.GetKey(grappleKey);
-        
-        // If key was released, allow new grapple on next press
-        if (!isGrappleKeyDown && wasGrappleKeyPressed)
-        {
-            wasGrappleKeyPressed = false;
-        }
-        
-        HandleGrappleInput();
-        
-        // Check if grappled object has reached minimum distance
-        if (isGrappling && currentGrappleTarget != null)
-        {
-            float currentDistance = Vector3.Distance(currentGrappleTarget.transform.position, grappleOrigin.position);
-            if (currentDistance <= minDistanceFromOrigin)
-            {
-                if (enableDebugLogs) Debug.Log("Minimum distance reached - auto releasing grapple");
-                // Stop the grappling animation
-                if (nyxAnimator != null)
-                {
-                    nyxAnimator.SetBool("isGrappling", false);
-                }
-                ReleaseGrapple();
-                StartCooldown();
-            }
-        }
-        
-        // Update animator based on grappling state
-        if (nyxAnimator != null)
-        {
-            nyxAnimator.SetBool("isGrappling", isGrappling);
-        }
-        
-        // Store key state for next frame
-        wasGrappleKeyPressed = isGrappleKeyDown;
-    }
-    
-    void StartCooldown()
-    {
-        if (enableDebugLogs) Debug.Log($"Starting cooldown - duration: {grappleCooldown}");
-        canGrapple = false;
-        cooldownTimer = grappleCooldown;
-    }
-    
-
-    
-    void HandleGrappleInput()
-    {
-        // Check for grapple key press
-        if (Input.GetKeyDown(grappleKey) && !wasGrappleKeyPressed && !isGrappling)
-        {
-            // Always trigger animation for at least 1 second when grapple key is pressed
-            if (nyxAnimator != null)
-            {
-                nyxAnimator.SetBool("isGrappling", true);
-            }
-            isGrappling = true;
-            wasGrappleKeyPressed = true;
-            
-                         // Only allow actual grapple if all conditions are met
-             if (canGrapple && lastHitDetected)
-             {
-                 if (enableDebugLogs) Debug.Log($"Grapple conditions met - canGrapple:{canGrapple}, lastHitDetected:{lastHitDetected}");
-                // Check if hit object has the "CanBeGrappled" tag
-                if (lastHit.collider.CompareTag("CanBeGrappled"))
-                {
-                    // Check if the object has a Grappleable script
-                    Grappleable grappleable = lastHit.collider.GetComponent<Grappleable>();
-                    if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
-                    {
-                        StartGrapple(grappleable);
-                        return; // Exit early as StartGrapple handles everything
-                    }
-                    else
-                    {
-                        if (enableDebugLogs) Debug.Log($"Grappleable check failed - hasComponent:{grappleable != null}, canBeGrappled:{grappleable?.canBeGrappled}, isBeingGrappled:{grappleable?.IsBeingGrappled}");
-                    }
-                }
-                else
-                {
-                    if (enableDebugLogs) Debug.Log("Hit object does not have CanBeGrappled tag");
-                }
-            }
-                         else
-             {
-                 if (enableDebugLogs) Debug.Log($"Grapple conditions NOT met - canGrapple:{canGrapple}, lastHitDetected:{lastHitDetected}");
-             }
-            
-            // If we reach here, no valid grapple was started, so just play animation for 1 second
-            StartCoroutine(BriefGrappleCoroutine());
-        }
-        
-        // Check if grapple key is released and we're currently grappling
-        if (Input.GetKeyUp(grappleKey) && isGrappling)
-        {
-            ReleaseGrapple();
-            StartCooldown();
-        }
-    }
-    
-    void StartGrapple(Grappleable target)
-    {
-        if (!target.canBeGrappled) return;
-        
-        // Check if target has a Rigidbody
-        Rigidbody targetRigidbody = target.GetComponent<Rigidbody>();
-        if (targetRigidbody == null)
-        {
-            if (enableDebugLogs) Debug.LogWarning($"Cannot grapple {target.name} - no Rigidbody found!");
-            return;
-        }
-        
-        currentGrappleTarget = target;
-        currentTargetRigidbody = targetRigidbody;
-        isGrappling = true;
-        grappleStartPosition = target.transform.position;
-        
-        // Set Nyx's animator state
-        if (nyxAnimator != null)
-        {
-            nyxAnimator.SetBool("isGrappling", true);
-        }
-        
-        // Notify the grappleable object
-        target.StartGrapple();
-        
-        if (enableDebugLogs) Debug.Log($"Started grappling: {target.name}");
-        
-        // Check if target is already at minimum distance
-        float currentDistance = Vector3.Distance(target.transform.position, grappleOrigin.position);
-        if (currentDistance <= minDistanceFromOrigin)
-        {
-            if (enableDebugLogs) Debug.Log("Target already at minimum distance - brief grapple");
-            StartCoroutine(BriefGrappleCoroutine());
-            return;
-        }
-        
-        // Create spring joint if enabled
-        if (useSpringJoint)
-        {
-            CreateSpringJoint();
-        }
-        
-        // Start joint attachment if enabled, then start pulling after attachment
-        if (useJointAttachment && grappleJoint != null)
-        {
-            // Get the grapple point from the target, or use the target's transform if no grapple point is set
-            Transform attachPoint = target.grapplePoint != null ? target.grapplePoint : target.transform;
-            StartCoroutine(AttachJointAndStartPull(attachPoint));
-        }
-        else
-        {
-            // If no joint attachment, start pull immediately
-            StartCoroutine(PhysicsGrappleCoroutine());
-        }
-    }
-    
-    void ReleaseGrapple()
-    {
-        if (isGrappling)
-        {
-            if (enableDebugLogs) Debug.Log("Grapple released - resetting state");
-            
-            // Destroy spring joint if it exists
-            if (currentSpringJoint != null)
-            {
-                Destroy(currentSpringJoint);
-                currentSpringJoint = null;
-            }
-            
-            // Start joint detachment if enabled
-            if (useJointAttachment && grappleJoint != null && isJointAttached)
-            {
-                StartCoroutine(DetachJointFromTarget());
-            }
-            
-            // Notify the grappleable object
-            if (currentGrappleTarget != null)
-            {
-                currentGrappleTarget.ReleaseGrapple();
-            }
-            
-            isGrappling = false;
-            currentGrappleTarget = null;
-            currentTargetRigidbody = null;
-            StopAllCoroutines();
-        }
-    }
-    
-    IEnumerator PhysicsGrappleCoroutine()
-    {
-        while (isGrappling && currentTargetRigidbody != null)
-        {
-            // Check if grapple key is still held
-            if (!Input.GetKey(grappleKey))
-            {
-                ReleaseGrapple();
-                yield break;
-            }
-            
-            // Calculate current distance from grapple origin
-            float currentDistance = Vector3.Distance(currentGrappleTarget.transform.position, grappleOrigin.position);
-            
-            // Only apply forces if not using spring joint
-            if (!useSpringJoint)
-            {
-                // Calculate direction from object to grapple origin
-                Vector3 directionToOrigin = (grappleOrigin.position - currentGrappleTarget.transform.position).normalized;
-                
-                // Calculate distance factor (stronger pull when farther away)
-                float distanceFactor = Mathf.Clamp01((currentDistance - minDistanceFromOrigin) / grappleRange);
-                
-                // Apply force toward grapple origin
-                Vector3 pullForceVector = directionToOrigin * pullForce * distanceFactor;
-                currentTargetRigidbody.AddForce(pullForceVector * Time.fixedDeltaTime);
-                
-                // Limit maximum velocity to prevent objects flying too fast
-                if (currentTargetRigidbody.velocity.magnitude > maxPullSpeed)
-                {
-                    currentTargetRigidbody.velocity = currentTargetRigidbody.velocity.normalized * maxPullSpeed;
-                }
-                
-                // Add some drag to make the motion feel more controlled
-                currentTargetRigidbody.velocity *= 0.98f;
-            }
-            
-            yield return new WaitForFixedUpdate();
-        }
-    }
-    
-    IEnumerator BriefGrappleCoroutine()
-    {
-        // Wait for at least 1 second to allow animation and effects to play
-        yield return new WaitForSeconds(1.0f);
-        
-        // Release the grapple and start cooldown
-        ReleaseGrapple();
-        StartCooldown();
-    }
-    
-    void CreateSpringJoint()
-    {
-        // Add a Rigidbody to the grapple origin if it doesn't have one
-        Rigidbody grappleOriginRigidbody = grappleOrigin.GetComponent<Rigidbody>();
-        if (grappleOriginRigidbody == null)
-        {
-            grappleOriginRigidbody = grappleOrigin.gameObject.AddComponent<Rigidbody>();
-            grappleOriginRigidbody.isKinematic = true; // Keep it stationary
-        }
-        
-        // Create spring joint on the target object
-        currentSpringJoint = currentTargetRigidbody.gameObject.AddComponent<SpringJoint>();
-        currentSpringJoint.connectedBody = grappleOriginRigidbody;
-        currentSpringJoint.autoConfigureConnectedAnchor = false;
-        currentSpringJoint.anchor = Vector3.zero;
-        currentSpringJoint.connectedAnchor = Vector3.zero;
-        
-        // Set spring properties
-        currentSpringJoint.spring = springStrength;
-        currentSpringJoint.damper = springDamper;
-        currentSpringJoint.minDistance = 0f; // Allow object to get close
-        currentSpringJoint.maxDistance = 0f; // Force tight connection
-        
-        if (enableDebugLogs) Debug.Log("Spring joint created for dynamic grappling");
-    }
-    
-    IEnumerator AttachJointAndStartPull(Transform attachPoint)
-    {
-        if (grappleJoint == null || !useJointAttachment) 
-        {
-            // Fallback to immediate pull if no joint
-            StartCoroutine(PhysicsGrappleCoroutine());
-            yield break;
-        }
-        
-        if (enableDebugLogs) Debug.Log("Moving joint to grapple point, then starting pull");
-        
-        Vector3 startPosition = grappleJoint.position;
-        Quaternion startRotation = grappleJoint.rotation;
-        Vector3 targetPosition = attachPoint.position;
-        
-        float journeyLength = Vector3.Distance(startPosition, targetPosition);
-        float journeyTime = journeyLength / jointMoveSpeed;
-        
-        float elapsedTime = 0;
-        
-        // Move joint to attach point
-        while (elapsedTime < journeyTime)
-        {
-            elapsedTime += Time.deltaTime;
-            float fractionOfJourney = elapsedTime / journeyTime;
-            
-            // Move joint towards target
-            grappleJoint.position = Vector3.Lerp(startPosition, targetPosition, fractionOfJourney);
-            
-            // Look at the target
-            Vector3 directionToTarget = (targetPosition - grappleJoint.position).normalized;
-            if (directionToTarget != Vector3.zero)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-                grappleJoint.rotation = Quaternion.Slerp(startRotation, targetRotation, fractionOfJourney);
-            }
-            
-            yield return null;
-        }
-        
-        // Snap to final position
-        grappleJoint.position = targetPosition;
-        
-        // Attach joint to target
-        grappleJoint.SetParent(attachPoint);
-        isJointAttached = true;
-        
-        if (enableDebugLogs) Debug.Log("Joint attached - now starting pull");
-        
-        // Now start the physics-based grapple coroutine
-        StartCoroutine(PhysicsGrappleCoroutine());
-    }
-    
-    IEnumerator AttachJointToTarget(Transform target)
-    {
-        if (grappleJoint == null || !useJointAttachment) 
-        {
-            yield break;
-        }
-        
-        if (enableDebugLogs) Debug.Log("Moving joint to target position");
-        
-        Vector3 startPosition = grappleJoint.position;
-        Quaternion startRotation = grappleJoint.rotation;
-        Vector3 targetPosition = target.position;
-        
-        float journeyLength = Vector3.Distance(startPosition, targetPosition);
-        float journeyTime = journeyLength / jointMoveSpeed;
-        
-        float elapsedTime = 0;
-        
-        while (elapsedTime < journeyTime)
-        {
-            elapsedTime += Time.deltaTime;
-            float fractionOfJourney = elapsedTime / journeyTime;
-            
-            // Move joint towards target
-            grappleJoint.position = Vector3.Lerp(startPosition, targetPosition, fractionOfJourney);
-            
-            // Look at the target
-            Vector3 directionToTarget = (targetPosition - grappleJoint.position).normalized;
-            if (directionToTarget != Vector3.zero)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-                grappleJoint.rotation = Quaternion.Slerp(startRotation, targetRotation, fractionOfJourney);
-            }
-            
-            yield return null;
-        }
-        
-        // Snap to final position
-        grappleJoint.position = targetPosition;
-        
-        // Attach joint to target
-        grappleJoint.SetParent(target);
-        isJointAttached = true;
-        
-        if (enableDebugLogs) Debug.Log("Joint attached to target");
-    }
-    
-    IEnumerator DetachJointFromTarget()
-    {
-        if (grappleJoint == null || !isJointAttached) 
-        {
-            yield break;
-        }
-        
-        if (enableDebugLogs) Debug.Log("Returning joint to original position");
-        
-        // Detach from target first
-        grappleJoint.SetParent(originalJointParent);
-        isJointAttached = false;
-        
-        Vector3 startPosition = grappleJoint.position;
-        Quaternion startRotation = grappleJoint.rotation;
-        
-        // Calculate world position of original location
-        Vector3 targetPosition = originalJointParent.TransformPoint(originalJointPosition);
-        Quaternion targetRotation = originalJointParent.rotation * originalJointRotation;
-        
-        float journeyLength = Vector3.Distance(startPosition, targetPosition);
-        float journeyTime = journeyLength / jointMoveSpeed;
-        
-        float elapsedTime = 0;
-        
-        while (elapsedTime < journeyTime)
-        {
-            elapsedTime += Time.deltaTime;
-            float fractionOfJourney = elapsedTime / journeyTime;
-            
-            // Move joint back to original position
-            grappleJoint.position = Vector3.Lerp(startPosition, targetPosition, fractionOfJourney);
-            grappleJoint.rotation = Quaternion.Slerp(startRotation, targetRotation, fractionOfJourney);
-            
-            yield return null;
-        }
-        
-        // Snap to final position and rotation
-        grappleJoint.localPosition = originalJointPosition;
-        grappleJoint.localRotation = originalJointRotation;
-        
-        if (enableDebugLogs) Debug.Log("Joint returned to original position");
-    }
-    
-    void PerformGrappleRaycast()
-    {
-        // Get the forward direction from the grapple origin
-        Vector3 rayDirection = grappleOrigin.forward;
         Vector3 rayOrigin = grappleOrigin.position;
+        Vector3 rayDirection = grappleOrigin.forward;
         
-        // Find all colliders within range
         Collider[] colliders = Physics.OverlapSphere(rayOrigin, grappleRange, grappleLayerMask);
         
         float closestDistance = float.MaxValue;
         RaycastHit closestHit = new RaycastHit();
-        bool hitDetected = false;
+        bool validTargetFound = false;
         
         foreach (Collider collider in colliders)
         {
             Vector3 directionToTarget = (collider.transform.position - rayOrigin).normalized;
             float angleToTarget = Vector3.Angle(rayDirection, directionToTarget);
             
-            // Check if target is within our cone angle
-            if (angleToTarget <= grappleAngle)
+            if (angleToTarget <= grappleAngle && collider.CompareTag("CanBeGrappled"))
             {
-                // Check if this collider is grappleable before doing expensive raycast
-                if (!collider.CompareTag("CanBeGrappled"))
-                    continue;
-                
-                // Perform raycast, but ignore non-grappleable objects
                 RaycastHit[] hits = Physics.RaycastAll(rayOrigin, directionToTarget, grappleRange, grappleLayerMask);
                 
                 foreach (RaycastHit hit in hits)
                 {
-                    // Only consider hits on grappleable objects
-                    if (hit.collider.CompareTag("CanBeGrappled") && hit.collider == collider)
+                    if (hit.collider == collider)
                     {
-                        if (hit.distance < closestDistance)
+                        Grappleable grappleable = hit.collider.GetComponent<Grappleable>();
+                        if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
                         {
-                            closestDistance = hit.distance;
-                            closestHit = hit;
-                            hitDetected = true;
+                            if (hit.distance < closestDistance)
+                            {
+                                closestDistance = hit.distance;
+                                closestHit = hit;
+                                validTargetFound = true;
+                                currentTarget = grappleable;
+                            }
                         }
-                        break; // Found our target, no need to check other hits
+                        break;
                     }
                 }
             }
         }
         
-        // Store for Gizmos
+        bool wasInRange = isGrappleableInRange;
+        isGrappleableInRange = validTargetFound;
         lastHit = closestHit;
-        lastHitDetected = hitDetected;
         
-        // Debug visualization
-        if (showDebugRay)
+        // Log state changes
+        if (enableDebugLogs && wasInRange != isGrappleableInRange)
         {
-            Color rayColor = debugRayColor;
+            Debug.Log($"Grappleable in range: {isGrappleableInRange} - Target: {(currentTarget ? currentTarget.name : "None")}");
+        }
+        
+        if (!validTargetFound)
+        {
+            currentTarget = null;
+        }
+    }
+    
+    void HandleGrappleInput()
+    {
+        // Grapple key pressed - start grappling animation
+        if (Input.GetKeyDown(grappleKey) && !isGrappling)
+        {
+            StartGrappling();
+        }
+        
+        // Grapple key released - stop everything
+        if (Input.GetKeyUp(grappleKey) && isGrappling)
+        {
+            StopGrappling();
+        }
+        
+        // If grappling and target in range, start reaching
+        if (isGrappling && isGrappleableInRange && !isHandReaching && !isPulling)
+        {
+            StartReachingToTarget();
+        }
+    }
+    
+    void StartGrappling()
+    {
+        isGrappling = true;
+        
+        if (enableDebugLogs) Debug.Log("Grappling started - animation triggered");
+        
+        // Notify target if in range
+        if (isGrappleableInRange && currentTarget != null)
+        {
+            currentTarget.StartGrapple();
+            currentTargetRigidbody = currentTarget.GetComponent<Rigidbody>();
+        }
+    }
+    
+    void StopGrappling()
+    {
+        if (enableDebugLogs) Debug.Log("Grappling stopped - resetting all states");
+        
+        // Notify current target
+        if (currentTarget != null)
+        {
+            currentTarget.ReleaseGrapple();
+        }
+        
+        StopAllCoroutines();
+        ResetAllStates();
+    }
+    
+    void StartReachingToTarget()
+    {
+        if (currentTarget == null || grappleJoint == null) return;
+        
+        isHandReaching = true;
+        
+        if (enableDebugLogs) Debug.Log($"Hand reaching to target: {currentTarget.name}");
+        
+        Transform targetPoint = currentTarget.grapplePoint != null ? currentTarget.grapplePoint : currentTarget.transform;
+        StartCoroutine(MoveJointToTarget(targetPoint));
+    }
+    
+    IEnumerator MoveJointToTarget(Transform targetPoint)
+    {
+        Vector3 startPosition = grappleJoint.position;
+        Vector3 targetPosition = targetPoint.position;
+        
+        float journeyLength = Vector3.Distance(startPosition, targetPosition);
+        float journeyTime = journeyLength / jointMoveSpeed;
+        float elapsedTime = 0;
+        
+        while (elapsedTime < journeyTime && isHandReaching)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / journeyTime;
             
-            // Change color if we can grapple this object
-            if (hitDetected && lastHit.collider.CompareTag("CanBeGrappled"))
+            grappleJoint.position = Vector3.Lerp(startPosition, targetPosition, progress);
+            
+            // Look at target
+            Vector3 direction = (targetPosition - grappleJoint.position).normalized;
+            if (direction != Vector3.zero)
             {
-                Grappleable grappleable = lastHit.collider.GetComponent<Grappleable>();
-                if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
+                grappleJoint.rotation = Quaternion.LookRotation(direction);
+            }
+            
+            yield return null;
+        }
+        
+        if (isHandReaching)
+        {
+            grappleJoint.position = targetPosition;
+            if (enableDebugLogs) Debug.Log("Hand reached target position");
+        }
+    }
+    
+    // Called by GrappleJointTrigger when hand reaches target
+    public void OnJointReachedTarget(Grappleable target)
+    {
+        if (!isHandReaching || target != currentTarget) return;
+        
+        if (enableDebugLogs) Debug.Log($"Joint trigger reached target: {target.name}");
+        
+        isHandReaching = false;
+        
+        // Only start pulling if target has rigidbody
+        if (currentTargetRigidbody != null)
+        {
+            StartPulling();
+        }
+        else
+        {
+            if (enableDebugLogs) Debug.Log("Target has no rigidbody - no pulling required");
+            // For objects like levers, just wait for them to handle their own logic
+        }
+    }
+    
+    void StartPulling()
+    {
+        if (currentTargetRigidbody == null) return;
+        
+        isPulling = true;
+        
+        if (enableDebugLogs) Debug.Log("Started pulling target");
+        
+        if (useSpringJoint)
+        {
+            CreateSpringJoint();
+        }
+        
+        StartCoroutine(PullTargetCoroutine());
+    }
+    
+    IEnumerator PullTargetCoroutine()
+    {
+        while (isPulling && currentTargetRigidbody != null && isGrappling)
+        {
+            float currentDistance = Vector3.Distance(currentTarget.transform.position, grappleOrigin.position);
+            
+            // Check if reached minimum distance
+            if (currentDistance <= minDistanceFromOrigin)
+            {
+                if (enableDebugLogs) Debug.Log("Target reached minimum distance - stopping pull");
+                StopGrappling();
+                yield break;
+            }
+            
+            // Apply pulling force (only if not using spring joint)
+            if (!useSpringJoint)
+            {
+                Vector3 directionToOrigin = (grappleOrigin.position - currentTarget.transform.position).normalized;
+                float distanceFactor = Mathf.Clamp01((currentDistance - minDistanceFromOrigin) / grappleRange);
+                Vector3 pullForceVector = directionToOrigin * pullForce * distanceFactor;
+                
+                currentTargetRigidbody.AddForce(pullForceVector * Time.fixedDeltaTime);
+                
+                // Limit velocity
+                if (currentTargetRigidbody.velocity.magnitude > maxPullSpeed)
                 {
-                    rayColor = debugHitColor;
+                    currentTargetRigidbody.velocity = currentTargetRigidbody.velocity.normalized * maxPullSpeed;
                 }
+                
+                currentTargetRigidbody.velocity *= 0.98f; // Add drag
             }
             
-            if (hitDetected)
-            {
-                // Draw ray to hit point
-                Debug.DrawLine(rayOrigin, lastHit.point, rayColor);
-                // Draw a small cross at hit point
-                Vector3 hitPoint = lastHit.point;
-                Debug.DrawLine(hitPoint + Vector3.up * 0.1f, hitPoint + Vector3.down * 0.1f, rayColor);
-                Debug.DrawLine(hitPoint + Vector3.left * 0.1f, hitPoint + Vector3.right * 0.1f, rayColor);
-            }
-            
-            // Draw cone visualization
-            DrawDebugCone(rayOrigin, rayDirection, grappleRange, grappleAngle, rayColor);
+            yield return new WaitForFixedUpdate();
         }
     }
     
-    void DrawDebugCone(Vector3 origin, Vector3 direction, float range, float angle, Color color)
+    void CheckPullingConditions()
     {
-        // Draw center line
-        Debug.DrawRay(origin, direction * range, color);
-        
-        // Draw cone edges
-        int segments = 8;
-        float angleStep = 360f / segments;
-        
-        for (int i = 0; i < segments; i++)
+        // Auto-stop if target gets too close while pulling
+        if (isPulling && currentTarget != null)
         {
-            float currentAngle = i * angleStep;
-            Vector3 coneDirection = GetConeDirection(direction, angle, currentAngle);
-            Debug.DrawRay(origin, coneDirection * range, color);
-        }
-        
-        // Draw cone circles at different distances
-        float[] distances = { range * 0.33f, range * 0.66f, range };
-        foreach (float distance in distances)
-        {
-            for (int i = 0; i < segments; i++)
+            float distance = Vector3.Distance(currentTarget.transform.position, grappleOrigin.position);
+            if (distance <= minDistanceFromOrigin)
             {
-                float angle1 = i * angleStep;
-                float angle2 = (i + 1) * angleStep;
-                
-                Vector3 point1 = origin + GetConeDirection(direction, angle, angle1) * distance;
-                Vector3 point2 = origin + GetConeDirection(direction, angle, angle2) * distance;
-                
-                Debug.DrawLine(point1, point2, color);
+                StopGrappling();
             }
         }
     }
     
-    Vector3 GetConeDirection(Vector3 forward, float coneAngle, float rotationAngle)
+    void UpdateAnimator()
     {
-        // Create a vector at the cone angle
-        Vector3 right = Vector3.Cross(forward, Vector3.up).normalized;
-        Vector3 up = Vector3.Cross(right, forward).normalized;
+        if (nyxAnimator != null)
+        {
+            nyxAnimator.SetBool("isGrappling", isGrappling);
+        }
+    }
+    
+    void CreateSpringJoint()
+    {
+        if (currentTargetRigidbody == null) return;
         
-        // Calculate the direction at the edge of the cone
-        float rad = coneAngle * Mathf.Deg2Rad;
-        float rotRad = rotationAngle * Mathf.Deg2Rad;
+        Rigidbody grappleOriginRigidbody = grappleOrigin.GetComponent<Rigidbody>();
+        if (grappleOriginRigidbody == null)
+        {
+            grappleOriginRigidbody = grappleOrigin.gameObject.AddComponent<Rigidbody>();
+            grappleOriginRigidbody.isKinematic = true;
+        }
         
-        Vector3 coneDirection = forward * Mathf.Cos(rad) + 
-                               (right * Mathf.Cos(rotRad) + up * Mathf.Sin(rotRad)) * Mathf.Sin(rad);
+        currentSpringJoint = currentTargetRigidbody.gameObject.AddComponent<SpringJoint>();
+        currentSpringJoint.connectedBody = grappleOriginRigidbody;
+        currentSpringJoint.autoConfigureConnectedAnchor = false;
+        currentSpringJoint.anchor = Vector3.zero;
+        currentSpringJoint.connectedAnchor = Vector3.zero;
+        currentSpringJoint.spring = springStrength;
+        currentSpringJoint.damper = springDamper;
+        currentSpringJoint.minDistance = 0f;
+        currentSpringJoint.maxDistance = 0f;
         
-        return coneDirection.normalized;
+        if (enableDebugLogs) Debug.Log("Spring joint created");
+    }
+    
+    void CleanupSpringJoint()
+    {
+        if (currentSpringJoint != null)
+        {
+            Destroy(currentSpringJoint);
+            currentSpringJoint = null;
+        }
+    }
+    
+    void ResetJointPosition()
+    {
+        if (grappleJoint != null && originalJointParent != null)
+        {
+            grappleJoint.SetParent(originalJointParent);
+            grappleJoint.localPosition = originalJointPosition;
+            grappleJoint.localRotation = originalJointRotation;
+        }
+    }
+    
+    // Public method for external force release (like from LeverGrapple)
+    public void ForceReleaseGrapple()
+    {
+        if (enableDebugLogs) Debug.Log("Force release grapple called");
+        StopGrappling();
+    }
+    
+    // Debug visualization
+    void OnDrawGizmos()
+    {
+        if (!useGizmos || !showDebugRay || grappleOrigin == null) return;
+        
+        Vector3 rayOrigin = grappleOrigin.position;
+        Vector3 rayDirection = grappleOrigin.forward;
+        
+        Color gizmoColor = isGrappleableInRange ? debugHitColor : debugRayColor;
+        Gizmos.color = gizmoColor;
+        
+        if (isGrappleableInRange && lastHit.collider != null)
+        {
+            Gizmos.DrawLine(rayOrigin, lastHit.point);
+            Gizmos.DrawWireSphere(lastHit.point, 0.1f);
+        }
+        else
+        {
+            Gizmos.DrawLine(rayOrigin, rayOrigin + rayDirection * grappleRange);
+        }
+        
+        // Draw cone visualization
+        DrawGizmoCone(rayOrigin, rayDirection, grappleRange, grappleAngle);
+        
+        // Draw state indicators
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireSphere(rayOrigin, 0.05f);
+        
+        // Draw minimum distance indicator
+        if (isPulling && currentTarget != null)
+        {
+            Gizmos.color = Color.yellow;
+            Vector3 directionToTarget = (currentTarget.transform.position - grappleOrigin.position).normalized;
+            Vector3 minDistancePos = grappleOrigin.position + directionToTarget * minDistanceFromOrigin;
+            Gizmos.DrawWireSphere(minDistancePos, 0.2f);
+        }
     }
     
     void DrawGizmoCone(Vector3 origin, Vector3 direction, float range, float angle)
     {
-        // Draw cone edges
         int segments = 12;
         float angleStep = 360f / segments;
         
@@ -679,7 +457,6 @@ public class NyxGrapple : MonoBehaviour
             Gizmos.DrawLine(origin, origin + coneDirection * range);
         }
         
-        // Draw cone circles at different distances
         float[] distances = { range * 0.5f, range };
         foreach (float distance in distances)
         {
@@ -696,56 +473,47 @@ public class NyxGrapple : MonoBehaviour
         }
     }
     
-    void OnDrawGizmos()
+    Vector3 GetConeDirection(Vector3 forward, float coneAngle, float rotationAngle)
     {
-        if (!useGizmos || !showDebugRay || grappleOrigin == null)
-            return;
-            
-        Vector3 rayOrigin = grappleOrigin.position;
-        Vector3 rayDirection = grappleOrigin.forward;
+        Vector3 right = Vector3.Cross(forward, Vector3.up).normalized;
+        Vector3 up = Vector3.Cross(right, forward).normalized;
         
-        // Set gizmo color based on grappleable status
-        Color gizmoColor = debugRayColor;
-        if (lastHitDetected && lastHit.collider.CompareTag("CanBeGrappled"))
-        {
-            Grappleable grappleable = lastHit.collider.GetComponent<Grappleable>();
-            if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
-            {
-                gizmoColor = debugHitColor;
-            }
-        }
+        float rad = coneAngle * Mathf.Deg2Rad;
+        float rotRad = rotationAngle * Mathf.Deg2Rad;
         
-        Gizmos.color = gizmoColor;
+        Vector3 coneDirection = forward * Mathf.Cos(rad) + 
+                               (right * Mathf.Cos(rotRad) + up * Mathf.Sin(rotRad)) * Mathf.Sin(rad);
         
-        if (lastHitDetected)
-        {
-            // Draw line to hit point
-            Gizmos.DrawLine(rayOrigin, lastHit.point);
-            
-            // Draw a small sphere at hit point
-            Gizmos.DrawWireSphere(lastHit.point, 0.1f);
-        }
-        else
-        {
-            // Draw center line when no hit
-            Gizmos.DrawLine(rayOrigin, rayOrigin + rayDirection * grappleRange);
-        }
-        
-        // Draw cone visualization with Gizmos
-        DrawGizmoCone(rayOrigin, rayDirection, grappleRange, grappleAngle);
-        
-        // Draw small sphere at origin
-        Gizmos.color = Color.white;
-        Gizmos.DrawWireSphere(rayOrigin, 0.05f);
-        
-        // Draw minimum distance indicator if we're grappling
-        if (isGrappling && currentGrappleTarget != null)
-        {
-            Gizmos.color = Color.yellow;
-            Vector3 directionToTarget = (currentGrappleTarget.transform.position - grappleOrigin.position).normalized;
-            Vector3 minDistancePos = grappleOrigin.position + directionToTarget * minDistanceFromOrigin;
-            Gizmos.DrawWireSphere(minDistancePos, 0.2f);
-        }
+        return coneDirection.normalized;
     }
 }
 
+// Helper component for joint trigger detection
+public class GrappleJointTrigger : MonoBehaviour
+{
+    private NyxGrapple nyxGrapple;
+    
+    public void Initialize(NyxGrapple grapple)
+    {
+        nyxGrapple = grapple;
+    }
+    
+    void OnTriggerEnter(Collider other)
+    {
+        if (nyxGrapple == null) return;
+        
+        Grappleable grappleable = other.GetComponent<Grappleable>();
+        if (grappleable != null)
+        {
+            // Notify NyxGrapple that joint reached target
+            nyxGrapple.OnJointReachedTarget(grappleable);
+            
+            // If it's a LeverGrapple, also notify it directly
+            LeverGrapple leverGrapple = other.GetComponent<LeverGrapple>();
+            if (leverGrapple != null)
+            {
+                leverGrapple.OnJointReached();
+            }
+        }
+    }
+}
