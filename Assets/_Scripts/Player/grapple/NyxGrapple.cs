@@ -47,7 +47,7 @@ public class NyxGrapple : MonoBehaviour
     private Quaternion originalJointRotation;
     private Transform originalJointParent;
     private SpringJoint currentSpringJoint;
-
+    
     void Awake()
     {
         SetupReferences();
@@ -114,6 +114,15 @@ public class NyxGrapple : MonoBehaviour
     
     void DetectGrappleableInRange()
     {
+        // If we're already grappling a target, keep it locked during the process
+        if (isGrappling && currentTarget != null && (isHandReaching || isPulling))
+        {
+            isGrappleableInRange = true;
+            if (enableDebugLogs && !isGrappleableInRange) 
+                Debug.Log($"Target locked during grappling: {currentTarget.name}");
+            return;
+        }
+        
         Vector3 rayOrigin = grappleOrigin.position;
         Vector3 rayDirection = grappleOrigin.forward;
         
@@ -201,6 +210,8 @@ public class NyxGrapple : MonoBehaviour
         {
             currentTarget.StartGrapple();
             currentTargetRigidbody = currentTarget.GetComponent<Rigidbody>();
+            if (enableDebugLogs) 
+                Debug.Log($"Target setup: {currentTarget.name}, HasRigidbody: {currentTargetRigidbody != null}");
         }
     }
     
@@ -220,7 +231,11 @@ public class NyxGrapple : MonoBehaviour
     
     void StartReachingToTarget()
     {
-        if (currentTarget == null || grappleJoint == null) return;
+        if (currentTarget == null || grappleJoint == null) 
+        {
+            if (enableDebugLogs) Debug.Log("Cannot start reaching - missing target or joint");
+            return;
+        }
         
         isHandReaching = true;
         
@@ -238,6 +253,8 @@ public class NyxGrapple : MonoBehaviour
         float journeyLength = Vector3.Distance(startPosition, targetPosition);
         float journeyTime = journeyLength / jointMoveSpeed;
         float elapsedTime = 0;
+        
+        if (enableDebugLogs) Debug.Log($"Moving joint: Distance={journeyLength:F2}, Time={journeyTime:F2}");
         
         while (elapsedTime < journeyTime && isHandReaching)
         {
@@ -259,14 +276,24 @@ public class NyxGrapple : MonoBehaviour
         if (isHandReaching)
         {
             grappleJoint.position = targetPosition;
-            if (enableDebugLogs) Debug.Log("Hand reached target position");
+            if (enableDebugLogs) Debug.Log("Hand reached target position - triggering joint reached");
+            
+            // Manually trigger the next step since we might not have a proper trigger collider setup
+            if (currentTarget != null)
+            {
+                OnJointReachedTarget(currentTarget);
+            }
         }
     }
     
-    // Called by GrappleJointTrigger when hand reaches target
+    // Called by GrappleJointTrigger when hand reaches target OR manually from MoveJointToTarget
     public void OnJointReachedTarget(Grappleable target)
     {
-        if (!isHandReaching || target != currentTarget) return;
+        if (!isHandReaching || target != currentTarget) 
+        {
+            if (enableDebugLogs) Debug.Log($"Joint reached ignored - isHandReaching:{isHandReaching}, correctTarget:{target == currentTarget}");
+            return;
+        }
         
         if (enableDebugLogs) Debug.Log($"Joint trigger reached target: {target.name}");
         
@@ -279,14 +306,18 @@ public class NyxGrapple : MonoBehaviour
         }
         else
         {
-            if (enableDebugLogs) Debug.Log("Target has no rigidbody - no pulling required");
-            // For objects like levers, just wait for them to handle their own logic
+            if (enableDebugLogs) Debug.Log("Target has no rigidbody - no pulling required (good for levers)");
+            // For objects like levers, they handle their own logic when the joint reaches them
         }
     }
     
     void StartPulling()
     {
-        if (currentTargetRigidbody == null) return;
+        if (currentTargetRigidbody == null) 
+        {
+            if (enableDebugLogs) Debug.Log("Cannot start pulling - no rigidbody");
+            return;
+        }
         
         isPulling = true;
         
@@ -334,6 +365,8 @@ public class NyxGrapple : MonoBehaviour
             
             yield return new WaitForFixedUpdate();
         }
+        
+        if (enableDebugLogs) Debug.Log("Pull coroutine ended");
     }
     
     void CheckPullingConditions()
@@ -443,6 +476,20 @@ public class NyxGrapple : MonoBehaviour
             Vector3 minDistancePos = grappleOrigin.position + directionToTarget * minDistanceFromOrigin;
             Gizmos.DrawWireSphere(minDistancePos, 0.2f);
         }
+        
+        // Draw state indicators with colors
+        if (enableDebugLogs)
+        {
+            // Draw state spheres with different colors
+            Gizmos.color = isGrappling ? Color.green : Color.gray;
+            Gizmos.DrawWireSphere(rayOrigin + Vector3.up * 1f, 0.1f); // Grappling state
+            
+            Gizmos.color = isHandReaching ? Color.cyan : Color.gray;
+            Gizmos.DrawWireSphere(rayOrigin + Vector3.up * 1.2f, 0.1f); // Reaching state
+            
+            Gizmos.color = isPulling ? Color.magenta : Color.gray;
+            Gizmos.DrawWireSphere(rayOrigin + Vector3.up * 1.4f, 0.1f); // Pulling state
+        }
     }
     
     void DrawGizmoCone(Vector3 origin, Vector3 direction, float range, float angle)
@@ -517,3 +564,4 @@ public class GrappleJointTrigger : MonoBehaviour
         }
     }
 }
+
