@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &420512104077517844
+--- !u!1 &915614505093567409
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,72 +8,41 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3750882607704898197}
+  - component: {fileID: 183205365067125625}
+  - component: {fileID: 4183504793642239514}
+  - component: {fileID: 66863963850053972}
+  - component: {fileID: 8185178899651940521}
   m_Layer: 0
-  m_Name: Grapple point
+  m_Name: lever 1
   m_TagString: CanBeGrappled
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3750882607704898197
+--- !u!4 &183205365067125625
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 420512104077517844}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0.000000010927848, y: -0.000000018927587, z: -0.8660254, w: 0.5}
-  m_LocalPosition: {x: 0.00203, y: 0.00387, z: 0.00009}
-  m_LocalScale: {x: 0.012060075, y: 0.012060075, z: 0.01763387}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4010727638218194791}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &9102668786202570230
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4762119091474741588}
-  - component: {fileID: 1953676614672148568}
-  - component: {fileID: 1189303997639983418}
-  - component: {fileID: 1273643655670301716}
-  m_Layer: 0
-  m_Name: lever
-  m_TagString: CanBeGrappled
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4762119091474741588
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9102668786202570230}
+  m_GameObject: {fileID: 915614505093567409}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -21.900005, y: 8.0271015, z: 135.25797}
+  m_LocalPosition: {x: 27.83, y: 4.54, z: 57.07}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4641861878382461004}
+  - {fileID: 6872057797185736951}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
---- !u!95 &1953676614672148568
+--- !u!95 &4183504793642239514
 Animator:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9102668786202570230}
+  m_GameObject: {fileID: 915614505093567409}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 898d06745fadff846989158f347f3e09, type: 2}
@@ -87,13 +56,13 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1189303997639983418
+--- !u!114 &66863963850053972
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9102668786202570230}
+  m_GameObject: {fileID: 915614505093567409}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9ee917a16eccda4a8a552bc2ea7f420, type: 3}
@@ -103,12 +72,12 @@ MonoBehaviour:
   pullable: 0
   isEnemy: 0
   animator: {fileID: 0}
-  grapplePoint: {fileID: 3750882607704898197}
+  grapplePoint: {fileID: 1830319435875799542}
   postReleaseStunDuration: 1
   OnGrappleStarted:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1273643655670301716}
+      - m_Target: {fileID: 8185178899651940521}
         m_TargetAssemblyTypeName: Lever, Assembly-CSharp
         m_MethodName: ActivateLever
         m_Mode: 1
@@ -123,19 +92,19 @@ MonoBehaviour:
   OnGrappleReleased:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &1273643655670301716
+--- !u!114 &8185178899651940521
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9102668786202570230}
+  m_GameObject: {fileID: 915614505093567409}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9905ab11886a5b4bbaaae3af1dd55b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leverAnimator: {fileID: 1953676614672148568}
+  leverAnimator: {fileID: 4183504793642239514}
   requiresArm: 1
   OnLeverActivated:
     m_PersistentCalls:
@@ -149,13 +118,44 @@ MonoBehaviour:
   OnPlayerExitTrigger:
     m_PersistentCalls:
       m_Calls: []
---- !u!1001 &5179576857595963303
+--- !u!1 &2099721025417287341
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1830319435875799542}
+  m_Layer: 0
+  m_Name: Grapple point
+  m_TagString: CanBeGrappled
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1830319435875799542
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099721025417287341}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.000000010927848, y: -0.000000018927587, z: -0.8660254, w: 0.5}
+  m_LocalPosition: {x: 0.00203, y: 0.00387, z: 0.00009}
+  m_LocalScale: {x: 0.012060075, y: 0.012060075, z: 0.01763387}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2926696995643568092}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &6400966736891934492
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 4762119091474741588}
+    m_TransformParent: {fileID: 183205365067125625}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: c9b23fd768b6dd444a8020abf32813c7,
         type: 3}
@@ -263,38 +263,32 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8091132604151060672, guid: c9b23fd768b6dd444a8020abf32813c7,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3750882607704898197}
+      addedObject: {fileID: 1830319435875799542}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c9b23fd768b6dd444a8020abf32813c7,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2950267841330791195}
+      addedObject: {fileID: 3953308003367178960}
   m_SourcePrefab: {fileID: 100100000, guid: c9b23fd768b6dd444a8020abf32813c7, type: 3}
---- !u!4 &4010727638218194791 stripped
+--- !u!4 &2926696995643568092 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8091132604151060672, guid: c9b23fd768b6dd444a8020abf32813c7,
     type: 3}
-  m_PrefabInstance: {fileID: 5179576857595963303}
+  m_PrefabInstance: {fileID: 6400966736891934492}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &4641861878382461004 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c9b23fd768b6dd444a8020abf32813c7,
-    type: 3}
-  m_PrefabInstance: {fileID: 5179576857595963303}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &5413577872392215286 stripped
+--- !u!1 &6058929763752725069 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c9b23fd768b6dd444a8020abf32813c7,
     type: 3}
-  m_PrefabInstance: {fileID: 5179576857595963303}
+  m_PrefabInstance: {fileID: 6400966736891934492}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &2950267841330791195
+--- !u!65 &3953308003367178960
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5413577872392215286}
+  m_GameObject: {fileID: 6058929763752725069}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -309,3 +303,9 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 0.36, z: 0.36}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &6872057797185736951 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c9b23fd768b6dd444a8020abf32813c7,
+    type: 3}
+  m_PrefabInstance: {fileID: 6400966736891934492}
+  m_PrefabAsset: {fileID: 0}

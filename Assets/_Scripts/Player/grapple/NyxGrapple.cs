@@ -7,7 +7,7 @@ public class NyxGrapple : MonoBehaviour
     [Header("Grapple Settings")]
     public float grappleRange = 10f;
     public float grappleAngle = 30f;
-    public LayerMask grappleLayerMask = -1;
+    // public LayerMask grappleLayerMask = -1; // No longer needed - using tag-based detection only
     public Transform nyxTransform;
     public Transform grappleOrigin;
     public Animator nyxAnimator;
@@ -192,7 +192,7 @@ public class NyxGrapple : MonoBehaviour
         Vector3 rayOrigin = grappleOrigin.position;
         Vector3 rayDirection = grappleOrigin.forward;
         
-        Collider[] colliders = Physics.OverlapSphere(rayOrigin, grappleRange, grappleLayerMask);
+        Collider[] colliders = Physics.OverlapSphere(rayOrigin, grappleRange);
         
         float closestDistance = float.MaxValue;
         RaycastHit closestHit = new RaycastHit();
@@ -205,13 +205,19 @@ public class NyxGrapple : MonoBehaviour
             
             if (angleToTarget <= grappleAngle && collider.CompareTag("CanBeGrappled"))
             {
-                RaycastHit[] hits = Physics.RaycastAll(rayOrigin, directionToTarget, grappleRange, grappleLayerMask);
+                RaycastHit[] hits = Physics.RaycastAll(rayOrigin, directionToTarget, grappleRange);
                 
                 foreach (RaycastHit hit in hits)
                 {
                     if (hit.collider == collider)
                     {
+                        // Try to get Grappleable component - check collider and parent
                         Grappleable grappleable = hit.collider.GetComponent<Grappleable>();
+                        if (grappleable == null)
+                        {
+                            grappleable = hit.collider.GetComponentInParent<Grappleable>();
+                        }
+                        
                         if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
                         {
                             if (hit.distance < closestDistance)
@@ -459,15 +465,21 @@ public class NyxGrapple : MonoBehaviour
             if (enableDebugLogs) Debug.Log($"Hand attached to grapple point: {attachedGrapplePoint.name}");
         }
         
-        // Only start pulling if target has rigidbody
-        if (currentTargetRigidbody != null)
+        // Only start pulling if target has rigidbody AND is pullable
+        if (currentTargetRigidbody != null && currentTarget.IsPullable)
         {
             StartPulling();
         }
         else
         {
-            if (enableDebugLogs) Debug.Log("Target has no rigidbody - no pulling required (good for levers)");
-            // For objects like levers, they handle their own logic when the joint reaches them
+            if (enableDebugLogs) 
+            {
+                if (currentTargetRigidbody == null)
+                    Debug.Log("Target has no rigidbody - no pulling required");
+                else if (!currentTarget.IsPullable)
+                    Debug.Log("Target is not pullable - no pulling required");
+            }
+            // For non-pullable objects, they handle their own logic when the joint reaches them
         }
     }
     
@@ -760,13 +772,6 @@ public class GrappleJointTrigger : MonoBehaviour
         {
             // Notify NyxGrapple that joint reached target
             nyxGrapple.OnJointReachedTarget(grappleable);
-            
-            // If it's a LeverGrapple, also notify it directly
-            LeverGrapple leverGrapple = other.GetComponent<LeverGrapple>();
-            if (leverGrapple != null)
-            {
-                leverGrapple.OnJointReached();
-            }
         }
     }
 }

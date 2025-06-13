@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-[RequireComponent(typeof(Rigidbody))]
 public class Grappleable : MonoBehaviour
 {
     [Header("Grappleable Settings")]
     public bool canBeGrappled = true;
+    public bool pullable = true; // Default is pullable
     public bool isEnemy = false;
     public Animator animator;
     public Transform grapplePoint; // The specific point where the grapple wrist will attach
@@ -27,9 +27,19 @@ public class Grappleable : MonoBehaviour
     protected bool isBeingGrappled = false;
     
     public bool IsBeingGrappled => isBeingGrappled;
+    public bool IsPullable => pullable;
     
     void Start()
     {
+        // Handle rigid body based on pullable setting
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (!pullable && rb != null)
+        {
+            // Remove or disable rigid body for non-pullable objects
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+        
         if (isEnemy)
         {
             navAgent = GetComponent<NavMeshAgent>();
@@ -74,7 +84,15 @@ public class Grappleable : MonoBehaviour
         }
         
         OnGrappleStarted?.Invoke();
-        Debug.Log($"{gameObject.name} is being grappled");
+        
+        if (pullable)
+        {
+            Debug.Log($"{gameObject.name} is being grappled and can be pulled");
+        }
+        else
+        {
+            Debug.Log($"{gameObject.name} is being grappled but cannot be pulled");
+        }
     }
     
     // Called when this object is released from grapple
