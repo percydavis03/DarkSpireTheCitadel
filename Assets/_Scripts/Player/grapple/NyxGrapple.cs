@@ -15,14 +15,17 @@ public class NyxGrapple : MonoBehaviour
     
     [Header("Hand/Joint Settings")]
     public Transform grappleJoint; // The hand/joint that reaches to targets
-    public float jointMoveSpeed = 100f;
+    public float jointMoveSpeed = 10f;
     public Collider jointTrigger; // Collider on the joint to detect when it reaches targets
+    public bool useIK = false; // IK approach (doesn't work well with mixamo rigs)
+    public bool disableAnimatorDuringGrapple = false; // Keep animator running for body animation
+    public bool overrideHandInLateUpdate = true; // Override hand position after animation runs
     
     [Header("Pull Settings")]
     public float minDistanceFromOrigin = 2f;
-    public float pullForce = 1000f;
+    public float pullForce = 20000f; // Much stronger force for heavy objects
     public float maxPullSpeed = 10f;
-    public bool useSpringJoint = false;
+    public bool useSpringJoint = false; // Keep false to see manual pulling
     public float springStrength = 50f;
     public float springDamper = 5f;
     
@@ -48,6 +51,15 @@ public class NyxGrapple : MonoBehaviour
     private Transform originalJointParent;
     private SpringJoint currentSpringJoint;
     
+    // Hand override tracking
+    private bool shouldOverrideHand = false;
+    private bool isHandAttachedToTarget = false;
+    private Vector3 targetHandPosition;
+    private Quaternion targetHandRotation;
+    private Vector3 handRestPosition;
+    private Quaternion handRestRotation;
+    private Transform attachedGrapplePoint;
+    
     void Awake()
     {
         SetupReferences();
@@ -65,6 +77,44 @@ public class NyxGrapple : MonoBehaviour
         HandleGrappleInput();
         UpdateAnimator();
         CheckPullingConditions();
+    }
+    
+    void LateUpdate()
+    {
+        // Override hand position after animator runs (so body animation plays normally)
+        if (shouldOverrideHand && grappleJoint != null)
+        {
+            // If hand is attached to target, follow the grapple point
+            if (isHandAttachedToTarget && attachedGrapplePoint != null)
+            {
+                grappleJoint.position = attachedGrapplePoint.position;
+                
+                // Look towards the grapple origin to maintain natural hand orientation
+                Vector3 directionToOrigin = (grappleOrigin.position - attachedGrapplePoint.position).normalized;
+                if (directionToOrigin != Vector3.zero)
+                {
+                    grappleJoint.rotation = Quaternion.LookRotation(directionToOrigin);
+                }
+                
+                // Debug every 30 frames to show attachment is working
+                if (enableDebugLogs && Time.frameCount % 30 == 0)
+                {
+                    Debug.Log($"Hand following attached target: {attachedGrapplePoint.position}");
+                }
+            }
+            else
+            {
+                // Normal reaching movement (hand moving to target)
+                grappleJoint.position = targetHandPosition;
+                grappleJoint.rotation = targetHandRotation;
+                
+                // Debug every 30 frames to show override is working
+                if (enableDebugLogs && Time.frameCount % 30 == 0)
+                {
+                    Debug.Log($"Hand reaching to target: {targetHandPosition}");
+                }
+            }
+        }
     }
     
     void SetupReferences()
@@ -94,6 +144,10 @@ public class NyxGrapple : MonoBehaviour
             originalJointPosition = grappleJoint.localPosition;
             originalJointRotation = grappleJoint.localRotation;
             originalJointParent = grappleJoint.parent;
+            
+            // Initialize target hand position to current position
+            targetHandPosition = grappleJoint.position;
+            targetHandRotation = grappleJoint.rotation;
         }
     }
     
@@ -105,6 +159,18 @@ public class NyxGrapple : MonoBehaviour
         isPulling = false;
         currentTarget = null;
         currentTargetRigidbody = null;
+        
+        // Stop hand override and detach from target
+        shouldOverrideHand = false;
+        isHandAttachedToTarget = false;
+        attachedGrapplePoint = null;
+        
+        // Restore animator if it was disabled
+        if (disableAnimatorDuringGrapple && nyxAnimator != null && !nyxAnimator.enabled)
+        {
+            nyxAnimator.enabled = true;
+            if (enableDebugLogs) Debug.Log("Restored animator");
+        }
         
         CleanupSpringJoint();
         ResetJointPosition();
@@ -211,7 +277,14 @@ public class NyxGrapple : MonoBehaviour
             currentTarget.StartGrapple();
             currentTargetRigidbody = currentTarget.GetComponent<Rigidbody>();
             if (enableDebugLogs) 
+            {
                 Debug.Log($"Target setup: {currentTarget.name}, HasRigidbody: {currentTargetRigidbody != null}");
+                if (currentTargetRigidbody != null)
+                {
+                    Debug.Log($"Target Rigidbody - Mass: {currentTargetRigidbody.mass}, Drag: {currentTargetRigidbody.drag}, AngularDrag: {currentTargetRigidbody.angularDrag}");
+                    Debug.Log($"Target Rigidbody - IsKinematic: {currentTargetRigidbody.isKinematic}, UseGravity: {currentTargetRigidbody.useGravity}");
+                }
+            }
         }
     }
     
@@ -239,6 +312,25 @@ public class NyxGrapple : MonoBehaviour
         
         isHandReaching = true;
         
+        // Store original hand position
+        if (grappleJoint != null)
+        {
+            handRestPosition = grappleJoint.position;
+            handRestRotation = grappleJoint.rotation;
+        }
+        
+        // Enable hand override (LateUpdate will handle positioning)
+        if (overrideHandInLateUpdate)
+        {
+            shouldOverrideHand = true;
+            if (enableDebugLogs) Debug.Log("Enabled hand override in LateUpdate - animation will play on body");
+        }
+        else if (disableAnimatorDuringGrapple && nyxAnimator != null)
+        {
+            nyxAnimator.enabled = false;
+            if (enableDebugLogs) Debug.Log("Disabled animator for manual hand control");
+        }
+        
         if (enableDebugLogs) Debug.Log($"Hand reaching to target: {currentTarget.name}");
         
         Transform targetPoint = currentTarget.grapplePoint != null ? currentTarget.grapplePoint : currentTarget.transform;
@@ -247,6 +339,12 @@ public class NyxGrapple : MonoBehaviour
     
     IEnumerator MoveJointToTarget(Transform targetPoint)
     {
+        if (grappleJoint == null)
+        {
+            if (enableDebugLogs) Debug.LogError("GrappleJoint is NULL! Please assign the hand/wrist transform in the inspector.");
+            yield break;
+        }
+        
         Vector3 startPosition = grappleJoint.position;
         Vector3 targetPosition = targetPoint.position;
         
@@ -254,28 +352,78 @@ public class NyxGrapple : MonoBehaviour
         float journeyTime = journeyLength / jointMoveSpeed;
         float elapsedTime = 0;
         
-        if (enableDebugLogs) Debug.Log($"Moving joint: Distance={journeyLength:F2}, Time={journeyTime:F2}");
+        if (enableDebugLogs) 
+        {
+            Debug.Log($"Moving joint: '{grappleJoint.name}'");
+            Debug.Log($"From: {startPosition} To: {targetPosition}");
+            Debug.Log($"Distance={journeyLength:F2}, Time={journeyTime:F2}, Speed={jointMoveSpeed}");
+        }
+        
+        // If journey time is too small, the movement might be instant
+        if (journeyTime < 0.1f)
+        {
+            if (enableDebugLogs) Debug.LogWarning($"Journey time is very short ({journeyTime:F3}s) - movement might appear instant! Try reducing jointMoveSpeed to 5-15 in inspector.");
+        }
+        
+        // Warn if speed is still too high
+        if (jointMoveSpeed > 20f && enableDebugLogs)
+        {
+            Debug.LogWarning($"jointMoveSpeed is {jointMoveSpeed} - this might be too fast to see! Try 5-15 for visible movement.");
+        }
         
         while (elapsedTime < journeyTime && isHandReaching)
         {
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / journeyTime;
             
-            grappleJoint.position = Vector3.Lerp(startPosition, targetPosition, progress);
+            Vector3 currentPos = Vector3.Lerp(startPosition, targetPosition, progress);
             
-            // Look at target
-            Vector3 direction = (targetPosition - grappleJoint.position).normalized;
-            if (direction != Vector3.zero)
+            // Set target position for LateUpdate override OR direct movement
+            if (overrideHandInLateUpdate)
             {
-                grappleJoint.rotation = Quaternion.LookRotation(direction);
+                targetHandPosition = currentPos;
+                Vector3 direction = (targetPosition - currentPos).normalized;
+                if (direction != Vector3.zero)
+                {
+                    targetHandRotation = Quaternion.LookRotation(direction);
+                }
             }
+            else
+            {
+                grappleJoint.position = currentPos;
+                Vector3 direction = (targetPosition - grappleJoint.position).normalized;
+                if (direction != Vector3.zero)
+                {
+                    grappleJoint.rotation = Quaternion.LookRotation(direction);
+                }
+            }
+            
+            // Debug every few frames to see progress
+            if (enableDebugLogs && Time.frameCount % 10 == 0)
+            {
+                Debug.Log($"Joint moving: Progress={progress:F2}, Pos={currentPos}");
+            }
+            
+            // Draw a debug line from original position to current position (breadcrumb trail)
+            Debug.DrawLine(startPosition, currentPos, Color.cyan, 0.1f);
+            Debug.DrawLine(currentPos, targetPosition, Color.red, 0.1f);
             
             yield return null;
         }
         
         if (isHandReaching)
         {
-            grappleJoint.position = targetPosition;
+            // Set final position
+            if (overrideHandInLateUpdate)
+            {
+                targetHandPosition = targetPosition;
+                targetHandRotation = Quaternion.LookRotation((targetPosition - grappleOrigin.position).normalized);
+            }
+            else
+            {
+                grappleJoint.position = targetPosition;
+            }
+            
             if (enableDebugLogs) Debug.Log("Hand reached target position - triggering joint reached");
             
             // Manually trigger the next step since we might not have a proper trigger collider setup
@@ -283,6 +431,10 @@ public class NyxGrapple : MonoBehaviour
             {
                 OnJointReachedTarget(currentTarget);
             }
+        }
+        else
+        {
+            if (enableDebugLogs) Debug.Log("Hand movement was interrupted");
         }
     }
     
@@ -298,6 +450,14 @@ public class NyxGrapple : MonoBehaviour
         if (enableDebugLogs) Debug.Log($"Joint trigger reached target: {target.name}");
         
         isHandReaching = false;
+        
+        // Attach hand to the target's grapple point
+        if (overrideHandInLateUpdate)
+        {
+            isHandAttachedToTarget = true;
+            attachedGrapplePoint = target.grapplePoint != null ? target.grapplePoint : target.transform;
+            if (enableDebugLogs) Debug.Log($"Hand attached to grapple point: {attachedGrapplePoint.name}");
+        }
         
         // Only start pulling if target has rigidbody
         if (currentTargetRigidbody != null)
@@ -350,9 +510,24 @@ public class NyxGrapple : MonoBehaviour
             {
                 Vector3 directionToOrigin = (grappleOrigin.position - currentTarget.transform.position).normalized;
                 float distanceFactor = Mathf.Clamp01((currentDistance - minDistanceFromOrigin) / grappleRange);
+                
+                // Use stronger force calculation
                 Vector3 pullForceVector = directionToOrigin * pullForce * distanceFactor;
                 
-                currentTargetRigidbody.AddForce(pullForceVector * Time.fixedDeltaTime);
+                // Try both Force and Impulse modes for stronger effect
+                currentTargetRigidbody.AddForce(pullForceVector, ForceMode.Force);
+                
+                // Also add a small impulse for immediate effect
+                if (currentTargetRigidbody.velocity.magnitude < 1f)
+                {
+                    currentTargetRigidbody.AddForce(pullForceVector * 0.1f, ForceMode.Impulse);
+                }
+                
+                // Debug the forces being applied
+                if (enableDebugLogs && Time.fixedTime % 0.5f < Time.fixedDeltaTime)
+                {
+                    Debug.Log($"Pulling: Distance={currentDistance:F2}, Force={pullForceVector.magnitude:F2}, Velocity={currentTargetRigidbody.velocity.magnitude:F2}, Mass={currentTargetRigidbody.mass}");
+                }
                 
                 // Limit velocity
                 if (currentTargetRigidbody.velocity.magnitude > maxPullSpeed)
@@ -360,7 +535,8 @@ public class NyxGrapple : MonoBehaviour
                     currentTargetRigidbody.velocity = currentTargetRigidbody.velocity.normalized * maxPullSpeed;
                 }
                 
-                currentTargetRigidbody.velocity *= 0.98f; // Add drag
+                // Reduce drag factor (was 0.98f, now 0.995f for less resistance)
+                currentTargetRigidbody.velocity *= 0.995f;
             }
             
             yield return new WaitForFixedUpdate();
@@ -477,6 +653,33 @@ public class NyxGrapple : MonoBehaviour
             Gizmos.DrawWireSphere(minDistancePos, 0.2f);
         }
         
+        // Draw hand movement line when reaching
+        if (isHandReaching && grappleJoint != null && currentTarget != null)
+        {
+            Gizmos.color = Color.cyan;
+            Transform targetPoint = currentTarget.grapplePoint != null ? currentTarget.grapplePoint : currentTarget.transform;
+            Gizmos.DrawLine(grappleJoint.position, targetPoint.position);
+            
+            // Draw hand position
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireSphere(grappleJoint.position, 0.15f);
+        }
+        
+        // Draw hand attachment when attached to target
+        if (isHandAttachedToTarget && grappleJoint != null && attachedGrapplePoint != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(grappleJoint.position, grappleOrigin.position);
+            
+            // Draw attached hand position with different color
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(grappleJoint.position, 0.2f);
+            
+            // Draw connection line to show attachment
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawLine(grappleJoint.position, attachedGrapplePoint.position);
+        }
+        
         // Draw state indicators with colors
         if (enableDebugLogs)
         {
@@ -489,6 +692,9 @@ public class NyxGrapple : MonoBehaviour
             
             Gizmos.color = isPulling ? Color.magenta : Color.gray;
             Gizmos.DrawWireSphere(rayOrigin + Vector3.up * 1.4f, 0.1f); // Pulling state
+            
+            Gizmos.color = isHandAttachedToTarget ? Color.yellow : Color.gray;
+            Gizmos.DrawWireSphere(rayOrigin + Vector3.up * 1.6f, 0.1f); // Hand attached state
         }
     }
     
