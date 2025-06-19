@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class NyxGrapple : MonoBehaviour
 {
@@ -11,7 +12,10 @@ public class NyxGrapple : MonoBehaviour
     public Transform nyxTransform;
     public Transform grappleOrigin;
     public Animator nyxAnimator;
-    public KeyCode grappleKey = KeyCode.E;
+    
+    [Header("Input System")]
+    public PlayerInputActions playerControls;
+    private InputAction grapple;
     
     [Header("Hand/Joint Settings")]
     public Transform grappleJoint; // The hand/joint that reaches to targets
@@ -62,13 +66,29 @@ public class NyxGrapple : MonoBehaviour
     
     void Awake()
     {
+        // Initialize PlayerInputActions
+        playerControls = new PlayerInputActions();
+        
         SetupReferences();
         StoreOriginalJointTransform();
     }
     
     void OnEnable()
     {
+        // Enable grapple input action
+        grapple = playerControls.General.Grapple;
+        grapple.Enable();
+        
         ResetAllStates();
+    }
+    
+    void OnDisable()
+    {
+        // Disable grapple input action
+        if (grapple != null)
+        {
+            grapple.Disable();
+        }
     }
     
     void Update()
@@ -253,13 +273,13 @@ public class NyxGrapple : MonoBehaviour
     void HandleGrappleInput()
     {
         // Grapple key pressed - start grappling animation
-        if (Input.GetKeyDown(grappleKey) && !isGrappling)
+        if (grapple.WasPressedThisFrame() && !isGrappling)
         {
             StartGrappling();
         }
         
         // Grapple key released - stop everything
-        if (Input.GetKeyUp(grappleKey) && isGrappling)
+        if (grapple.WasReleasedThisFrame() && isGrappling)
         {
             StopGrappling();
         }
