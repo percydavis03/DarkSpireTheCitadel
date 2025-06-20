@@ -8,6 +8,9 @@ public class Lever : MonoBehaviour
     [Header("Lever Settings")]
     public Animator leverAnimator;
     
+    [Header("Save State")]
+    public PlayerSaveState thisGameSave; // Direct reference to save state
+    
     [Header("Interaction Settings")]
     public bool requiresArm = true; // Set to false if lever doesn't require the arm
     
@@ -81,17 +84,23 @@ public class Lever : MonoBehaviour
     }
     
     /// <summary>
-    /// Checks if Nyx has his new arm
+    /// Checks if Nyx has his new arm by checking the save state
     /// </summary>
     private bool HasArm()
     {
-        // Check if ArmActivate instance exists and check the save state
+        // Direct check using save state reference (same pattern as Player_Movement)
+        if (thisGameSave != null)
+        {
+            return thisGameSave.hasArm;
+        }
+        
+        // Fallback: Check if ArmActivate instance exists and check the save state
         if (ArmActivate.instance != null && ArmActivate.instance.thisGameSave != null)
         {
             return ArmActivate.instance.thisGameSave.hasArm;
         }
         
-        // Fallback: assume player doesn't have arm if ArmActivate instance or save state doesn't exist
+        // Final fallback: assume player doesn't have arm if save state doesn't exist
         return false;
     }
     
