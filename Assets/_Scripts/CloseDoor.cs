@@ -22,4 +22,8 @@ public class CloseDoor : MonoBehaviour
     {
         anim.SetBool("OpenDoor", true);
     }
+    public void ClosedDoor()
+    {
+        anim.SetBool("OpenDoor", false);
+    }
 }

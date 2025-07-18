@@ -93,6 +93,8 @@ GameObject:
   m_Component:
   - component: {fileID: 5694993129853025368}
   - component: {fileID: 4739343275181931833}
+  - component: {fileID: 5509656059286488650}
+  - component: {fileID: 3380345398492463199}
   m_Layer: 0
   m_Name: Gate Rise
   m_TagString: Untagged
@@ -138,6 +140,41 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 10, y: 4.491399, z: 2.5053596}
   m_Center: {x: 0, y: 0, z: 1.2528038}
+--- !u!95 &5509656059286488650
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7549683828398544229}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9048e3ad8b2d46343b2c3eabfd3e81c6, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &3380345398492463199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7549683828398544229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f31331fbb424a0441b2199dd592b2e2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  anim: {fileID: 0}
+  door: {fileID: 0}
 --- !u!1 &7728559663941526628
 GameObject:
   m_ObjectHideFlags: 0
