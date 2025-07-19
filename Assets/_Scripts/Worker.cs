@@ -10,8 +10,8 @@ public class Worker : MonoBehaviour
     public PlayerSaveState thisGameSave;
 
     //stats
-    public float enemyHP = 30;
-    public float maxEnemyHP = 30;
+    public float enemyHP = 40; // Increased from 30 to 40 (slightly less than Enemy_Basic)
+    public float maxEnemyHP = 40; // Increased from 30 to 40
     public int damageTaken;
     public int setSpeed;
 
@@ -145,6 +145,8 @@ public class Worker : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         print("collide");
+        // OLD SYSTEM - Now handled by WeaponScript for combo damage
+        /*
         if (other.gameObject.CompareTag("Weapon"))
         {
             if (isHit == false)
@@ -153,6 +155,7 @@ public class Worker : MonoBehaviour
                
             }
         }
+        */
     }
     public void TakeDamage()
     {
@@ -165,6 +168,23 @@ public class Worker : MonoBehaviour
             anim.SetBool("IsHurting", true);
             enemyHP = enemyHP - damageTaken;
             print("literally take damage ");
+            StartCoroutine(Wait(0.5f));
+        }
+    }
+
+    // New method for combo-specific damage
+    public void TakeComboDamage(int damage)
+    {
+        isHit = true;
+        anim.SetBool("IsRunning", false);
+        anim.SetBool("IsAttacking", false);
+       
+        // No knockback for workers - handled by WeaponScript if needed
+        if (enemyHP != 0)
+        {
+            anim.SetBool("IsHurting", true);
+            enemyHP = enemyHP - damage;
+            print($"literally take {damage} combo damage");
             StartCoroutine(Wait(0.5f));
         }
     }

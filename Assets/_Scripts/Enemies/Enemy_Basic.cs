@@ -15,8 +15,8 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     public bool isSpeartwo;
     public GameObject exit;
     //stats
-    public float enemyHP = 30;
-    public float maxEnemyHP = 30;
+    public float enemyHP = 50; // Increased from 30 to 50
+    public float maxEnemyHP = 50; // Increased from 30 to 50
     public int damageTaken;
     public int setSpeed;
 
@@ -36,8 +36,18 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     public Transform player;
     public Image healthFill;
     public float waitThreshold = 0.05f;
+    
     //combat
     public GameObject spear_hitbox;
+    
+    //Parry/Stun System
+    [Header("Stun System")]
+    public bool isStunned = false;
+    public float stunDuration = 2.0f;
+    public float defaultStunDuration = 2.0f;
+    private Coroutine stunCoroutine;
+    public bool canBeParried = true; // Can this enemy be parried?
+    
     //AI
     public NavMeshAgent agent;
     public LayerMask whatIsGround, whatIsPlayer;
@@ -101,6 +111,98 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             print("literally take damage ");
             StartCoroutine(Wait(0.5f));
         }
+    }
+
+    // New method for combo-specific damage
+    public void TakeComboDamage(int damage)
+    {
+        // Don't take damage if stunned (parry already handled damage)
+        if (isStunned) return;
+        
+        isHit = true;
+        anim.SetBool("IsRunning", false);
+        anim.SetBool("IsAttacking", false);
+        KnockbackEntity(player);
+       
+        // Much lighter knockback - only apply if it's from WeaponScript's special 3rd combo
+        // Regular combo attacks won't trigger this knockback
+        if (enemyHP != 0)
+        {
+            anim.SetBool("IsHurting", true);
+            enemyHP = enemyHP - damage;
+            print($"literally take {damage} combo damage");
+            StartCoroutine(Wait(0.5f));
+        }
+    }
+
+    // Parry System Methods
+    public bool IsAttacking()
+    {
+        return anim.GetBool("IsAttacking") || anim.GetBool("IsAttacking2");
+    }
+
+    public void GetParried(float customStunDuration = -1f)
+    {
+        if (!canBeParried || isStunned || dead) return;
+
+        print("Enemy parried! Stunned.");
+        
+        // Stop current actions
+        StopAllAttacks();
+        anim.SetBool("IsRunning", false);
+        anim.SetBool("IsHurting", false);
+        
+        // Apply stun
+        isStunned = true;
+        anim.SetBool("IsStunned", true);
+        
+        // Set stun duration
+        float duration = customStunDuration > 0 ? customStunDuration : defaultStunDuration;
+        
+        // Stop existing stun coroutine if running
+        if (stunCoroutine != null)
+        {
+            StopCoroutine(stunCoroutine);
+        }
+        
+        stunCoroutine = StartCoroutine(StunCoroutine(duration));
+    }
+
+    private IEnumerator StunCoroutine(float duration)
+    {
+        // Disable movement and attacks
+        StopMoving();
+        
+        yield return new WaitForSeconds(duration);
+        
+        // Recover from stun
+        RecoverFromStun();
+    }
+
+    public void RecoverFromStun()
+    {
+        if (!isStunned) return;
+        
+        print("Enemy recovering from stun");
+        isStunned = false;
+        anim.SetBool("IsStunned", false);
+        
+        // Re-enable movement
+        if (!dead)
+        {
+            agent.enabled = true;
+            GetComponent<NavMeshAgent>().speed = setSpeed;
+        }
+        
+        stunCoroutine = null;
+    }
+
+    private void StopAllAttacks()
+    {
+        anim.SetBool("IsAttacking", false);
+        anim.SetBool("IsAttacking2", false);
+        spear_hitbox.SetActive(false);
+        alreadyAttacked = false;
     }
 
     public void GetKnockedBack(Vector3 force)
@@ -179,6 +281,8 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     private void OnTriggerEnter(Collider other)
     {
         print("collide");
+        // OLD SYSTEM - Now handled by WeaponScript for combo damage
+        /*
         if (other.gameObject.CompareTag("Weapon"))
         {
             if (isHit == false)
@@ -189,6 +293,7 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
            
             //randomListObject = Random.Range(0, bloodSplats.Count);
         }
+        */
     }
 
     public void Death()

@@ -27,6 +27,18 @@ public class Player_Movement : MonoBehaviour
     private bool isSlashing;
     public float spinDistance;
 
+    //combo system
+    [Header("Combo System")]
+    public bool isComboing = false;
+    public int comboCount = 0;
+    public float comboWindow = 1.5f; // Time window to continue combo
+    private Coroutine comboResetCoroutine;
+    public bool canComboNext = false; // Simple flag to allow next combo attack
+
+    [Header("Animation Management")]
+    public string[] attackAnimations = {"isAttacking", "isComboing", "isSpinAttack", "AttackInt"};
+    // 0: isAttacking, 1: isComboing, 2: isSpinAttack, 3: AttackInt (parameter name for int)
+
     //slash attack
     public GameObject gauntletHitbox;
     //FOR THE MOVEMENT:
@@ -135,6 +147,9 @@ public class Player_Movement : MonoBehaviour
         slash.Disable();
         interact.Disable();
         roll.Disable();
+        
+        // Reset combo when script is disabled
+        ResetCombo();
     }
     IEnumerator WaitUntil(float seconds)
     {
@@ -143,11 +158,55 @@ public class Player_Movement : MonoBehaviour
         anim.SetBool("isAttacking", false);
         EndAttack();
     }
+
+    IEnumerator ComboTimeout()
+    {
+        yield return new WaitForSeconds(comboWindow);
+        // Combo window expired, reset combo
+        ResetCombo();
+    }
+
+    IEnumerator EnableComboAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (isComboing && comboCount < 3)
+        {
+            canComboNext = true;
+            Debug.Log($"Combo window opened for attack {comboCount + 1}");
+        }
+    }
+
+    public void ResetCombo()
+    {
+        isComboing = false;
+        comboCount = 0;
+        canComboNext = false;
+        
+        // Update animator using array like Sam's approach
+        anim.SetBool(attackAnimations[1], false); // isComboing
+        anim.SetInteger(attackAnimations[3], 0);   // AttackInt
+        
+        // Stop any running combo timeout
+        if (comboResetCoroutine != null)
+        {
+            StopCoroutine(comboResetCoroutine);
+            comboResetCoroutine = null;
+        }
+    }
+
+    // Call this from animation events or automatically to allow next attack
+    public void EnableComboNext()
+    {
+        canComboNext = true;
+    }
+
+
     public void Die()
     {
         if (GameManager.instance.justDied == true)
         {
             GameManager.instance.justDied = false;
+            ResetCombo(); // Reset combo when dying
             //anim.SetBool("isDead", true);
         }
 
@@ -156,6 +215,7 @@ public class Player_Movement : MonoBehaviour
     public void FailSafe()
     {
         StartCoroutine("WaitUntil", 0.5f);
+        ResetCombo(); // Reset combo on failsafe
        if(!canMove)
         {
             canMove = true;
@@ -168,12 +228,15 @@ public class Player_Movement : MonoBehaviour
     }
     public void EndAttack()
     {
-        anim.SetBool("isAttacking", false);
-        anim.SetBool("isSpinAttack", false);
+        anim.SetBool(attackAnimations[0], false); // isAttacking
+        anim.SetBool(attackAnimations[2], false); // isSpinAttack
         swordHitbox.SetActive(false);
         canMove = true;
         isAttacking = false;
         canRotate = true;
+        isSpinAttack = false;
+        
+        // Don't reset combo here - let it continue or timeout naturally
     }
     public void EndSlash()
     {
@@ -286,6 +349,9 @@ public class Player_Movement : MonoBehaviour
 
         HandleInputs();
         
+        // Update attack states like Sam's approach
+        UpdateAttackStates();
+        
         if (canMove && canTurn && !thisGameSave.inMenu)
         {
             // Get input values
@@ -357,6 +423,7 @@ public class Player_Movement : MonoBehaviour
         {
             rolling = true;
             isAttacking = false;
+            ResetCombo(); // Reset combo when rolling
             Main_Player.instance.canTakeDamage = false;
             anim.SetBool("isRolling", true);
         }
@@ -436,40 +503,126 @@ public class Player_Movement : MonoBehaviour
             isSlashing = false;
             canRotate = true;
         }
-        if (attack.WasPressedThisFrame() && !isAttacking && !isSprint && thisGameSave.canAttack && !thisGameSave.inMenu) //ATTACK
+
+        // SIMPLE COMBO ATTACK SYSTEM
+        if (attack.WasPressedThisFrame() && thisGameSave.canAttack && !thisGameSave.inMenu)
         {
-            anim.SetBool("isAttacking", true);
-            anim.SetBool("isArmAttack", false);
-            StartCoroutine("WaitUntil", 2f);
-            moveDirection = Vector3.zero;
-            canRotate = false;
-            isAttacking = true;
-            canMove = false;
-        }
-        else if (attack.WasPressedThisFrame() && isAttacking && isSpinAttack) //cancel attack
-        {
-            anim.SetBool("isAttacking", false);
-            swordHitbox.SetActive(false);
-            canMove = true;
-            isAttacking = false;
-            canRotate = true;
+            // Handle sprint attack (spin attack) - takes priority
+            if (isSprint && !isAttacking)
+            {
+                // Reset any existing combo for spin attack
+                ResetCombo();
+                
+                isSpinAttack = true;
+                anim.SetBool(attackAnimations[2], true); // isSpinAttack
+                SetAttackState();
+                Debug.Log("spinAttack");
+                return;
+            }
+
+            // Simple combo system - allow attack when not attacking OR when can combo next
+            if ((!isAttacking && !isSprint) || (isComboing && canComboNext && comboCount < 3))
+            {
+                // Start or continue combo
+                comboCount++;
+                if (comboCount > 3) comboCount = 1; // Reset to 1 after 3
+                
+                isComboing = true;
+                canComboNext = false; // Reset flag after using it
+                
+                // Update animator
+                anim.SetBool(attackAnimations[1], true);     // isComboing  
+                anim.SetInteger(attackAnimations[3], comboCount); // AttackInt
+                anim.SetBool(attackAnimations[0], true);     // isAttacking
+                anim.SetBool("isArmAttack", false);
+                
+                // Set attack state
+                SetAttackState();
+                
+                // Start/restart combo timer
+                if (comboResetCoroutine != null)
+                {
+                    StopCoroutine(comboResetCoroutine);
+                }
+                comboResetCoroutine = StartCoroutine(ComboTimeout());
+                
+                Debug.Log($"Combo attack {comboCount}");
+            }
+            else if (isAttacking && isSpinAttack) // Cancel spin attack
+            {
+                anim.SetBool(attackAnimations[0], false); // isAttacking
+                anim.SetBool(attackAnimations[2], false); // isSpinAttack
+                ClearAttackState();
+                isSpinAttack = false;
+            }
         }
 
-        if (attack.WasPressedThisFrame() && isSprint && !isAttacking && thisGameSave.canAttack && !thisGameSave.inMenu) //SPIN ATTACK
-        {
-            isSpinAttack = true;
-            anim.SetBool("isSpinAttack", true);
-            canMove = false;
-            canRotate = false;
-            isAttacking = true;
-            Debug.Log("spinAttack");
-        }
+        // Handle hurt state
         if (anim.GetBool("isHurt"))
         {
             canMove = true;
             GauntletOff();
             anim.SetBool("isArmAttack", false);
+            ResetCombo(); // Reset combo when hurt
             Debug.Log("ishurting");
+        }
+    }
+
+
+
+    private void SetAttackState()
+    {
+        // Centralized attack state setup like Sam's approach
+        StartCoroutine("WaitUntil", 2f);
+        moveDirection = Vector3.zero;
+        canRotate = false;
+        isAttacking = true;
+        canMove = false;
+        
+        // Enable combo after a short delay (allows for combo timing)
+        StartCoroutine(EnableComboAfterDelay(0.3f));
+    }
+
+    private void ClearAttackState()
+    {
+        // Centralized attack state cleanup
+        canMove = true;
+        isAttacking = false;
+        canRotate = true;
+        swordHitbox.SetActive(false);
+    }
+
+    private void UpdateAttackAnimations()
+    {
+        // Update attack-related animations based on current state
+        if (isAttacking)
+        {
+            if (!canMove)
+            {
+                canMove = false; // Ensure movement is disabled during attacks
+            }
+        }
+    }
+
+    // State checking methods like Sam's approach
+    public bool IsInAttackState()
+    {
+        return isAttacking || isSlashing || rolling;
+    }
+
+    public bool CanPerformAction()
+    {
+        return canMove && !IsInAttackState() && !thisGameSave.inMenu;
+    }
+
+
+
+    private void UpdateAttackStates()
+    {
+        // Simple state management
+        if (isAttacking)
+        {
+            canMove = false;
         }
     }
 }
