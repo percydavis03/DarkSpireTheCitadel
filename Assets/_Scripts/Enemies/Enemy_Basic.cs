@@ -136,6 +136,9 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
 
     public void TakeDamage()
     {
+        // Don't interrupt attack recovery animation
+        if (isInAttackRecovery) return;
+        
         isHit = true;
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsAttacking", false);
@@ -156,6 +159,9 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     {
         // Don't take damage if stunned (parry already handled damage)
         if (isStunned) return;
+        
+        // Don't interrupt attack recovery animation
+        if (isInAttackRecovery) return;
         
         isHit = true;
         anim.SetBool("IsRunning", false);
@@ -362,6 +368,7 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     {
         spear_hitbox.SetActive(false);
         anim.SetBool("IsAttacking", false);
+        anim.SetBool("IsAttacking2", false);
         
         // Face player when stopping attack
         if (player != null)
@@ -369,9 +376,14 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             transform.LookAt(player);
         }
         
-        if (agent != null && agent.enabled)
+        // Re-enable NavMesh after attack recovery animation completes
+        if (agent != null)
         {
-            GetComponent<NavMeshAgent>().speed = setSpeed;
+            agent.enabled = true;
+            if (agent.enabled && agent.isOnNavMesh)
+            {
+                GetComponent<NavMeshAgent>().speed = setSpeed;
+            }
         }
         print("stop attacking");
     }
@@ -460,12 +472,22 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         if (playerInAttackRange && !thisGameSave.inMenu && playerInSightRange && !isHit) AttackPlayer();
 
         
-        if (agent != null && agent.enabled && agent.velocity.magnitude > 0.1f && !anim.GetBool("IsHurting") && !anim.GetBool("IsAttacking"))
+        // Update Speed parameter for blend tree
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
         {
-            anim.SetBool("IsRunning", true);
+            float currentSpeed = agent.velocity.magnitude;
+            // Option 1: Normalize to 0-1 range
+            float normalizedSpeed = currentSpeed / setSpeed;
+            
+            // Option 2: Use actual speed values (if you prefer)
+            // float normalizedSpeed = currentSpeed;
+            
+            anim.SetFloat("Speed", normalizedSpeed);
+            anim.SetBool("IsRunning", currentSpeed > 0.1f && !anim.GetBool("IsHurting") && !anim.GetBool("IsAttacking"));
         }
-        if (agent == null || !agent.enabled || agent.velocity.magnitude < 0.1f)
+        else
         {
+            anim.SetFloat("Speed", 0f);
             anim.SetBool("IsRunning", false);
         }
 
@@ -635,6 +657,31 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         isInParryWindow = false;
         isInPerfectParryWindow = false;
         canBeParriedNow = false;
+        
+        // Disable NavMesh during recovery dash animation
+        if (agent != null && agent.enabled)
+        {
+            agent.enabled = false;
+        }
+    }
+    
+    // Override root motion during recovery
+    private void OnAnimatorMove()
+    {
+        if (isInAttackRecovery && anim != null)
+        {
+            // Scale down the Z movement (adjust multiplier as needed)
+            Vector3 deltaPosition = anim.deltaPosition;
+            deltaPosition.z *= 0.3f; // Try 0.1f, 0.3f, 0.5f, 0.7f
+            
+            Debug.Log($"Recovery dash: Original Z={anim.deltaPosition.z}, Scaled Z={deltaPosition.z}");
+            transform.position += deltaPosition;
+        }
+        else if (anim != null)
+        {
+            // Normal root motion behavior
+            transform.position += anim.deltaPosition;
+        }
     }
     
     // For multi-phase attacks - advance to next phase
@@ -704,6 +751,24 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     {
         StopAttacking();
         ResetParryStates(); // Reset enhanced parry system states
+    }
+    
+    // Call this at the END of attack recovery animation
+    public void AnimRecoveryComplete()
+    {
+        Debug.Log("Attack recovery animation complete");
+        isInAttackRecovery = false;
+        
+        // Re-enable NavMesh agent after recovery dash
+        if (agent != null)
+        {
+            agent.enabled = true;
+            if (agent.enabled && agent.isOnNavMesh)
+            {
+                agent.Warp(transform.position); // Sync position
+                GetComponent<NavMeshAgent>().speed = setSpeed;
+            }
+        }
     }
     public void AnimFallEnd()
     {
