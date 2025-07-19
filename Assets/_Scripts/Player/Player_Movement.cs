@@ -313,6 +313,7 @@ public class Player_Movement : MonoBehaviour
         {
             moveDirection = new Vector3(0, 0, 0);
             anim.SetBool("isRun", false);
+            anim.SetBool("isWalk", false);
         }
     }
     void Update()
@@ -330,12 +331,14 @@ public class Player_Movement : MonoBehaviour
         {
             canMove = false;
             anim.SetBool("isRun", false);
+            anim.SetBool("isWalk", false);
         }
        
         if (openInfoMenu.WasPressedThisFrame()) //INFO MENU
         {
             print("openmenu");
             anim.SetBool("isRun", false);
+            anim.SetBool("isWalk", false);
             MenuScript.instance.InfoMenu();
 
         }
@@ -343,6 +346,7 @@ public class Player_Movement : MonoBehaviour
         if (openMainMenu.WasPressedThisFrame())
         {
             anim.SetBool("isRun", false);
+            anim.SetBool("isWalk", false);
             MenuScript.instance.MainMenu();  //MAIN MENU
 
         }
@@ -468,14 +472,34 @@ public class Player_Movement : MonoBehaviour
         if (thisGameSave.inMenu)
         {
             anim.SetBool("isRun", false);
+            anim.SetBool("isWalk", false);
             return;
         }
+        
         // Use currentVelocity magnitude with a small threshold for more responsive detection
         bool isMoving = currentVelocity.magnitude > 0.05f;
-        anim.SetBool("isRun", isMoving && !isJumping);
-        if (!isMoving)
+        bool isGrounded = characterController.isGrounded;
+        
+        if (isMoving && isGrounded && !isJumping)
         {
+            if (isSprint)
+            {
+                // Running animation when sprinting
+                anim.SetBool("isWalk", false);
+                anim.SetBool("isRun", true);
+            }
+            else
+            {
+                // Walking animation when not sprinting
+                anim.SetBool("isRun", false);
+                anim.SetBool("isWalk", true);
+            }
+        }
+        else
+        {
+            // Not moving or not grounded - disable both
             anim.SetBool("isRun", false);
+            anim.SetBool("isWalk", false);
         }
     }
 

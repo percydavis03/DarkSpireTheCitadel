@@ -25,12 +25,26 @@ public class Worker : MonoBehaviour
     public GameObject shovelHitbox;
     
     //Parry/Stun System
-    [Header("Stun System")]
+    [Header("Enhanced Parry System")]
     public bool isStunned = false;
     public float stunDuration = 2.0f;
     public float defaultStunDuration = 2.0f;
     private Coroutine stunCoroutine;
     public bool canBeParried = true; // Can this enemy be parried?
+
+    [Header("Animation-Driven Parry Windows")]
+    public bool isInParryWindow = false;        // Set by animation events
+    public bool isInPerfectParryWindow = false; // Set by animation events for frame-perfect timing
+    public bool canBeParriedNow = false;        // Set by animation events when vulnerable
+
+    [Header("Attack Phase System")]
+    public bool isInAttackStartup = false;      // Before parry window opens
+    public bool isInAttackActive = false;       // Main attack phase (can be parried)
+    public bool isInAttackRecovery = false;     // After attack (cannot be parried)
+
+    [Header("Worker Parry Settings (Easier than Elite enemies)")]
+    public float workerParryWindow = 0.3f;      // Generous window for workers
+    public float workerPerfectWindow = 0.1f;    // Perfect timing window
     
     //AI
     public NavMeshAgent agent;
@@ -207,10 +221,26 @@ public class Worker : MonoBehaviour
         }
     }
 
-    // Parry System Methods
+    // Enhanced Parry System Methods
     public bool IsAttacking()
     {
         return anim.GetBool("isAttacking");
+    }
+    
+    // NEW: Enhanced parry methods for animation-driven timing
+    public bool CanBeParriedNow()
+    {
+        return canBeParriedNow && canBeParried && !dead;
+    }
+    
+    public bool IsInParryWindow()
+    {
+        return isInParryWindow && isInAttackActive;
+    }
+    
+    public bool IsInPerfectParryWindow()
+    {
+        return isInPerfectParryWindow && isInAttackActive;
     }
 
     public void GetParried(float customStunDuration = -1f)
@@ -283,6 +313,109 @@ public class Worker : MonoBehaviour
         agent.enabled = false;
     }
 
+    //---------ENHANCED ANIMATION EVENTS FOR WORKER PARRY SYSTEM---------
+    
+    // Called at the start of worker attack animation
+    public void AnimAttackStartup()
+    {
+        Debug.Log("Worker Attack Startup - No parry window yet");
+        isInAttackStartup = true;
+        isInAttackActive = false;
+        isInAttackRecovery = false;
+        canBeParriedNow = false;
+        isInParryWindow = false;
+        isInPerfectParryWindow = false;
+    }
+    
+    // Called when worker parry window opens (easier timing than elite enemies)
+    public void AnimParryWindowOpen()
+    {
+        Debug.Log("Worker Parry window OPENED (Easy mode)");
+        isInAttackStartup = false;
+        isInAttackActive = true;
+        canBeParriedNow = true;
+        isInParryWindow = true;
+        
+        // Start perfect parry window timer
+        StartCoroutine(WorkerPerfectParryWindowCoroutine());
+        
+        // Close parry window after generous duration for workers
+        StartCoroutine(CloseParryWindowAfterDelay(workerParryWindow));
+    }
+    
+    // Called for worker perfect parry timing
+    public void AnimPerfectParryWindow()
+    {
+        Debug.Log("WORKER PERFECT PARRY WINDOW ACTIVE!");
+        isInPerfectParryWindow = true;
+        
+        // Close perfect window after duration
+        StartCoroutine(ClosePerfectParryWindowAfterDelay(workerPerfectWindow));
+    }
+    
+    // Called when worker attack becomes active
+    public void AnimAttackActive()
+    {
+        Debug.Log("Worker Attack is now ACTIVE");
+        isInAttackActive = true;
+        WeaponOn(); // Enable shovel hitbox
+    }
+    
+    // Called when worker parry window closes
+    public void AnimParryWindowClose()
+    {
+        Debug.Log("Worker Parry window CLOSED");
+        isInParryWindow = false;
+        isInPerfectParryWindow = false;
+        canBeParriedNow = false;
+    }
+    
+    // Called when worker attack enters recovery
+    public void AnimAttackRecovery()
+    {
+        Debug.Log("Worker Attack Recovery");
+        isInAttackActive = false;
+        isInAttackRecovery = true;
+        isInParryWindow = false;
+        isInPerfectParryWindow = false;
+        canBeParriedNow = false;
+    }
+    
+    // Worker-specific coroutines
+    private IEnumerator WorkerPerfectParryWindowCoroutine()
+    {
+        // Wait before perfect window opens (generous timing for workers)
+        yield return new WaitForSeconds(0.15f);
+        AnimPerfectParryWindow();
+    }
+    
+    private IEnumerator CloseParryWindowAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (isInParryWindow)
+        {
+            AnimParryWindowClose();
+        }
+    }
+    
+    private IEnumerator ClosePerfectParryWindowAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        isInPerfectParryWindow = false;
+    }
+    
+    // Reset all worker parry states
+    public void ResetParryStates()
+    {
+        isInAttackStartup = false;
+        isInAttackActive = false;
+        isInAttackRecovery = false;
+        canBeParriedNow = false;
+        isInParryWindow = false;
+        isInPerfectParryWindow = false;
+    }
+    
+    //---------ORIGINAL WORKER METHODS---------
     public void WeaponOn()
     {
         shovelHitbox.SetActive(true);
@@ -300,6 +433,7 @@ public class Worker : MonoBehaviour
         anim.SetBool("IsAttacking", false);
         transform.LookAt(player);
         GetComponent<NavMeshAgent>().speed = setSpeed;
+        ResetParryStates(); // Reset enhanced parry system states
         print("stop attacking");
     }
 

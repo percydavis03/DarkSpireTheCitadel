@@ -41,12 +41,30 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     public GameObject spear_hitbox;
     
     //Parry/Stun System
-    [Header("Stun System")]
+    [Header("Enhanced Parry System")]
     public bool isStunned = false;
     public float stunDuration = 2.0f;
     public float defaultStunDuration = 2.0f;
     private Coroutine stunCoroutine;
     public bool canBeParried = true; // Can this enemy be parried?
+
+    [Header("Animation-Driven Parry Windows")]
+    public bool isInParryWindow = false;        // Set by animation events
+    public bool isInPerfectParryWindow = false; // Set by animation events for frame-perfect timing
+    public bool canBeParriedNow = false;        // Set by animation events when vulnerable
+
+    [Header("Attack Phase System")]
+    public int currentAttackPhase = 0;          // Track multi-phase attacks
+    public int maxAttackPhases = 1;             // Single-phase by default
+    public bool isInAttackStartup = false;      // Before parry window opens
+    public bool isInAttackActive = false;       // Main attack phase (can be parried)
+    public bool isInAttackRecovery = false;     // After attack (cannot be parried)
+
+    [Header("Parry Difficulty Settings")]
+    [Range(1, 5)]
+    public int parryDifficulty = 2;             // 1=Easy, 5=Expert
+    public float[] difficultyParryWindows = {0.4f, 0.3f, 0.2f, 0.1f, 0.05f}; // Easy to Expert
+    public float[] difficultyPerfectWindows = {0.1f, 0.08f, 0.06f, 0.04f, 0.02f}; // Perfect timing windows
     
     //AI
     public NavMeshAgent agent;
@@ -135,10 +153,26 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         }
     }
 
-    // Parry System Methods
+    // Enhanced Parry System Methods
     public bool IsAttacking()
     {
         return anim.GetBool("IsAttacking") || anim.GetBool("IsAttacking2");
+    }
+    
+    // NEW: Enhanced parry methods for animation-driven timing
+    public bool CanBeParriedNow()
+    {
+        return canBeParriedNow && canBeParried && !dead;
+    }
+    
+    public bool IsInParryWindow()
+    {
+        return isInParryWindow && isInAttackActive;
+    }
+    
+    public bool IsInPerfectParryWindow()
+    {
+        return isInPerfectParryWindow && isInAttackActive;
     }
 
     public void GetParried(float customStunDuration = -1f)
@@ -444,6 +478,131 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
 
 
     //---------ANIMATIONS---------
+    //---------ENHANCED ANIMATION EVENTS FOR PARRY SYSTEM---------
+    
+    // Called at the start of attack animation - enemy begins attack startup
+    public void AnimAttackStartup()
+    {
+        Debug.Log("Attack Startup - No parry window yet");
+        isInAttackStartup = true;
+        isInAttackActive = false;
+        isInAttackRecovery = false;
+        canBeParriedNow = false;
+        isInParryWindow = false;
+        isInPerfectParryWindow = false;
+        currentAttackPhase = 1;
+    }
+    
+    // Called when parry window opens - enemy becomes vulnerable
+    public void AnimParryWindowOpen()
+    {
+        Debug.Log($"Parry window OPENED - Difficulty {parryDifficulty}");
+        isInAttackStartup = false;
+        isInAttackActive = true;
+        canBeParriedNow = true;
+        isInParryWindow = true;
+        
+        // Start perfect parry window timer
+        StartCoroutine(PerfectParryWindowCoroutine());
+        
+        // Close parry window after difficulty-based duration
+        float windowDuration = difficultyParryWindows[Mathf.Clamp(parryDifficulty - 1, 0, 4)];
+        StartCoroutine(CloseParryWindowAfterDelay(windowDuration));
+    }
+    
+    // Called for frame-perfect parry timing (very brief window)
+    public void AnimPerfectParryWindow()
+    {
+        Debug.Log("PERFECT PARRY WINDOW ACTIVE!");
+        isInPerfectParryWindow = true;
+        
+        // Close perfect window after very short duration
+        float perfectDuration = difficultyPerfectWindows[Mathf.Clamp(parryDifficulty - 1, 0, 4)];
+        StartCoroutine(ClosePerfectParryWindowAfterDelay(perfectDuration));
+    }
+    
+    // Called when attack becomes active and deals damage
+    public void AnimAttackActive()
+    {
+        Debug.Log("Attack is now ACTIVE - dealing damage");
+        isInAttackActive = true;
+        WeaponOn(); // Enable hitbox
+    }
+    
+    // Called when parry window closes - no longer vulnerable
+    public void AnimParryWindowClose()
+    {
+        Debug.Log("Parry window CLOSED");
+        isInParryWindow = false;
+        isInPerfectParryWindow = false;
+        canBeParriedNow = false;
+    }
+    
+    // Called when attack enters recovery phase
+    public void AnimAttackRecovery()
+    {
+        Debug.Log("Attack Recovery - no longer parrysable");
+        isInAttackActive = false;
+        isInAttackRecovery = true;
+        isInParryWindow = false;
+        isInPerfectParryWindow = false;
+        canBeParriedNow = false;
+    }
+    
+    // For multi-phase attacks - advance to next phase
+    public void AnimNextAttackPhase()
+    {
+        currentAttackPhase++;
+        Debug.Log($"Attack Phase {currentAttackPhase}/{maxAttackPhases}");
+        
+        if (currentAttackPhase <= maxAttackPhases)
+        {
+            // Reset for next phase
+            AnimParryWindowOpen();
+        }
+        else
+        {
+            // Attack complete
+            AnimAttackRecovery();
+        }
+    }
+    
+    // Coroutine to handle perfect parry window timing
+    private IEnumerator PerfectParryWindowCoroutine()
+    {
+        // Wait a brief moment before perfect window opens
+        yield return new WaitForSeconds(0.1f);
+        AnimPerfectParryWindow();
+    }
+    
+    private IEnumerator CloseParryWindowAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (isInParryWindow) // Only close if still open
+        {
+            AnimParryWindowClose();
+        }
+    }
+    
+    private IEnumerator ClosePerfectParryWindowAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        isInPerfectParryWindow = false;
+    }
+    
+    // Reset all parry states (called when attack ends or is interrupted)
+    public void ResetParryStates()
+    {
+        isInAttackStartup = false;
+        isInAttackActive = false;
+        isInAttackRecovery = false;
+        canBeParriedNow = false;
+        isInParryWindow = false;
+        isInPerfectParryWindow = false;
+        currentAttackPhase = 0;
+    }
+
+    //---------ORIGINAL ANIMATION EVENTS---------
     public void AnimStab()
     {
        WeaponOn();
@@ -456,6 +615,7 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     public void AnimAttackEnd()
     {
         StopAttacking();
+        ResetParryStates(); // Reset enhanced parry system states
     }
     public void AnimFallEnd()
     {
