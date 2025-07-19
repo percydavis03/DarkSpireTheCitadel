@@ -6,6 +6,13 @@ public class WeaponScript : MonoBehaviour
 {
     public PlayerSaveState thisGameSave;
     
+    [Header("Parry System")]
+    public bool parryEnabled = true;
+    public float parryWindow = 0.5f; // Time window for successful parry
+    public float parryDamageMultiplier = 1.5f; // Extra damage multiplier on parry
+    public float parryStunDuration = 2.0f; // How long enemies stay stunned
+    private float lastParryTime = -1f; // Track last parry to prevent spam
+    
     private void Start()
     {
         // Find PlayerSaveState if not assigned
@@ -49,6 +56,12 @@ public class WeaponScript : MonoBehaviour
         // Handle enemy damage
         if (other.gameObject.CompareTag("Enemy"))
         {
+            // Check for parry conditions first
+            if (parryEnabled && CheckForParry(other))
+            {
+                return; // Parry handled, don't continue with normal damage
+            }
+            
             // Get the appropriate damage for current combo
             int damage = GetCurrentComboDamage();
             
@@ -98,5 +111,107 @@ public class WeaponScript : MonoBehaviour
                 knockbackable.GetKnockedBack(new Vector3(5, 5, 5)); // Reduced normal knockback (was 10,10,10)
             }
         }
+    }
+
+    private bool CheckForParry(Collider enemyCollider)
+    {
+        // Check if player is currently attacking
+        bool playerAttacking = Player_Movement.instance != null && Player_Movement.instance.IsInAttackState();
+        
+        if (!playerAttacking) return false;
+        
+        // Check parry cooldown to prevent spam
+        if (Time.time - lastParryTime < parryWindow)
+        {
+            return false;
+        }
+        
+        // Check Enemy_Basic
+        if (enemyCollider.TryGetComponent(out Enemy_Basic enemyBasic))
+        {
+            if (enemyBasic.IsAttacking() && enemyBasic.canBeParried && !enemyBasic.isStunned)
+            {
+                lastParryTime = Time.time;
+                return ExecuteParry(enemyBasic);
+            }
+        }
+        // Check Worker
+        else if (enemyCollider.TryGetComponent(out Worker worker))
+        {
+            if (worker.IsAttacking() && worker.canBeParried && !worker.isStunned)
+            {
+                lastParryTime = Time.time;
+                return ExecuteParry(worker);
+            }
+        }
+        
+        return false;
+    }
+
+    private bool ExecuteParry(Enemy_Basic enemy)
+    {
+        Debug.Log("PARRY SUCCESS! Enemy stunned!");
+        
+        // Calculate parry damage
+        int parryDamage = Mathf.RoundToInt(GetCurrentComboDamage() * parryDamageMultiplier);
+        
+        // Apply parry effects with custom duration
+        enemy.GetParried(parryStunDuration);
+        
+        // Deal parry damage
+        enemy.enemyHP -= parryDamage;
+        Debug.Log($"Parry damage: {parryDamage}");
+        
+        // Add visual/audio effects for parry
+        OnParrySuccess();
+        
+        return true;
+    }
+
+    private bool ExecuteParry(Worker worker)
+    {
+        Debug.Log("PARRY SUCCESS! Worker stunned!");
+        
+        // Calculate parry damage
+        int parryDamage = Mathf.RoundToInt(GetCurrentComboDamage() * parryDamageMultiplier);
+        
+        // Apply parry effects with custom duration
+        worker.GetParried(parryStunDuration);
+        
+        // Deal parry damage
+        worker.enemyHP -= parryDamage;
+        Debug.Log($"Parry damage: {parryDamage}");
+        
+        // Add visual/audio effects for parry
+        OnParrySuccess();
+        
+        return true;
+    }
+
+    private void OnParrySuccess()
+    {
+        Debug.Log("Parry executed successfully!");
+        
+        // Basic feedback - can be expanded with more effects
+        // Stop player briefly for impact feel
+        if (Player_Movement.instance != null)
+        {
+            StartCoroutine(ParryFeedback());
+        }
+        
+        // TODO: Future enhancements could include:
+        // - Screen shake
+        // - Particle effects  
+        // - Sound effects
+        // - UI feedback
+        // - Slow motion effect
+    }
+
+    private IEnumerator ParryFeedback()
+    {
+        // Brief pause for impact feel
+        Time.timeScale = 0.1f;
+        yield return new WaitForSecondsRealtime(0.1f);
+        Time.timeScale = 1f;
     }
 }

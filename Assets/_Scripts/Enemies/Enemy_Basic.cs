@@ -340,6 +340,12 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             }
         }
 
+        // Don't do any AI behaviors while stunned
+        if (isStunned)
+        {
+            return;
+        }
+
         //Check for sight and attack
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);

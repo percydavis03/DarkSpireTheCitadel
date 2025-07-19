@@ -23,6 +23,15 @@ public class Worker : MonoBehaviour
     //Animation
     public Animator anim;
     public GameObject shovelHitbox;
+    
+    //Parry/Stun System
+    [Header("Stun System")]
+    public bool isStunned = false;
+    public float stunDuration = 2.0f;
+    public float defaultStunDuration = 2.0f;
+    private Coroutine stunCoroutine;
+    public bool canBeParried = true; // Can this enemy be parried?
+    
     //AI
     public NavMeshAgent agent;
     public LayerMask whatIsGround, whatIsPlayer;
@@ -67,6 +76,12 @@ public class Worker : MonoBehaviour
                 Death();
 
             }
+        }
+
+        // Don't do any AI behaviors while stunned
+        if (isStunned)
+        {
+            return;
         }
 
         //Check for sight and attack
@@ -175,6 +190,9 @@ public class Worker : MonoBehaviour
     // New method for combo-specific damage
     public void TakeComboDamage(int damage)
     {
+        // Don't take damage if stunned (parry already handled damage)
+        if (isStunned) return;
+        
         isHit = true;
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsAttacking", false);
@@ -187,6 +205,82 @@ public class Worker : MonoBehaviour
             print($"literally take {damage} combo damage");
             StartCoroutine(Wait(0.5f));
         }
+    }
+
+    // Parry System Methods
+    public bool IsAttacking()
+    {
+        return anim.GetBool("isAttacking");
+    }
+
+    public void GetParried(float customStunDuration = -1f)
+    {
+        if (!canBeParried || isStunned || dead) return;
+
+        print("Worker parried! Stunned.");
+        
+        // Stop current actions
+        StopAllAttacks();
+        anim.SetBool("isRunning", false);
+        anim.SetBool("IsHurting", false);
+        
+        // Apply stun
+        isStunned = true;
+        anim.SetBool("IsStunned", true);
+        
+        // Set stun duration
+        float duration = customStunDuration > 0 ? customStunDuration : defaultStunDuration;
+        
+        // Stop existing stun coroutine if running
+        if (stunCoroutine != null)
+        {
+            StopCoroutine(stunCoroutine);
+        }
+        
+        stunCoroutine = StartCoroutine(StunCoroutine(duration));
+    }
+
+    private IEnumerator StunCoroutine(float duration)
+    {
+        // Disable movement and attacks
+        StopMoving();
+        
+        yield return new WaitForSeconds(duration);
+        
+        // Recover from stun
+        RecoverFromStun();
+    }
+
+    public void RecoverFromStun()
+    {
+        if (!isStunned) return;
+        
+        print("Worker recovering from stun");
+        isStunned = false;
+        anim.SetBool("IsStunned", false);
+        
+        // Re-enable movement
+        if (!dead)
+        {
+            agent.enabled = true;
+            GetComponent<NavMeshAgent>().speed = setSpeed;
+        }
+        
+        stunCoroutine = null;
+    }
+
+    private void StopAllAttacks()
+    {
+        anim.SetBool("isAttacking", false);
+        shovelHitbox.SetActive(false);
+        alreadyAttacked = false;
+    }
+
+    private void StopMoving()
+    {
+        GetComponent<NavMeshAgent>().speed = 0;
+        agent.isStopped = true;
+        agent.enabled = false;
     }
 
     public void WeaponOn()
