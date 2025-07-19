@@ -93,14 +93,14 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         // Find the player reference properly
         if (player == null)
         {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Nyx");
             if (playerObj != null)
             {
                 player = playerObj.transform;
             }
             else
             {
-                Debug.LogWarning($"Enemy {name}: Could not find Player GameObject with tag 'Player'");
+                Debug.LogWarning($"Enemy {name}: Could not find Player GameObject with tag 'nyx'");
             }
         }
     }

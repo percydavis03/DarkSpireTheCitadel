@@ -42,10 +42,10 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.25000006
   m_TransitionOffset: 0
   m_ExitTime: 0.75
-  m_HasExitTime: 0
+  m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
@@ -236,10 +236,10 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
-  m_TransitionOffset: 0
-  m_ExitTime: 0.75
-  m_HasExitTime: 1
+  m_TransitionDuration: 0
+  m_TransitionOffset: 0.34090936
+  m_ExitTime: 0.9204545
+  m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
@@ -614,8 +614,8 @@ AnimatorStateTransition:
   m_IsExit: 0
   serializedVersion: 3
   m_TransitionDuration: 0
-  m_TransitionOffset: 0.12711881
-  m_ExitTime: 0.9204545
+  m_TransitionOffset: 0.17389412
+  m_ExitTime: 0.9831758
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1095,10 +1095,10 @@ AnimatorController:
   - serializedVersion: 5
     m_Name: attacks
     m_StateMachine: {fileID: -8080419018320800298}
-    m_Mask: {fileID: 0}
+    m_Mask: {fileID: 101100000, guid: 5dbc83012baac1b45af988b7ac22a48e, type: 2}
     m_Motions: []
     m_Behaviours: []
-    m_BlendingMode: 0
+    m_BlendingMode: 1
     m_SyncedLayerIndex: -1
     m_DefaultWeight: 0.88
     m_IKPass: 0
@@ -1136,10 +1136,10 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
-  m_TransitionOffset: 0
-  m_ExitTime: 0.6590909
-  m_HasExitTime: 1
+  m_TransitionDuration: 0.09788954
+  m_TransitionOffset: 0.10371174
+  m_ExitTime: 0.86651427
+  m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
@@ -1349,8 +1349,8 @@ AnimatorStateTransition:
   m_IsExit: 0
   serializedVersion: 3
   m_TransitionDuration: 0.25
-  m_TransitionOffset: 0
-  m_ExitTime: 0.75
+  m_TransitionOffset: 0.062337626
+  m_ExitTime: 0.78636366
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1416,7 +1416,7 @@ AnimatorStateMachine:
     m_Position: {x: 1246.2587, y: 45.9617, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -5146399870700339887}
-    m_Position: {x: 550, y: -190, z: 0}
+    m_Position: {x: 680, y: -200, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 716779081725618983}
     m_Position: {x: 1235.1288, y: -65.33725, z: 0}
@@ -1860,8 +1860,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: f623ecc8d5654f44798b36ffcba5a493,
-    type: 3}
+  m_Motion: {fileID: 7400000, guid: 9ce72f3bdfda153428c165a83afd06fc, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
