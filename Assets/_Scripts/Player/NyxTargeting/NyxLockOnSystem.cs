@@ -19,6 +19,12 @@ public class NyxLockOnSystem : MonoBehaviour
     [Header("Input")]
     [SerializeField] private PlayerInputActions playerControls;
     [SerializeField] private float cycleInputThreshold = 0.3f;
+
+    [Header("Rotation Settings")]
+    [SerializeField] private bool enableAutoRotation = true;
+    [SerializeField] private float rotationSpeed = 12f;
+    [SerializeField] private bool onlyRotateWhenLocked = true;
+    [SerializeField] private float rotationThreshold = 5f; // Don't rotate if already facing target within this angle
     
     private InputAction cycleTargets;
     private float lastCycleInput;
@@ -136,6 +142,7 @@ public class NyxLockOnSystem : MonoBehaviour
         UpdateLockOnState();
         HandleTargetCycling();
         UpdateRedDot();
+        HandleTargetRotation();
     }
     
     private void UpdateLockOnState()
@@ -153,6 +160,75 @@ public class NyxLockOnSystem : MonoBehaviour
                 ReleaseLockOn();
             }
         }
+    }
+    
+    private void HandleTargetRotation()
+    {
+        if (!enableAutoRotation || nyxTransform == null) return;
+        
+        // Only rotate when locked on if specified
+        if (onlyRotateWhenLocked && !isLockOnActive) return;
+        
+        // Get the target to rotate towards
+        ITargetable targetToFace = isLockOnActive ? currentLockedTarget : null;
+        
+        // If not locked on but we have targets and auto-rotation is enabled, face closest
+        if (!isLockOnActive && lockableTargets.Count > 0 && !onlyRotateWhenLocked)
+        {
+            targetToFace = GetClosestTarget();
+        }
+        
+        if (targetToFace?.Transform == null) return;
+        
+        // Calculate direction to target
+        Vector3 targetPos = targetToFace.TargetPoint != null ? 
+            targetToFace.TargetPoint.position : 
+            targetToFace.Transform.position;
+        
+        Vector3 directionToTarget = (targetPos - nyxTransform.position).normalized;
+        
+        // Only rotate on Y axis (horizontal rotation)
+        directionToTarget.y = 0;
+        
+        if (directionToTarget.magnitude < 0.1f) return; // Target too close or same position
+        
+        // Check if we're already facing the target
+        float angleToTarget = Vector3.Angle(nyxTransform.forward, directionToTarget);
+        if (angleToTarget < rotationThreshold) return;
+        
+        // Calculate target rotation
+        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+        
+        // Smoothly rotate towards target
+        nyxTransform.rotation = Quaternion.Slerp(
+            nyxTransform.rotation, 
+            targetRotation, 
+            rotationSpeed * Time.deltaTime
+        );
+    }
+    
+    private ITargetable GetClosestTarget()
+    {
+        if (lockableTargets.Count == 0) return null;
+        
+        ITargetable closest = null;
+        float closestDistance = float.MaxValue;
+        
+        foreach (var target in lockableTargets)
+        {
+            if (!target.CanBeTargeted) continue;
+            
+            Vector3 targetPos = target.TargetPoint != null ? target.TargetPoint.position : target.Transform.position;
+            float distance = Vector3.Distance(nyxTransform.position, targetPos);
+            
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closest = target;
+            }
+        }
+        
+        return closest;
     }
     
     private void OnTargetsUpdated(List<ITargetable> targets)
