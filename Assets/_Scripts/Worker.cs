@@ -66,6 +66,27 @@ public class Worker : MonoBehaviour
         isHit = false;
         dead = false;
         alreadyAttacked = false;
+        
+        // Find the player reference properly
+        if (player == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+            }
+            else
+            {
+                Debug.LogWarning($"Worker {name}: Could not find Player GameObject with tag 'Player'");
+            }
+        }
+        
+        // Auto-add TargetableEnemy component if missing for targeting system
+        if (GetComponent<TargetableEnemy>() == null)
+        {
+            gameObject.AddComponent<TargetableEnemy>();
+            Debug.Log($"Auto-added TargetableEnemy component to Worker {name}");
+        }
     }
     private void Awake()
     {

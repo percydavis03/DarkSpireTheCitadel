@@ -107,6 +107,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": ""Press"",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CycleTargets"",
+                    ""type"": ""Value"",
+                    ""id"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -296,6 +305,50 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Grapple"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""Controller Bumpers"",
+                    ""id"": ""12345678-9abc-def0-1234-567890abcdef"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleTargets"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""87654321-fedc-ba09-8765-432109876543"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleTargets"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""11111111-2222-3333-4444-555555555555"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleTargets"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": ""Scale(factor=0.1)"",
+                    ""groups"": """",
+                    ""action"": ""CycleTargets"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -313,6 +366,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_General_Slash = m_General.FindAction("Slash", throwIfNotFound: true);
         m_General_Roll = m_General.FindAction("Roll", throwIfNotFound: true);
         m_General_Grapple = m_General.FindAction("Grapple", throwIfNotFound: true);
+        m_General_CycleTargets = m_General.FindAction("CycleTargets", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -383,6 +437,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_General_Slash;
     private readonly InputAction m_General_Roll;
     private readonly InputAction m_General_Grapple;
+    private readonly InputAction m_General_CycleTargets;
     public struct GeneralActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -396,6 +451,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Slash => m_Wrapper.m_General_Slash;
         public InputAction @Roll => m_Wrapper.m_General_Roll;
         public InputAction @Grapple => m_Wrapper.m_General_Grapple;
+        public InputAction @CycleTargets => m_Wrapper.m_General_CycleTargets;
         public InputActionMap Get() { return m_Wrapper.m_General; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -432,6 +488,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Grapple.started += instance.OnGrapple;
             @Grapple.performed += instance.OnGrapple;
             @Grapple.canceled += instance.OnGrapple;
+            @CycleTargets.started += instance.OnCycleTargets;
+            @CycleTargets.performed += instance.OnCycleTargets;
+            @CycleTargets.canceled += instance.OnCycleTargets;
         }
 
         private void UnregisterCallbacks(IGeneralActions instance)
@@ -463,6 +522,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Grapple.started -= instance.OnGrapple;
             @Grapple.performed -= instance.OnGrapple;
             @Grapple.canceled -= instance.OnGrapple;
+            @CycleTargets.started -= instance.OnCycleTargets;
+            @CycleTargets.performed -= instance.OnCycleTargets;
+            @CycleTargets.canceled -= instance.OnCycleTargets;
         }
 
         public void RemoveCallbacks(IGeneralActions instance)
@@ -491,5 +553,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnSlash(InputAction.CallbackContext context);
         void OnRoll(InputAction.CallbackContext context);
         void OnGrapple(InputAction.CallbackContext context);
+        void OnCycleTargets(InputAction.CallbackContext context);
     }
 }

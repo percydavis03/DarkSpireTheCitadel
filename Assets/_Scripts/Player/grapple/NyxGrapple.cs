@@ -13,6 +13,9 @@ public class NyxGrapple : MonoBehaviour
     public Transform grappleOrigin;
     public Animator nyxAnimator;
     
+    [Header("Targeting System")]
+    [SerializeField] private NyxTargetingSystem targetingSystem; // Reference to shared targeting system
+    
     [Header("Input System")]
     public PlayerInputActions playerControls;
     private InputAction grapple;
@@ -47,7 +50,8 @@ public class NyxGrapple : MonoBehaviour
     private bool isPulling = false;             // Actively pulling target
     
     // Target Information
-    private Grappleable currentTarget;
+    private ITargetable currentTargetInterface; // New interface-based target
+    private Grappleable currentTarget; // Keep for backward compatibility
     private Rigidbody currentTargetRigidbody;
     private RaycastHit lastHit;
     private Vector3 originalJointPosition;
@@ -71,6 +75,7 @@ public class NyxGrapple : MonoBehaviour
         
         SetupReferences();
         StoreOriginalJointTransform();
+        SetupTargetingSystem();
     }
     
     void OnEnable()
@@ -198,6 +203,31 @@ public class NyxGrapple : MonoBehaviour
         if (enableDebugLogs) Debug.Log("NyxGrapple: All states reset");
     }
     
+    void SetupTargetingSystem()
+    {
+        // Get or create targeting system
+        if (targetingSystem == null)
+        {
+            targetingSystem = GetComponent<NyxTargetingSystem>();
+            if (targetingSystem == null)
+            {
+                Debug.LogWarning("NyxGrapple: No NyxTargetingSystem found. Grapple targeting will use fallback method.");
+                return;
+            }
+        }
+        
+        // Configure targeting system for grapple-specific parameters
+        targetingSystem.ConfigureTargeting(
+            grappleRange, 
+            grappleAngle, 
+            new TargetType[] { TargetType.Grappleable, TargetType.Enemy }, // Allow both grappleable objects and enemies
+            true // Require line of sight
+        );
+        
+        if (enableDebugLogs)
+            Debug.Log("NyxGrapple: Targeting system configured for grapple parameters");
+    }
+    
     void DetectGrappleableInRange()
     {
         // If we're already grappling a target, keep it locked during the process
@@ -209,6 +239,66 @@ public class NyxGrapple : MonoBehaviour
             return;
         }
         
+        bool wasInRange = isGrappleableInRange;
+        isGrappleableInRange = false;
+        
+        // Use targeting system if available
+        if (targetingSystem != null)
+        {
+            // Get best grappleable target from targeting system
+            var bestTarget = targetingSystem.BestTarget;
+            
+            if (bestTarget != null && (bestTarget.TargetType == TargetType.Grappleable || bestTarget.TargetType == TargetType.Enemy))
+            {
+                // Try to get the Grappleable component
+                Grappleable grappleable = null;
+                
+                // Check if it's a TargetableGrappleable wrapper
+                var targetableGrappleable = bestTarget as TargetableGrappleable;
+                if (targetableGrappleable != null)
+                {
+                    grappleable = targetableGrappleable.Grappleable;
+                }
+                else
+                {
+                    // Direct grappleable component
+                    grappleable = bestTarget.Transform.GetComponent<Grappleable>();
+                }
+                
+                if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
+                {
+                    currentTargetInterface = bestTarget;
+                    currentTarget = grappleable;
+                    isGrappleableInRange = true;
+                    
+                    // Create a fake raycast hit for backwards compatibility
+                    lastHit = new RaycastHit();
+                    // Note: We could improve this by having the targeting system provide hit information
+                }
+            }
+        }
+        else
+        {
+            // Fallback to original detection method if no targeting system
+            DetectGrappleableInRangeFallback();
+        }
+        
+        // Log state changes
+        if (enableDebugLogs && wasInRange != isGrappleableInRange)
+        {
+            Debug.Log($"Grappleable in range: {isGrappleableInRange} - Target: {(currentTarget ? currentTarget.name : "None")}");
+        }
+        
+        if (!isGrappleableInRange)
+        {
+            currentTarget = null;
+            currentTargetInterface = null;
+        }
+    }
+    
+    void DetectGrappleableInRangeFallback()
+    {
+        // Original detection method as fallback
         Vector3 rayOrigin = grappleOrigin.position;
         Vector3 rayDirection = grappleOrigin.forward;
         
@@ -254,20 +344,8 @@ public class NyxGrapple : MonoBehaviour
             }
         }
         
-        bool wasInRange = isGrappleableInRange;
         isGrappleableInRange = validTargetFound;
         lastHit = closestHit;
-        
-        // Log state changes
-        if (enableDebugLogs && wasInRange != isGrappleableInRange)
-        {
-            Debug.Log($"Grappleable in range: {isGrappleableInRange} - Target: {(currentTarget ? currentTarget.name : "None")}");
-        }
-        
-        if (!validTargetFound)
-        {
-            currentTarget = null;
-        }
     }
     
     void HandleGrappleInput()

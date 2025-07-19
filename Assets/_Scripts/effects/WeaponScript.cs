@@ -23,7 +23,12 @@ public class WeaponScript : MonoBehaviour
     [Header("Parry Stun System (Cohesive with Grapple)")]
     public float perfectParryStunMultiplier = 2.0f; // Perfect parries = 2x stun duration
     public float comboParryStunBonus = 0.5f;        // Extra 0.5s stun during combos
-    public Vector3 standardParryKnockback = new Vector3(30, 15, 30); // Simple, consistent knockback
+    public Vector3 standardParryKnockback = new Vector3(80, 30, 80); // Increased for more impact
+    
+    [Header("Simple Combat Knockback")]
+    public Vector3 lightKnockback = new Vector3(5, 1, 5);      // Very light knockback
+    public Vector3 mediumKnockback = new Vector3(8, 2, 8);     // Medium knockback  
+    public Vector3 heavyKnockback = new Vector3(12, 3, 12);    // Heavy knockback
     
     [Header("Combo Parry System")]
     public float comboParryWindow = 0.1f;       
@@ -76,45 +81,49 @@ public class WeaponScript : MonoBehaviour
             
             int damage = GetCurrentComboDamage();
             
-            bool isThirdCombo = Player_Movement.instance != null && 
-                               Player_Movement.instance.isComboing && 
-                               Player_Movement.instance.comboCount == 3;
+            // Determine combo knockback based on current combo count
+            Vector3 knockbackForce = lightKnockback; // Default to combo 1
+            string comboType = "1st Combo";
+            
+            if (Player_Movement.instance != null && Player_Movement.instance.isComboing)
+            {
+                switch (Player_Movement.instance.comboCount)
+                {
+                    case 1:
+                        knockbackForce = lightKnockback;
+                        comboType = "1st Combo";
+                        break;
+                    case 2:
+                        knockbackForce = mediumKnockback;
+                        comboType = "2nd Combo";
+                        break;
+                    case 3:
+                        knockbackForce = heavyKnockback;
+                        comboType = "3rd Combo - HEAVY HIT!";
+                        break;
+                }
+            }
             
             if (other.TryGetComponent(out Enemy_Basic enemyBasic))
             {
                 enemyBasic.TakeComboDamage(damage);
-                
-                if (isThirdCombo)
-                {
-                    enemyBasic.GetKnockedBack(new Vector3(50, 20, 50));
-                    Debug.Log("3rd Combo Attack - Strong Knockback Applied!");
-                }
+                enemyBasic.GetKnockedBack(knockbackForce);
+                Debug.Log($"{comboType} - Knockback: {knockbackForce}");
             }
             else if (other.TryGetComponent(out Worker worker))
             {
                 worker.TakeComboDamage(damage);
                 
-                if (isThirdCombo)
-                {
-                    Debug.Log("3rd Combo Attack - Extra Impact on Worker!");
-                }
+                // Workers get slightly reduced knockback but still get knocked back
+                Vector3 workerKnockback = new Vector3(
+                    knockbackForce.x * 0.8f, // Workers get slightly less knockback
+                    knockbackForce.y * 0.8f,
+                    knockbackForce.z * 0.8f
+                );
+                worker.GetKnockedBack(workerKnockback);
+                Debug.Log($"{comboType} on Worker - Knockback: {workerKnockback}");
             }
-        }
-        
-        if (other.TryGetComponent(out IKnockbackable knockbackable))
-        {
-            bool isThirdCombo = Player_Movement.instance != null && 
-                               Player_Movement.instance.isComboing && 
-                               Player_Movement.instance.comboCount == 3;
-            
-            if (isThirdCombo)
-            {
-                knockbackable.GetKnockedBack(new Vector3(50, 20, 50));
-            }
-            else
-            {
-                knockbackable.GetKnockedBack(new Vector3(5, 5, 5));
-            }
+            // Removed the duplicate IKnockbackable check that was causing double knockback
         }
     }
 

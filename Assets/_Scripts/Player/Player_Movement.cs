@@ -110,6 +110,7 @@ public class Player_Movement : MonoBehaviour
         isAttacking = false;
         canRotate = true;
     }
+    
     private void OnEnable() //need for input system
     {
         openInfoMenu = playerControls.General.Inventory;
@@ -270,12 +271,18 @@ public class Player_Movement : MonoBehaviour
 
     public void GauntletOn()
     {
-        gauntletHitbox.SetActive(true);
+        if (gauntletHitbox != null)
+        {
+            gauntletHitbox.SetActive(true);
+        }
     }
 
     public void GauntletOff()
     {
-        gauntletHitbox.SetActive(false);    
+        if (gauntletHitbox != null)
+        {
+            gauntletHitbox.SetActive(false);
+        }
     }
     public void StopMoving()
     {
@@ -431,6 +438,12 @@ public class Player_Movement : MonoBehaviour
             Main_Player.instance.canTakeDamage = false;
             anim.SetBool("isRolling", true);
         }
+        
+        // Safety check: ensure player can take damage when not rolling
+        if (!rolling && Main_Player.instance != null && !Main_Player.instance.canTakeDamage)
+        {
+            Main_Player.instance.canTakeDamage = true;
+        }
         // Handle sprint
         if (sprint.IsPressed() && !isAttacking)
         {
@@ -508,12 +521,34 @@ public class Player_Movement : MonoBehaviour
         canTurn = true;
     }
 
+    // Helper method to safely set animator bool parameters
+    private void SafeSetAnimatorBool(string paramName, bool value)
+    {
+        if (anim != null)
+        {
+            // Check if parameter exists before trying to set it
+            foreach (AnimatorControllerParameter param in anim.parameters)
+            {
+                if (param.name == paramName && param.type == AnimatorControllerParameterType.Bool)
+                {
+                    anim.SetBool(paramName, value);
+                    return;
+                }
+            }
+            // If we reach here, parameter doesn't exist - log a warning only once
+            if (paramName == "isArmAttack")
+            {
+                Debug.LogWarning($"Animator parameter '{paramName}' not found - arm attack functionality may be disabled");
+            }
+        }
+    }
+
     private void HandleAttackInputs()
     {
         if (slash.WasPressedThisFrame()  && !isSlashing && thisGameSave.hasArm ) //slash attack
         {
             print("slash attack");
-            anim.SetBool("isArmAttack", true);
+            SafeSetAnimatorBool("isArmAttack", true);
             moveDirection = Vector3.zero;
             canRotate = false;
             isSlashing = true;
@@ -521,8 +556,11 @@ public class Player_Movement : MonoBehaviour
         }
         else if (slash.WasPressedThisFrame() && isSlashing) //cancel slash
         {
-            anim.SetBool("isArmAttack", false);
-            gauntletHitbox.SetActive(false);
+            SafeSetAnimatorBool("isArmAttack", false);
+            if (gauntletHitbox != null)
+            {
+                gauntletHitbox.SetActive(false);
+            }
             canMove = true;
             isSlashing = false;
             canRotate = true;
@@ -558,7 +596,7 @@ public class Player_Movement : MonoBehaviour
                 anim.SetBool(attackAnimations[1], true);     // isComboing  
                 anim.SetInteger(attackAnimations[3], comboCount); // AttackInt
                 anim.SetBool(attackAnimations[0], true);     // isAttacking
-                anim.SetBool("isArmAttack", false);
+                SafeSetAnimatorBool("isArmAttack", false);
                 
                 // Set attack state
                 SetAttackState();
@@ -586,7 +624,7 @@ public class Player_Movement : MonoBehaviour
         {
             canMove = true;
             GauntletOff();
-            anim.SetBool("isArmAttack", false);
+            SafeSetAnimatorBool("isArmAttack", false);
             ResetCombo(); // Reset combo when hurt
             Debug.Log("ishurting");
         }

@@ -41,6 +41,7 @@ public class Main_Player : MonoBehaviour
     {
         isDead = false;
         isFaded = true;
+        canTakeDamage = true; // Initialize to true so player can take damage
         thisGameSave.inMenu = false;
     }
     IEnumerator Wait()
@@ -64,8 +65,17 @@ public class Main_Player : MonoBehaviour
         StartCoroutine(Wait());
         Player_Movement.instance.GotHit();
 
-        // Apply knockback
-        Vector3 knockbackDirection = (transform.position - Player.transform.position).normalized;
+        // Apply knockback - use safe direction calculation
+        Vector3 knockbackDirection = Vector3.forward; // Default direction
+        if (Player != null)
+        {
+            knockbackDirection = (transform.position - Player.transform.position).normalized;
+        }
+        else
+        {
+            // Fallback: use a random direction if Player is not assigned
+            knockbackDirection = new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)).normalized;
+        }
         knockbackDirection.y = 0; // Keep knockback horizontal
         Player_Movement.instance.ApplyKnockback(knockbackDirection * knockbackForce);
 

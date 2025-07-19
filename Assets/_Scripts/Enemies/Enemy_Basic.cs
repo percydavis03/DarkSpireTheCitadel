@@ -89,13 +89,33 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         isHit = false;
         dead = false;
         alreadyAttacked = false;
+        
+        // Find the player reference properly
+        if (player == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+            }
+            else
+            {
+                Debug.LogWarning($"Enemy {name}: Could not find Player GameObject with tag 'Player'");
+            }
+        }
     }
     private void Awake()
     {
-        //player = GameObject.Find("Player").transform;
         damageTaken = thisGameSave.mainAttackDamage; 
         rb = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();
+
+        // Ensure we have a valid agent
+        if (agent == null)
+        {
+            Debug.LogError($"Enemy {name}: NavMeshAgent component not found!");
+            return;
+        }
 
         //agent.angularSpeed = 0f;
         //agent.updateRotation = false;
@@ -140,15 +160,21 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         isHit = true;
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsAttacking", false);
+        
+        // Face the player when taking damage for better combat feedback
+        if (player != null)
+        {
+            transform.LookAt(player);
+        }
+        
         KnockbackEntity(player);
        
-        // Much lighter knockback - only apply if it's from WeaponScript's special 3rd combo
-        // Regular combo attacks won't trigger this knockback
-        if (enemyHP != 0)
+        // Apply damage
+        if (enemyHP > 0)
         {
             anim.SetBool("IsHurting", true);
             enemyHP = enemyHP - damage;
-            print($"literally take {damage} combo damage");
+            print($"take {damage} damage, HP now: {enemyHP}");
             StartCoroutine(Wait(0.5f));
         }
     }
@@ -186,6 +212,12 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsHurting", false);
         
+        // Face the player when parried for better visual feedback
+        if (player != null)
+        {
+            transform.LookAt(player);
+        }
+        
         // Apply stun
         isStunned = true;
         anim.SetBool("IsStunned", true);
@@ -222,10 +254,14 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         anim.SetBool("IsStunned", false);
         
         // Re-enable movement
-        if (!dead)
+        if (!dead && agent != null)
         {
             agent.enabled = true;
-            GetComponent<NavMeshAgent>().speed = setSpeed;
+            // Only set speed if agent is properly enabled and on NavMesh
+            if (agent.enabled && agent.isOnNavMesh)
+            {
+                GetComponent<NavMeshAgent>().speed = setSpeed;
+            }
         }
         
         stunCoroutine = null;
@@ -243,36 +279,54 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     {
         print("knockback");
         StopMoving();
-        StartCoroutine(ApplyKnockback(force));
+        // Simple knockback without complex physics
+        StartCoroutine(SimpleKnockback(force));
     }
 
-    private IEnumerator ApplyKnockback(Vector3 force)
+    private IEnumerator SimpleKnockback(Vector3 force)
     {
-        yield return null;
-        rb.useGravity = true;
-        rb.isKinematic = false;
-        rb.AddForce(force);
-
-        yield return new WaitForFixedUpdate();
-        yield return new WaitUntil(() => rb.velocity.magnitude < waitThreshold);
-
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.useGravity = false;
-        rb.isKinematic = true;
-        agent.Warp(transform.position);
-        agent.enabled = true;
-        GetComponent<NavMeshAgent>().speed = setSpeed;
+        // Don't use rigidbody physics - just move the transform directly
+        Vector3 knockbackDirection = force.normalized;
+        float knockbackDistance = force.magnitude * 0.1f; // Scale down the distance
+        Vector3 startPosition = transform.position;
+        Vector3 targetPosition = startPosition + knockbackDirection;
+        
+        float duration = 0.2f; // Very short knockback
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / duration;
+            
+            // Simple lerp movement
+            transform.position = Vector3.Lerp(startPosition, targetPosition, progress);
+            yield return null;
+        }
+        
+        // Re-enable NavMesh agent
+        if (agent != null)
+        {
+            agent.Warp(transform.position);
+            agent.enabled = true;
+            
+            if (agent.enabled && agent.isOnNavMesh)
+            {
+                GetComponent<NavMeshAgent>().speed = setSpeed;
+            }
+        }
+        
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
-
-        yield return null;
     }
     public void StopMoving()
     {
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
+        {
             GetComponent<NavMeshAgent>().speed = 0;
             agent.isStopped = true;
             agent.enabled = false;
+        }
     }
     public void Reposition()
     {
@@ -308,8 +362,17 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     {
         spear_hitbox.SetActive(false);
         anim.SetBool("IsAttacking", false);
-        transform.LookAt(player);
-        GetComponent<NavMeshAgent>().speed = setSpeed;
+        
+        // Face player when stopping attack
+        if (player != null)
+        {
+            transform.LookAt(player);
+        }
+        
+        if (agent != null && agent.enabled)
+        {
+            GetComponent<NavMeshAgent>().speed = setSpeed;
+        }
         print("stop attacking");
     }
     private void OnTriggerEnter(Collider other)
@@ -366,7 +429,11 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         {
            if (!dead)
             {
-                agent.SetDestination(thisGuy.transform.position);
+                // Add safety check before using agent
+                if (agent != null && agent.enabled && agent.isOnNavMesh)
+                {
+                    agent.SetDestination(thisGuy.transform.position);
+                }
                 spear_hitbox.SetActive(false);
                  /// fix this
                 anim.SetBool("IsDead", true);
@@ -389,11 +456,11 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         if (playerInAttackRange && !thisGameSave.inMenu && playerInSightRange && !isHit) AttackPlayer();
 
         
-        if (agent.velocity.magnitude > 0.1f && !anim.GetBool("IsHurting") && !anim.GetBool("IsAttacking"))
+        if (agent != null && agent.enabled && agent.velocity.magnitude > 0.1f && !anim.GetBool("IsHurting") && !anim.GetBool("IsAttacking"))
         {
             anim.SetBool("IsRunning", true);
         }
-        if (agent.velocity.magnitude < 0.1f)
+        if (agent == null || !agent.enabled || agent.velocity.magnitude < 0.1f)
         {
             anim.SetBool("IsRunning", false);
         }
@@ -409,7 +476,7 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     {
         if (!walkPointSet) SearchWalkPoint();
 
-        if (walkPointSet)
+        if (walkPointSet && agent != null && agent.enabled && agent.isOnNavMesh)
         {
             agent.SetDestination(walkPoint);
         }
@@ -440,13 +507,19 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
 
     private void ChasePlayer()
     {
-        agent.SetDestination(player.position);
-        transform.LookAt(player);
+        if (agent != null && agent.enabled && agent.isOnNavMesh && player != null)
+        {
+            agent.SetDestination(player.position);
+            transform.LookAt(player); // Face player while chasing
+        }
     }
 
     private void AttackPlayer()
     {
-        agent.SetDestination(thisGuy.transform.position);
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
+        {
+            agent.SetDestination(thisGuy.transform.position);
+        }
         
         if (isSpeartwo)
         {
@@ -457,8 +530,16 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             anim.SetBool("IsAttacking", true);
         }
         
-        GetComponent<NavMeshAgent>().speed = 0;
-        //transform.LookAt(player);
+        if (agent != null && agent.enabled)
+        {
+            GetComponent<NavMeshAgent>().speed = 0;
+        }
+        
+        // Face player during attack
+        if (player != null)
+        {
+            transform.LookAt(player);
+        }
 
         if (!alreadyAttacked)
         {
@@ -471,7 +552,10 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     {
         alreadyAttacked = false;
         //weaponHitbox.SetActive(false);
-        GetComponent<NavMeshAgent>().speed = setSpeed;
+        if (agent != null && agent.enabled)
+        {
+            GetComponent<NavMeshAgent>().speed = setSpeed;
+        }
         anim.SetBool("IsAttacking", false);
     }
 
