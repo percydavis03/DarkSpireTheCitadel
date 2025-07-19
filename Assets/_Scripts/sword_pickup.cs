@@ -21,6 +21,7 @@ public class sword_pickup : MonoBehaviour
             thisGameSave.canAttack = true;
             sword.SetActive(true);
             thisOne.SetActive(false);
+            thisGameSave.hasSword = true;
         }
        
     }

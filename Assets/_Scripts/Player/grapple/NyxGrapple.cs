@@ -250,20 +250,8 @@ public class NyxGrapple : MonoBehaviour
             
             if (bestTarget != null && (bestTarget.TargetType == TargetType.Grappleable || bestTarget.TargetType == TargetType.Enemy))
             {
-                // Try to get the Grappleable component
-                Grappleable grappleable = null;
-                
-                // Check if it's a TargetableGrappleable wrapper
-                var targetableGrappleable = bestTarget as TargetableGrappleable;
-                if (targetableGrappleable != null)
-                {
-                    grappleable = targetableGrappleable.Grappleable;
-                }
-                else
-                {
-                    // Direct grappleable component
-                    grappleable = bestTarget.Transform.GetComponent<Grappleable>();
-                }
+                // Since Grappleable now implements ITargetable directly, we can cast it directly
+                Grappleable grappleable = bestTarget as Grappleable;
                 
                 if (grappleable != null && grappleable.canBeGrappled && !grappleable.IsBeingGrappled)
                 {
@@ -273,7 +261,6 @@ public class NyxGrapple : MonoBehaviour
                     
                     // Create a fake raycast hit for backwards compatibility
                     lastHit = new RaycastHit();
-                    // Note: We could improve this by having the targeting system provide hit information
                 }
             }
         }
@@ -303,6 +290,20 @@ public class NyxGrapple : MonoBehaviour
         Vector3 rayDirection = grappleOrigin.forward;
         
         Collider[] colliders = Physics.OverlapSphere(rayOrigin, grappleRange);
+        
+        // DEBUG: Show what we're finding
+        if (enableDebugLogs && colliders.Length > 0)
+        {
+            Debug.Log($"FALLBACK: Found {colliders.Length} objects within {grappleRange} units");
+            foreach (Collider col in colliders)
+            {
+                float distance = Vector3.Distance(col.transform.position, rayOrigin);
+                Vector3 directionToTarget = (col.transform.position - rayOrigin).normalized;
+                float angleToTarget = Vector3.Angle(rayDirection, directionToTarget);
+                bool hasCorrectTag = col.CompareTag("CanBeGrappled");
+                Debug.Log($"  - {col.name}: Distance={distance:F1}, Angle={angleToTarget:F1}°, Tag={hasCorrectTag}");
+            }
+        }
         
         float closestDistance = float.MaxValue;
         RaycastHit closestHit = new RaycastHit();
@@ -336,6 +337,7 @@ public class NyxGrapple : MonoBehaviour
                                 closestHit = hit;
                                 validTargetFound = true;
                                 currentTarget = grappleable;
+                                if (enableDebugLogs) Debug.Log($"FALLBACK: Valid target found - {grappleable.name}");
                             }
                         }
                         break;
@@ -346,19 +348,32 @@ public class NyxGrapple : MonoBehaviour
         
         isGrappleableInRange = validTargetFound;
         lastHit = closestHit;
+        
+        if (enableDebugLogs && !validTargetFound && colliders.Length > 0)
+        {
+            Debug.LogWarning("FALLBACK: Objects found but none are valid grappleable targets!");
+        }
     }
     
     void HandleGrappleInput()
     {
+        // DEBUG: Show what's happening with input
+        if (enableDebugLogs && grapple.IsPressed())
+        {
+            Debug.Log($"G key held - isGrappling: {isGrappling}, targetInRange: {isGrappleableInRange}, currentTarget: {(currentTarget ? currentTarget.name : "None")}");
+        }
+        
         // Grapple key pressed - start grappling animation
         if (grapple.WasPressedThisFrame() && !isGrappling)
         {
+            if (enableDebugLogs) Debug.Log("G key pressed - attempting to start grapple");
             StartGrappling();
         }
         
         // Grapple key released - stop everything
         if (grapple.WasReleasedThisFrame() && isGrappling)
         {
+            if (enableDebugLogs) Debug.Log("G key released - stopping grapple");
             StopGrappling();
         }
         
@@ -375,6 +390,14 @@ public class NyxGrapple : MonoBehaviour
         
         if (enableDebugLogs) Debug.Log("Grappling started - animation triggered");
         
+        // DEBUG: Show grapple joint status
+        if (enableDebugLogs) 
+        {
+            Debug.Log($"Grapple Joint: {(grappleJoint != null ? grappleJoint.name : "NULL")}");
+            Debug.Log($"Target in range: {isGrappleableInRange}");
+            Debug.Log($"Current target: {(currentTarget != null ? currentTarget.name : "NULL")}");
+        }
+        
         // Notify target if in range
         if (isGrappleableInRange && currentTarget != null)
         {
@@ -389,6 +412,10 @@ public class NyxGrapple : MonoBehaviour
                     Debug.Log($"Target Rigidbody - IsKinematic: {currentTargetRigidbody.isKinematic}, UseGravity: {currentTargetRigidbody.useGravity}");
                 }
             }
+        }
+        else if (enableDebugLogs)
+        {
+            Debug.LogWarning($"No valid target found! isGrappleableInRange: {isGrappleableInRange}, currentTarget: {(currentTarget != null ? currentTarget.name : "NULL")}");
         }
     }
     

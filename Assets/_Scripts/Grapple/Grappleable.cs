@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Grappleable : MonoBehaviour
+public class Grappleable : MonoBehaviour, ITargetable
 {
     [Header("Grappleable Settings")]
     public bool canBeGrappled = true;
@@ -24,10 +24,39 @@ public class Grappleable : MonoBehaviour
     public UnityEngine.Events.UnityEvent OnGrappleStarted;
     public UnityEngine.Events.UnityEvent OnGrappleReleased;
     
+    [Header("Targeting System")]
+    [SerializeField] private int targetPriority = 2; // Lower than enemies by default
+    [SerializeField] private bool showTargetEffects = true;
+    [SerializeField] private GameObject targetIndicator; // Optional visual indicator when targeted
+    
     protected bool isBeingGrappled = false;
+    private bool isCurrentlyTargeted = false;
+    private Renderer[] renderers;
+    private Color[] originalColors;
     
     public bool IsBeingGrappled => isBeingGrappled;
     public bool IsPullable => pullable;
+    
+    // ITargetable implementation
+    public Transform Transform => transform;
+    public Transform TargetPoint => grapplePoint != null ? grapplePoint : transform;
+    public int TargetPriority => isEnemy ? 4 : (pullable ? 2 : 1); // Enemy grapplebales have higher priority
+    public TargetType TargetType => isEnemy ? TargetType.Enemy : TargetType.Grappleable;
+    
+    public bool CanBeTargeted 
+    { 
+        get 
+        {
+            // Use existing Grappleable logic for determining if it can be targeted
+            if (!canBeGrappled) return false;
+            if (isBeingGrappled) return false;
+            
+            // Check if GameObject is active
+            if (!gameObject.activeInHierarchy) return false;
+            
+            return true;
+        }
+    }
     
     void Start()
     {
@@ -49,7 +78,149 @@ public class Grappleable : MonoBehaviour
                 originalSpeed = navAgent.speed;
             }
         }
+        
+        // Initialize targeting system components
+        SetupTargetingSystem();
     }
+    
+    void SetupTargetingSystem()
+    {
+        // Get renderers for visual effects
+        renderers = GetComponentsInChildren<Renderer>();
+        
+        // Store original colors for highlight effects
+        StoreOriginalColors();
+    }
+    
+    void StoreOriginalColors()
+    {
+        if (renderers != null && renderers.Length > 0)
+        {
+            originalColors = new Color[renderers.Length];
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                if (renderers[i] != null && renderers[i].material != null)
+                {
+                    if (renderers[i].material.HasProperty("_Color"))
+                    {
+                        originalColors[i] = renderers[i].material.color;
+                    }
+                    else if (renderers[i].material.HasProperty("_BaseColor"))
+                    {
+                        originalColors[i] = renderers[i].material.GetColor("_BaseColor");
+                    }
+                    else
+                    {
+                        originalColors[i] = Color.white;
+                    }
+                }
+            }
+        }
+    }
+    
+    // ITargetable interface methods
+    public void OnTargetSelected()
+    {
+        isCurrentlyTargeted = true;
+        
+        // Show visual indicator
+        if (targetIndicator != null)
+        {
+            targetIndicator.SetActive(true);
+        }
+        
+        // Apply target highlight effect
+        if (showTargetEffects)
+        {
+            ApplyTargetHighlight();
+        }
+    }
+    
+    public void OnTargetDeselected()
+    {
+        isCurrentlyTargeted = false;
+        
+        // Hide visual indicator
+        if (targetIndicator != null)
+        {
+            targetIndicator.SetActive(false);
+        }
+        
+        // Remove target highlight effect
+        if (showTargetEffects)
+        {
+            RemoveTargetHighlight();
+        }
+    }
+    
+    public Bounds GetTargetBounds()
+    {
+        Collider col = GetComponent<Collider>();
+        if (col != null)
+        {
+            return col.bounds;
+        }
+        
+        // Fallback: create bounds around transform
+        return new Bounds(transform.position, Vector3.one);
+    }
+    
+    void ApplyTargetHighlight()
+    {
+        if (renderers == null || renderers.Length == 0) return;
+        
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null && renderers[i].material != null)
+            {
+                // Add a slight blue/green tint for grappleable objects
+                Color highlightColor = originalColors[i] * 1.2f; // Brighten slightly
+                
+                if (pullable)
+                {
+                    highlightColor.g = Mathf.Min(highlightColor.g + 0.3f, 1f); // Add green tint for pullable
+                }
+                else
+                {
+                    highlightColor.b = Mathf.Min(highlightColor.b + 0.3f, 1f); // Add blue tint for interactive
+                }
+                
+                if (renderers[i].material.HasProperty("_Color"))
+                {
+                    renderers[i].material.color = highlightColor;
+                }
+                else if (renderers[i].material.HasProperty("_BaseColor"))
+                {
+                    renderers[i].material.SetColor("_BaseColor", highlightColor);
+                }
+            }
+        }
+    }
+    
+    void RemoveTargetHighlight()
+    {
+        if (renderers == null || renderers.Length == 0) return;
+        
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null && renderers[i].material != null && i < originalColors.Length)
+            {
+                if (renderers[i].material.HasProperty("_Color"))
+                {
+                    renderers[i].material.color = originalColors[i];
+                }
+                else if (renderers[i].material.HasProperty("_BaseColor"))
+                {
+                    renderers[i].material.SetColor("_BaseColor", originalColors[i]);
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Check if this target is currently being targeted by any system
+    /// </summary>
+    public bool IsCurrentlyTargeted => isCurrentlyTargeted;
     
     // Called when this object starts being grappled
     public virtual void StartGrapple()

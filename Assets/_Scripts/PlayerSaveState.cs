@@ -21,7 +21,9 @@ public class PlayerSaveState : ScriptableObject
     public int combo3Damage = 5;  // Third attack damage (reduced from 8)
     public int finisherDamage = 6; // Finisher move damage (reduced from 10)
     
+    [Header("Player Upgrades")]
     public bool hasArm;
+    public bool hasSword;
     
     public int GetComboDamage(int comboCount)
     {

@@ -39,9 +39,9 @@ public class TargetingSystemSetup : EditorWindow
         
         GUILayout.Space(10);
         
-        if (GUILayout.Button("Add TargetableGrappleable to all Grappleable components"))
+        if (GUILayout.Button("Verify Grappleable Components (Now Built-in)"))
         {
-            AddTargetableGrappleableToGrappleables();
+            VerifyGrappleableComponents();
         }
         
         GUILayout.Space(10);
@@ -133,24 +133,28 @@ public class TargetingSystemSetup : EditorWindow
         Debug.Log($"Added TargetableEnemy to {addedCount} Boss objects");
     }
     
-    private static void AddTargetableGrappleableToGrappleables()
+    private static void VerifyGrappleableComponents()
     {
         Grappleable[] grapplebales = FindObjectsOfType<Grappleable>();
-        int addedCount = 0;
+        int validCount = 0;
+        int needsTagCount = 0;
         
         foreach (var grappleable in grapplebales)
         {
-            if (grappleable.GetComponent<TargetableGrappleable>() == null)
+            validCount++;
+            
+            // Check if it has the correct tag
+            if (!grappleable.CompareTag("CanBeGrappled"))
             {
-                grappleable.gameObject.AddComponent<TargetableGrappleable>();
-                addedCount++;
+                grappleable.tag = "CanBeGrappled";
+                needsTagCount++;
                 
                 // Mark the object as dirty so changes are saved
                 EditorUtility.SetDirty(grappleable.gameObject);
             }
         }
         
-        Debug.Log($"Added TargetableGrappleable to {addedCount} Grappleable objects");
+        Debug.Log($"Found {validCount} Grappleable objects (now with built-in targeting). Added 'CanBeGrappled' tag to {needsTagCount} objects.");
     }
     
     private static void AddTargetingSystemsToNyx()
@@ -214,7 +218,7 @@ public class TargetingSystemSetup : EditorWindow
         AddTargetableEnemyToEnemyBasic();
         AddTargetableEnemyToWorkers();
         AddTargetableEnemyToBosses();
-        AddTargetableGrappleableToGrappleables();
+        VerifyGrappleableComponents();
         AddTargetingSystemsToNyx(); // Add this to complete setup
         
         Debug.Log("Complete targeting system setup finished!");

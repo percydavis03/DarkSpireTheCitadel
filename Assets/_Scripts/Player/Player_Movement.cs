@@ -46,7 +46,6 @@ public class Player_Movement : MonoBehaviour
     public int speed;
     public Transform playerTransform;
     public float rotationSpeed;
-    private bool rolling;
 
     public Animator anim;
     //public Camera playerCamera;
@@ -89,6 +88,48 @@ public class Player_Movement : MonoBehaviour
     //arm
     public bool inPickupZone;
 
+    // Blend Tree Support (1D Speed-based)
+[Header("Animation Blend Tree")]
+[Tooltip("Use blend tree for speed transitions (recommended)")]
+public bool useBlendTree = true;
+[Tooltip("Speed parameter name in animator")]
+public string speedParameterName = "Speed";
+[Tooltip("How fast the blend parameter changes")]
+public float blendSpeed = 5f;
+private float animatorSpeed = 0f;
+private float targetAnimatorSpeed = 0f;
+
+// Sprint transition variables
+[Header("Sprint Transitions")]
+public float sprintAcceleration = 8f;
+public float sprintDeceleration = 12f;
+private float currentSpeed;
+private float targetSpeed;
+private bool sprintInput;
+
+// Dodge Roll System
+[Header("Dodge Roll System")]
+[Tooltip("How far the player rolls")]
+public float rollDistance = 5f;
+[Tooltip("How fast the roll moves")]
+public float rollSpeed = 15f;
+[Tooltip("Time before player can roll again")]
+public float rollCooldown = 1f;
+[Tooltip("How long the roll invincibility lasts")]
+public float invincibilityDuration = 0.6f;
+[Tooltip("If true, rolls in input direction. If false, rolls forward")]
+public bool directionalRoll = true;
+[Tooltip("If true, can cancel attacks with roll")]
+public bool canRollCancelAttacks = true;
+
+// Roll state variables
+private bool rolling = false;
+private bool canRoll = true;
+private Vector3 rollDirection;
+private float rollTimer = 0f;
+private float cooldownTimer = 0f;
+private Coroutine rollCoroutine;
+
     private void Awake()
     {
         if (instance == null)
@@ -109,6 +150,18 @@ public class Player_Movement : MonoBehaviour
         anim = animationSource.GetComponent<Animator>();
         isAttacking = false;
         canRotate = true;
+        
+        // Initialize speed variables
+        currentSpeed = thisGameSave.playerSpeed;
+        targetSpeed = thisGameSave.playerSpeed;
+        animatorSpeed = 0f;
+        targetAnimatorSpeed = 0f;
+        
+        // Initialize roll variables
+        rolling = false;
+        canRoll = true;
+        cooldownTimer = 0f;
+        rollTimer = 0f;
     }
     
     private void OnEnable() //need for input system
@@ -151,6 +204,14 @@ public class Player_Movement : MonoBehaviour
         
         // Reset combo when script is disabled
         ResetCombo();
+        
+        // Clean up roll state
+        if (rollCoroutine != null)
+        {
+            StopCoroutine(rollCoroutine);
+            rollCoroutine = null;
+        }
+        rolling = false;
     }
     IEnumerator WaitUntil(float seconds)
     {
@@ -290,11 +351,157 @@ public class Player_Movement : MonoBehaviour
         speed = thisGameSave.playerSpeed;
     }
 
-    public void StopRolling()
+    // Enhanced Roll Input Handling
+    private void HandleRollInput()
+    {
+        if (roll.WasPressedThisFrame() && canRoll && !thisGameSave.inMenu)
+        {
+            // Check if we can roll (cooldown, state restrictions)
+            bool canStartRoll = true;
+            
+            // Can't roll if already rolling
+            if (rolling) canStartRoll = false;
+            
+            // Check if attacks can be cancelled
+            if (isAttacking && !canRollCancelAttacks) canStartRoll = false;
+            
+            if (canStartRoll)
+            {
+                StartRoll();
+            }
+        }
+    }
+    
+    private void StartRoll()
+    {
+        // Determine roll direction
+        if (directionalRoll)
+        {
+            // Roll in input direction (or forward if no input)
+            float horizontalInput = Input.GetAxis("Horizontal");
+            float verticalInput = Input.GetAxis("Vertical");
+            Vector2 inputVector = new Vector2(horizontalInput, verticalInput);
+            
+            if (inputVector.magnitude > 0.1f)
+            {
+                // Roll in input direction relative to camera
+                Vector3 cameraForward = mainCamera.transform.forward;
+                Vector3 cameraRight = mainCamera.transform.right;
+                cameraForward.y = 0;
+                cameraRight.y = 0;
+                cameraForward.Normalize();
+                cameraRight.Normalize();
+                
+                rollDirection = (cameraForward * verticalInput + cameraRight * horizontalInput).normalized;
+            }
+            else
+            {
+                // No input - roll forward
+                rollDirection = playerTransform.forward;
+            }
+        }
+        else
+        {
+            // Always roll forward
+            rollDirection = playerTransform.forward;
+        }
+        
+        // Set roll state
+        rolling = true;
+        canRoll = false;
+        cooldownTimer = rollCooldown;
+        rollTimer = 0f;
+        
+        // Cancel attacks and combos
+        if (isAttacking)
+        {
+            isAttacking = false;
+            ResetCombo();
+            ClearAttackState();
+        }
+        
+        // Set invincibility
+        if (Main_Player.instance != null)
+        {
+            Main_Player.instance.canTakeDamage = false;
+        }
+        
+        // Animation
+        anim.SetBool("isRolling", true);
+        
+        // Start roll movement coroutine
+        if (rollCoroutine != null)
+        {
+            StopCoroutine(rollCoroutine);
+        }
+        rollCoroutine = StartCoroutine(RollMovement());
+        
+        Debug.Log($"Roll started in direction: {rollDirection}");
+    }
+    
+    private IEnumerator RollMovement()
+    {
+        float rollDuration = rollDistance / rollSpeed;
+        Vector3 startPosition = transform.position;
+        Vector3 targetPosition = startPosition + (rollDirection * rollDistance);
+        
+        rollTimer = 0f;
+        
+        while (rollTimer < rollDuration && rolling)
+        {
+            rollTimer += Time.deltaTime;
+            float progress = rollTimer / rollDuration;
+            
+            // Use an easing curve for more natural roll movement
+            float easedProgress = Mathf.Sin(progress * Mathf.PI * 0.5f); // Ease out
+            
+            // Calculate movement for this frame
+            Vector3 newPosition = Vector3.Lerp(startPosition, targetPosition, easedProgress);
+            Vector3 movement = newPosition - transform.position;
+            
+            // Apply roll movement
+            characterController.Move(movement);
+            
+            yield return null;
+        }
+        
+        // End roll after duration or if manually stopped
+        if (rolling)
+        {
+            EndRoll();
+        }
+    }
+    
+    public void EndRoll()
     {
         rolling = false;
         anim.SetBool("isRolling", false);
-        Main_Player.instance.canTakeDamage = true;
+        
+        // Stop roll movement
+        if (rollCoroutine != null)
+        {
+            StopCoroutine(rollCoroutine);
+            rollCoroutine = null;
+        }
+        
+        // Restore damage after invincibility period
+        StartCoroutine(RestoreVulnerability());
+    }
+    
+    private IEnumerator RestoreVulnerability()
+    {
+        yield return new WaitForSeconds(invincibilityDuration);
+        
+        if (Main_Player.instance != null && !rolling)
+        {
+            Main_Player.instance.canTakeDamage = true;
+        }
+    }
+    
+    // Legacy method for animation events (calls new EndRoll)
+    public void StopRolling()
+    {
+        EndRoll();
     }
 
     public void ApplyKnockback(Vector3 knockbackForce)
@@ -363,7 +570,8 @@ public class Player_Movement : MonoBehaviour
         // Update attack states like Sam's approach
         UpdateAttackStates();
         
-        if (canMove && canTurn && !thisGameSave.inMenu)
+        // Handle normal movement (not during roll)
+        if (canMove && canTurn && !thisGameSave.inMenu && !rolling)
         {
             // Get input values
             float verticalInput = Input.GetAxis("Vertical");
@@ -392,9 +600,15 @@ public class Player_Movement : MonoBehaviour
             // Apply movement
             moveDirection = new Vector3(currentVelocity.x, moveDirection.y, currentVelocity.z);
         }
+        else if (rolling)
+        {
+            // During roll, movement is handled by the roll coroutine
+            // Just maintain the Y component for gravity
+            // (Roll movement is applied directly in RollMovement coroutine)
+        }
 
-        // Handle rotation
-        if (moveDirection.magnitude > 0.1f && canRotate)
+        // Handle rotation (not during roll)
+        if (!rolling && moveDirection.magnitude > 0.1f && canRotate)
         {
             Vector3 rotationDirection = new Vector3(moveDirection.x, 0, moveDirection.z).normalized;
             if (rotationDirection != Vector3.zero)
@@ -404,6 +618,19 @@ public class Player_Movement : MonoBehaviour
                     playerTransform.rotation,
                     toRotation,
                     rotationSpeed * Time.deltaTime * 2f // Increased rotation speed for more responsive turning
+                );
+            }
+        }
+        else if (rolling && directionalRoll)
+        {
+            // During directional roll, face the roll direction
+            if (rollDirection != Vector3.zero)
+            {
+                Quaternion toRotation = Quaternion.LookRotation(rollDirection, Vector3.up);
+                playerTransform.rotation = Quaternion.RotateTowards(
+                    playerTransform.rotation,
+                    toRotation,
+                    rotationSpeed * Time.deltaTime * 4f // Faster rotation during roll
                 );
             }
         }
@@ -429,32 +656,69 @@ public class Player_Movement : MonoBehaviour
         {
             MenuScript.instance.MainMenu();
         }*/
-        // Roll Dodge
-        if (roll.IsPressed() && !rolling)
-        {
-            rolling = true;
-            isAttacking = false;
-            ResetCombo(); // Reset combo when rolling
-            Main_Player.instance.canTakeDamage = false;
-            anim.SetBool("isRolling", true);
-        }
+        // Enhanced Dodge Roll System
+        HandleRollInput();
         
-        // Safety check: ensure player can take damage when not rolling
-        if (!rolling && Main_Player.instance != null && !Main_Player.instance.canTakeDamage)
+        // Update roll cooldown
+        if (!canRoll)
         {
-            Main_Player.instance.canTakeDamage = true;
+            cooldownTimer -= Time.deltaTime;
+            if (cooldownTimer <= 0f)
+            {
+                canRoll = true;
+            }
         }
-        // Handle sprint
-        if (sprint.IsPressed() && !isAttacking)
+        // Handle sprint with smooth transitions (not during roll)
+        bool previousSprintInput = sprintInput;
+        sprintInput = sprint.IsPressed() && !isAttacking && !rolling;
+        
+        if (sprintInput)
         {
-            speed = thisGameSave.sprintSpeed;
+            targetSpeed = thisGameSave.sprintSpeed;
             isSprint = true;
         }
         else
         {
-            speed = thisGameSave.playerSpeed;
+            targetSpeed = thisGameSave.playerSpeed;
             isSprint = false;
         }
+        
+        // Handle speed transitions (not during roll)
+        if (useBlendTree && !rolling)
+        {
+            // 1D Blend Tree: Speed-based blending
+            float horizontalInput = Input.GetAxis("Horizontal");
+            float verticalInput = Input.GetAxis("Vertical");
+            bool isMoving = new Vector2(horizontalInput, verticalInput).magnitude > 0.1f;
+            
+            if (isMoving)
+            {
+                targetAnimatorSpeed = sprintInput ? 1f : 0.5f; // 0.5 = walk, 1 = sprint
+            }
+            else
+            {
+                targetAnimatorSpeed = 0f; // idle
+            }
+            
+            // Smooth speed blending
+            animatorSpeed = Mathf.Lerp(animatorSpeed, targetAnimatorSpeed, Time.deltaTime * blendSpeed);
+            
+            // Update actual movement speed based on blend value
+            float baseSpeed = thisGameSave.playerSpeed;
+            float speedDifference = thisGameSave.sprintSpeed - baseSpeed;
+            currentSpeed = baseSpeed + (speedDifference * Mathf.Clamp01(animatorSpeed));
+            
+            // Update the actual speed variable used in movement calculations
+            speed = Mathf.RoundToInt(currentSpeed);
+        }
+        else if (!rolling)
+        {
+            // Fallback: Simple linear interpolation (not during roll)
+            float speedTransitionRate = sprintInput ? sprintAcceleration : sprintDeceleration;
+            currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * speedTransitionRate);
+            speed = Mathf.RoundToInt(currentSpeed);
+        }
+        // During roll, speed is managed by roll system
 
         // Handle attack inputs
         HandleAttackInputs();
@@ -484,8 +748,33 @@ public class Player_Movement : MonoBehaviour
     {
         if (thisGameSave.inMenu)
         {
-            anim.SetBool("isRun", false);
-            anim.SetBool("isWalk", false);
+            if (useBlendTree)
+            {
+                // Reset speed parameter to 0 when in menu
+                SafeSetAnimatorFloat(speedParameterName, 0f);
+            }
+            else
+            {
+                anim.SetBool("isRun", false);
+                anim.SetBool("isWalk", false);
+            }
+            return;
+        }
+        
+        // Rolling animation takes priority
+        if (rolling)
+        {
+            if (useBlendTree)
+            {
+                // Set speed to 0 during roll (roll animation handled by isRolling trigger)
+                SafeSetAnimatorFloat(speedParameterName, 0f);
+            }
+            else
+            {
+                // Disable movement animations during roll
+                anim.SetBool("isRun", false);
+                anim.SetBool("isWalk", false);
+            }
             return;
         }
         
@@ -493,26 +782,43 @@ public class Player_Movement : MonoBehaviour
         bool isMoving = currentVelocity.magnitude > 0.05f;
         bool isGrounded = characterController.isGrounded;
         
-        if (isMoving && isGrounded && !isJumping)
+        if (useBlendTree)
         {
-            if (isSprint)
+            // 1D Blend Tree: Use single speed parameter
+            if (isMoving && isGrounded && !isJumping && !rolling)
             {
-                // Running animation when sprinting
-                anim.SetBool("isWalk", false);
-                anim.SetBool("isRun", true);
+                SafeSetAnimatorFloat(speedParameterName, animatorSpeed);
             }
             else
             {
-                // Walking animation when not sprinting
-                anim.SetBool("isRun", false);
-                anim.SetBool("isWalk", true);
+                // Not moving or not grounded - set to idle
+                SafeSetAnimatorFloat(speedParameterName, 0f);
             }
         }
         else
         {
-            // Not moving or not grounded - disable both
-            anim.SetBool("isRun", false);
-            anim.SetBool("isWalk", false);
+            // Traditional boolean approach (fallback)
+            if (isMoving && isGrounded && !isJumping && !rolling)
+            {
+                if (isSprint)
+                {
+                    // Running animation when sprinting
+                    anim.SetBool("isWalk", false);
+                    anim.SetBool("isRun", true);
+                }
+                else
+                {
+                    // Walking animation when not sprinting
+                    anim.SetBool("isRun", false);
+                    anim.SetBool("isWalk", true);
+                }
+            }
+            else
+            {
+                // Not moving or not grounded - disable both
+                anim.SetBool("isRun", false);
+                anim.SetBool("isWalk", false);
+            }
         }
     }
 
@@ -539,6 +845,28 @@ public class Player_Movement : MonoBehaviour
             if (paramName == "isArmAttack")
             {
                 Debug.LogWarning($"Animator parameter '{paramName}' not found - arm attack functionality may be disabled");
+            }
+        }
+    }
+
+    // Helper method to safely set animator float parameters
+    private void SafeSetAnimatorFloat(string paramName, float value)
+    {
+        if (anim != null)
+        {
+            // Check if parameter exists before trying to set it
+            foreach (AnimatorControllerParameter param in anim.parameters)
+            {
+                if (param.name == paramName && param.type == AnimatorControllerParameterType.Float)
+                {
+                    anim.SetFloat(paramName, value);
+                    return;
+                }
+            }
+            // If we reach here, parameter doesn't exist - log a warning only once
+            if (paramName == speedParameterName)
+            {
+                Debug.LogWarning($"Animator parameter '{paramName}' not found - blend tree functionality may be disabled. Make sure to add a Float parameter named '{speedParameterName}' to your Animator.");
             }
         }
     }
