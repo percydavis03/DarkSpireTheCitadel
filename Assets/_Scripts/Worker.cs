@@ -415,6 +415,47 @@ public class Worker : MonoBehaviour
         isInPerfectParryWindow = false;
     }
     
+    //---------SIMPLE KNOCKBACK SYSTEM FOR WORKERS---------
+    
+    public void GetKnockedBack(Vector3 force)
+    {
+        Debug.Log("Worker knocked back - keeping it simple!");
+        StopMoving();
+        StartCoroutine(ApplySimpleKnockback(force));
+    }
+    
+    private IEnumerator ApplySimpleKnockback(Vector3 force)
+    {
+        // Simple knockback for workers
+        yield return null;
+        rb.useGravity = true;
+        rb.isKinematic = false;
+        
+        // Apply consistent knockback force
+        rb.AddForce(force);
+        
+        Debug.Log($"Worker knockback applied: {force}");
+        
+        yield return new WaitForFixedUpdate();
+        yield return new WaitUntil(() => rb.velocity.magnitude < 0.1f);
+        
+        // Reset worker physics
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.useGravity = false;
+        rb.isKinematic = true;
+        
+        // Re-enable worker AI after knockback
+        if (agent != null)
+        {
+            agent.Warp(transform.position);
+            agent.enabled = true;
+            GetComponent<NavMeshAgent>().speed = setSpeed;
+        }
+        
+        yield return null;
+    }
+    
     //---------ORIGINAL WORKER METHODS---------
     public void WeaponOn()
     {

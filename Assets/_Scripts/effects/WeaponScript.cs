@@ -16,13 +16,18 @@ public class WeaponScript : MonoBehaviour
     public float expertParryWindow = 0.05f;     // Boss-level timing
     
     [Header("Parry Feedback")]
-    public float parryDamageMultiplier = 1.5f;
-    public float parryStunDuration = 2.0f;
-    public float perfectParryBonus = 2.0f;      // Extra damage for frame-perfect parries
+    public float parryDamageMultiplier = 0.8f;      // Less damage than normal attacks
+    public float parryStunDuration = 2.0f;          // Standard stun duration
+    public float perfectParryBonus = 1.2f;          // Minor damage boost for perfect timing
+    
+    [Header("Parry Stun System (Cohesive with Grapple)")]
+    public float perfectParryStunMultiplier = 2.0f; // Perfect parries = 2x stun duration
+    public float comboParryStunBonus = 0.5f;        // Extra 0.5s stun during combos
+    public Vector3 standardParryKnockback = new Vector3(30, 15, 30); // Simple, consistent knockback
     
     [Header("Combo Parry System")]
-    public float comboParryWindow = 0.1f;       // Shorter window during combos
-    public float comboParryBonus = 1.2f;        // Extra multiplier for combo parries
+    public float comboParryWindow = 0.1f;       
+    public float comboParryBonus = 1.1f;        // Minimal extra damage
     
     private float lastParryTime = -1f;
     
@@ -184,29 +189,46 @@ public class WeaponScript : MonoBehaviour
 
     private bool ExecuteEnhancedParry(Enemy_Basic enemy, bool isPerfectParry)
     {
-        Debug.Log(isPerfectParry ? "PERFECT PARRY! Maximum damage!" : "PARRY SUCCESS! Enemy stunned!");
+        Debug.Log(isPerfectParry ? "PERFECT PARRY! Extended stun!" : "PARRY SUCCESS! Enemy stunned!");
         
-        // Calculate enhanced parry damage
-        float totalMultiplier = parryDamageMultiplier;
+        // Calculate reduced parry damage
+        float totalMultiplier = parryDamageMultiplier; // 0.8f
         
         if (isPerfectParry)
         {
-            totalMultiplier *= perfectParryBonus;
+            totalMultiplier *= perfectParryBonus; // 1.2f
         }
         
         if (Player_Movement.instance != null && Player_Movement.instance.isComboing)
         {
-            totalMultiplier *= comboParryBonus;
+            totalMultiplier *= comboParryBonus; // 1.1f
         }
         
         int parryDamage = Mathf.RoundToInt(GetCurrentComboDamage() * totalMultiplier);
         
-        // Apply enhanced parry effects
-        float stunDuration = isPerfectParry ? parryStunDuration * 1.5f : parryStunDuration;
+        // MAIN REWARD: Calculate enhanced stun duration
+        float stunDuration = parryStunDuration; // Base 2.0s
+        
+        if (isPerfectParry)
+        {
+            stunDuration *= perfectParryStunMultiplier; // Perfect = 4.0s stun!
+        }
+        
+        if (Player_Movement.instance != null && Player_Movement.instance.isComboing)
+        {
+            stunDuration += comboParryStunBonus; // +0.5s during combos
+        }
+        
+        // Apply the enhanced stun (this makes enemies grappable!)
         enemy.GetParried(stunDuration);
         
+        // Apply reduced damage
         enemy.enemyHP -= parryDamage;
-        Debug.Log($"Enhanced parry damage: {parryDamage} (Perfect: {isPerfectParry})");
+        
+        // Simple, consistent knockback
+        enemy.GetKnockedBack(standardParryKnockback);
+        
+        Debug.Log($"Parry: {parryDamage} damage, {stunDuration}s stun (Perfect: {isPerfectParry})");
         
         OnParrySuccess(isPerfectParry);
         
@@ -215,58 +237,60 @@ public class WeaponScript : MonoBehaviour
 
     private bool ExecuteEnhancedParry(Worker worker, bool isPerfectParry)
     {
-        Debug.Log(isPerfectParry ? "PERFECT PARRY! Maximum damage!" : "PARRY SUCCESS! Worker stunned!");
+        Debug.Log(isPerfectParry ? "PERFECT PARRY! Worker stunned longer!" : "PARRY SUCCESS! Worker stunned!");
         
-        float totalMultiplier = parryDamageMultiplier;
+        // Calculate reduced parry damage
+        float totalMultiplier = parryDamageMultiplier; // 0.8f
         
         if (isPerfectParry)
         {
-            totalMultiplier *= perfectParryBonus;
+            totalMultiplier *= perfectParryBonus; // 1.2f
         }
         
         if (Player_Movement.instance != null && Player_Movement.instance.isComboing)
         {
-            totalMultiplier *= comboParryBonus;
+            totalMultiplier *= comboParryBonus; // 1.1f
         }
         
         int parryDamage = Mathf.RoundToInt(GetCurrentComboDamage() * totalMultiplier);
         
-        float stunDuration = isPerfectParry ? parryStunDuration * 1.5f : parryStunDuration;
+        // MAIN REWARD: Calculate enhanced stun duration  
+        float stunDuration = parryStunDuration; // Base 2.0s
+        
+        if (isPerfectParry)
+        {
+            stunDuration *= perfectParryStunMultiplier; // Perfect = 4.0s stun!
+        }
+        
+        if (Player_Movement.instance != null && Player_Movement.instance.isComboing)
+        {
+            stunDuration += comboParryStunBonus; // +0.5s during combos
+        }
+        
+        // Apply the enhanced stun (works with grapple system!)
         worker.GetParried(stunDuration);
         
+        // Apply reduced damage
         worker.enemyHP -= parryDamage;
-        Debug.Log($"Enhanced parry damage: {parryDamage} (Perfect: {isPerfectParry})");
+        
+        // Simple, consistent knockback for workers
+        worker.GetKnockedBack(standardParryKnockback);
+        
+        Debug.Log($"Worker parry: {parryDamage} damage, {stunDuration}s stun (Perfect: {isPerfectParry})");
         
         OnParrySuccess(isPerfectParry);
         
         return true;
     }
-
+    
     private void OnParrySuccess(bool isPerfectParry)
     {
-        Debug.Log($"Enhanced parry executed! Perfect: {isPerfectParry}");
+        Debug.Log($"Parry executed! Perfect: {isPerfectParry} - Focus: Extended stun for grappling!");
         
-        if (Player_Movement.instance != null)
-        {
-            StartCoroutine(EnhancedParryFeedback(isPerfectParry));
-        }
-        
-        // TODO: Enhanced feedback based on parry quality:
-        // - Different particle effects for perfect vs normal parries
-        // - Different screen shake intensity
-        // - Different sound effects
-        // - UI feedback showing parry quality
-        // - Different slow motion effects
-    }
-
-    private IEnumerator EnhancedParryFeedback(bool isPerfectParry)
-    {
-        // Enhanced feedback for perfect parries
-        float timeScale = isPerfectParry ? 0.05f : 0.1f;
-        float duration = isPerfectParry ? 0.2f : 0.1f;
-        
-        Time.timeScale = timeScale;
-        yield return new WaitForSecondsRealtime(duration);
-        Time.timeScale = 1f;
+        // TODO: Simple feedback without slow motion:
+        // - Brief screen shake for all parries
+        // - Different sound effects for perfect vs normal
+        // - UI feedback showing stun duration
+        // - Particle effects or visual indicators
     }
 }
