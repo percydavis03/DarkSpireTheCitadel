@@ -1159,7 +1159,33 @@ MonoBehaviour:
   thisGuy: {fileID: 1814872507465041094}
   player: {fileID: 3488818573682954259, guid: 286cc0691f4f6a041b42a56c044f50c6, type: 3}
   healthFill: {fileID: 540862159057767731}
+  waitThreshold: 0.05
   spear_hitbox: {fileID: 8727025427618301063}
+  isStunned: 0
+  stunDuration: 2
+  defaultStunDuration: 2
+  canBeParried: 1
+  isInParryWindow: 0
+  isInPerfectParryWindow: 0
+  canBeParriedNow: 0
+  currentAttackPhase: 0
+  maxAttackPhases: 1
+  isInAttackStartup: 0
+  isInAttackActive: 0
+  isInAttackRecovery: 0
+  parryDifficulty: 2
+  difficultyParryWindows:
+  - 0.4
+  - 0.3
+  - 0.2
+  - 0.1
+  - 0.05
+  difficultyPerfectWindows:
+  - 0.1
+  - 0.08
+  - 0.06
+  - 0.04
+  - 0.02
   agent: {fileID: 8853411899951149036}
   whatIsGround:
     serializedVersion: 2

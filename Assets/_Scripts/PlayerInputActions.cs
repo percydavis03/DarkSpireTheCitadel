@@ -342,9 +342,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"",
-                    ""path"": ""<Mouse>/middleButton"",
+                    ""path"": ""<Mouse>/scroll/y"",
                     ""interactions"": """",
-                    ""processors"": ""Scale(factor=0.1)"",
+                    ""processors"": """",
                     ""groups"": """",
                     ""action"": ""CycleTargets"",
                     ""isComposite"": false,

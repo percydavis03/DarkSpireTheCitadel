@@ -29,7 +29,7 @@ public class NyxTargetingSystem : MonoBehaviour
     [SerializeField] private int maxTargetsPerFrame = 10; // Limit for performance
     
     [Header("Debug")]
-    [SerializeField] private bool enableDebugLogs = false;
+    [SerializeField] private bool enableDebugLogs = true; // Enable by default for troubleshooting
     [SerializeField] private bool showDebugVisualization = true;
     [SerializeField] private Color coneColor = Color.blue;
     [SerializeField] private Color targetLineColor = Color.green;

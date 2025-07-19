@@ -1,0 +1,34 @@
+// This is a text file with instructions to create a simple lock-on indicator prefab manually
+
+HOW TO CREATE LOCK-ON INDICATOR MANUALLY:
+
+1. CREATE NEW GAME OBJECT:
+   - Right-click in Hierarchy → Create Empty
+   - Name it "SimpleLockOnIndicator"
+
+2. ADD SPRITE RENDERER:
+   - Select SimpleLockOnIndicator
+   - Add Component → Rendering → Sprite Renderer
+   - Set Sprite to any simple sprite (circle, crosshair, etc.)
+   - Set Color to Red (255, 0, 0, 255)
+
+3. ADD LOCK-ON INDICATOR SCRIPT:
+   - Add Component → Scripts → LockOnIndicator
+   - The script will auto-configure itself
+
+4. SCALE IT:
+   - Set Transform Scale to (0.5, 0.5, 0.5)
+
+5. MAKE IT A PREFAB:
+   - Drag from Hierarchy to Project folder
+   - Delete from Hierarchy (we just want the prefab)
+
+6. ASSIGN TO LOCK-ON SYSTEM:
+   - Find your Nyx child object
+   - In NyxLockOnSystem component
+   - Set "Lock On Indicator Prefab" to your new prefab
+   - Check "Use World Space Indicator"
+
+7. TEST:
+   - Press RB/LB on controller OR scroll mouse wheel
+   - Should see red circle above enemies 

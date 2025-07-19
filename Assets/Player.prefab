@@ -2084,6 +2084,8 @@ GameObject:
   - component: {fileID: 5590703173683751734}
   - component: {fileID: 3688565540525338254}
   - component: {fileID: 2427458369210021597}
+  - component: {fileID: 3481393364203808334}
+  - component: {fileID: 1481794033222216808}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -2219,6 +2221,15 @@ MonoBehaviour:
   thisGameSave: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
   swordHitbox: {fileID: 1658697661035905755}
   spinDistance: 0
+  isComboing: 0
+  comboCount: 0
+  comboWindow: 1.5
+  canComboNext: 0
+  attackAnimations:
+  - isAttacking
+  - isComboing
+  - isSpinAttack
+  - AttackInt
   gauntletHitbox: {fileID: 0}
   speed: 4
   playerTransform: {fileID: 3174362507664998656}
@@ -2310,6 +2321,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Player: {fileID: 0}
   thisGameSave: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
+  canTakeDamage: 0
   ough: {fileID: 0}
   bloodSplat: {fileID: 2116165384315778508, guid: 1406c2d0c30ed0346aebe50fa1578e53,
     type: 3}
@@ -2453,6 +2465,76 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nonRigidbodyVelocity: 0
   attenuationObject: {fileID: 0}
+--- !u!114 &3481393364203808334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154107589237833224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a5f221221cedfa4199a1b5a55226e6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nyxTransform: {fileID: 3174362507664998656}
+  autoFindNyx: 0
+  targetingRange: 15
+  targetingAngle: 45
+  obstacleLayerMask:
+    serializedVersion: 2
+    m_Bits: 321
+  targetingOrigin: {fileID: 3174362507664998656}
+  useCameraDirection: 0
+  targetingCamera: {fileID: 0}
+  cameraAngleTolerance: 5
+  allowedTargetTypes: 0000000001000000
+  requireLineOfSight: 1
+  prioritizeClosestTarget: 1
+  updateFrequency: 0.1
+  maxTargetsPerFrame: 10
+  enableDebugLogs: 1
+  showDebugVisualization: 1
+  coneColor: {r: 0, g: 0, b: 1, a: 1}
+  targetLineColor: {r: 0, g: 1, b: 0, a: 1}
+  blockedLineColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &1481794033222216808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154107589237833224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddf15e8b32f8ca647b380ba5cf2479ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nyxTransform: {fileID: 3174362507664998656}
+  autoFindNyx: 0
+  enableLockOn: 1
+  lockOnRange: 20
+  lockOnAngle: 80
+  autoLockOnClosest: 1
+  lockOnLostDistance: 25
+  adjustCameraOnLockOn: 0
+  cameraTarget: {fileID: 0}
+  cameraLerpSpeed: 2
+  cameraOffset: {x: 0, y: 2, z: 0}
+  enableLockOnToggle: 0
+  cycleInputThreshold: 0.3
+  lockOnIndicatorPrefab: {fileID: 287009170033980275, guid: ffcba48034191a548a4b6cc49799ec0f,
+    type: 3}
+  uiCanvas: {fileID: 364269329265196484}
+  showLockOnIndicator: 1
+  useWorldSpaceIndicator: 1
+  worldSpaceIndicator: {fileID: 335920887594038709, guid: ffcba48034191a548a4b6cc49799ec0f,
+    type: 3}
+  autoFaceTarget: 1
+  faceTargetSpeed: 1.32
+  onlyFaceWhenNotMoving: 0
+  enableDebugLogs: 1
+  showDebugGizmos: 1
 --- !u!1 &1233231036507952271
 GameObject:
   m_ObjectHideFlags: 0
@@ -3234,7 +3316,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5183829a7927378439ff8d43ec69c204, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackTarget: Enemy
+  thisGameSave: {fileID: 0}
+  parryEnabled: 1
+  easyParryWindow: 0.3
+  normalParryWindow: 0.15
+  hardParryWindow: 0.08
+  expertParryWindow: 0.05
+  parryDamageMultiplier: 0.8
+  parryStunDuration: 2
+  perfectParryBonus: 1.2
+  perfectParryStunMultiplier: 2
+  comboParryStunBonus: 0.5
+  standardParryKnockback: {x: 80, y: 30, z: 80}
+  lightKnockback: {x: 5, y: 1, z: 5}
+  mediumKnockback: {x: 8, y: 2, z: 8}
+  heavyKnockback: {x: 12, y: 3, z: 12}
+  comboParryWindow: 0.1
+  comboParryBonus: 1.1
 --- !u!1 &1707337481270763488
 GameObject:
   m_ObjectHideFlags: 0

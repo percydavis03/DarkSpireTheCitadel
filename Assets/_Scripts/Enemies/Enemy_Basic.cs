@@ -424,7 +424,11 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     // Update is called once per frame
     void Update()
     {
-        //healthFill.fillAmount = enemyHP / maxEnemyHP;
+        // Update health bar if it exists
+        if (healthFill != null)
+        {
+            healthFill.fillAmount = enemyHP / maxEnemyHP;
+        }
         if (enemyHP <= 0)
         {
            if (!dead)

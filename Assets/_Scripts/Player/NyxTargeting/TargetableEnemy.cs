@@ -194,14 +194,31 @@ public class TargetableEnemy : MonoBehaviour, ITargetable
         }
         
         // Fallback: calculate bounds from renderers
-        if (renderers.Length > 0)
+        if (renderers != null && renderers.Length > 0)
         {
-            Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++)
+            // Find first valid renderer
+            Renderer firstValidRenderer = null;
+            for (int i = 0; i < renderers.Length; i++)
             {
-                bounds.Encapsulate(renderers[i].bounds);
+                if (renderers[i] != null)
+                {
+                    firstValidRenderer = renderers[i];
+                    break;
+                }
             }
-            return bounds;
+            
+            if (firstValidRenderer != null)
+            {
+                Bounds bounds = firstValidRenderer.bounds;
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    if (renderers[i] != null)
+                    {
+                        bounds.Encapsulate(renderers[i].bounds);
+                    }
+                }
+                return bounds;
+            }
         }
         
         // Last resort: use transform position with default size
