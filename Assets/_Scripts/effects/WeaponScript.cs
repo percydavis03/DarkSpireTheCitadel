@@ -34,6 +34,10 @@ public class WeaponScript : MonoBehaviour
     public float comboParryWindow = 0.1f;       
     public float comboParryBonus = 1.1f;        // Minimal extra damage
     
+    [Header("Debug Settings")]
+    [Tooltip("Enable debug logs for weapon collisions - disable for performance")]
+    public bool enableDebugLogs = false; // DISABLED - was causing spam
+    
     private float lastParryTime = -1f;
     
     private void Start()
@@ -54,45 +58,47 @@ public class WeaponScript : MonoBehaviour
     
     public int GetCurrentComboDamage()
     {
+        int baseDamage = thisGameSave.mainAttackDamage;
+        
         if (Player_Movement.instance != null)
         {
             int currentCombo = Player_Movement.instance.comboCount;
             
             if (Player_Movement.instance.isComboing && currentCombo > 0)
             {
-                int comboDamage = thisGameSave.GetComboDamage(currentCombo);
-                Debug.Log($"Combo {currentCombo} damage: {comboDamage}");
-                return comboDamage;
+                baseDamage = thisGameSave.GetComboDamage(currentCombo);
+                if (enableDebugLogs) Debug.Log($"Combo {currentCombo} damage: {baseDamage}");
             }
         }
         
-        return thisGameSave.mainAttackDamage;
+        return baseDamage;
     }
     
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"WeaponScript collision with: {other.gameObject.name}, Tag: {other.gameObject.tag}");
+        if (enableDebugLogs) Debug.Log($"WeaponScript collision with: {other.gameObject.name}, Tag: {other.gameObject.tag}");
         
         if (other.gameObject.CompareTag("Enemy"))
         {
-            Debug.Log($"Enemy collision detected with {other.gameObject.name}");
+            if (enableDebugLogs) Debug.Log($"Enemy collision detected with {other.gameObject.name}");
             
             // Enhanced parry check with precise timing
             if (parryEnabled && CheckForEnhancedParry(other))
             {
-                Debug.Log("Parry was executed, skipping normal damage");
+                if (enableDebugLogs) Debug.Log("Parry was executed, skipping normal damage");
                 return; // Parry handled, don't continue with normal damage
             }
             
             int damage = GetCurrentComboDamage();
-            Debug.Log($"Calculated damage: {damage}");
+            if (enableDebugLogs) Debug.Log($"Calculated damage: {damage}");
             
-            // Determine combo knockback based on current combo count
-            Vector3 knockbackForce = lightKnockback; // Default to combo 1
-            string comboType = "1st Combo";
+            // Determine knockback based on attack type
+            Vector3 knockbackForce = lightKnockback; // Default
+            string comboType = "Basic Attack";
             
             if (Player_Movement.instance != null && Player_Movement.instance.isComboing)
             {
+                // Regular combo knockback
                 switch (Player_Movement.instance.comboCount)
                 {
                     case 1:
@@ -112,14 +118,14 @@ public class WeaponScript : MonoBehaviour
             
             if (other.TryGetComponent(out Enemy_Basic enemyBasic))
             {
-                Debug.Log($"Found Enemy_Basic component, calling TakeComboDamage({damage})");
+                if (enableDebugLogs) Debug.Log($"Found Enemy_Basic component, calling TakeComboDamage({damage})");
                 enemyBasic.TakeComboDamage(damage);
                 enemyBasic.GetKnockedBack(knockbackForce);
-                Debug.Log($"{comboType} - Knockback: {knockbackForce}");
+                if (enableDebugLogs) Debug.Log($"{comboType} - Knockback: {knockbackForce}");
             }
             else if (other.TryGetComponent(out Worker worker))
             {
-                Debug.Log($"Found Worker component, calling TakeComboDamage({damage})");
+                if (enableDebugLogs) Debug.Log($"Found Worker component, calling TakeComboDamage({damage})");
                 worker.TakeComboDamage(damage);
                 
                 // Workers get slightly reduced knockback but still get knocked back
@@ -129,17 +135,17 @@ public class WeaponScript : MonoBehaviour
                     knockbackForce.z * 0.8f
                 );
                 worker.GetKnockedBack(workerKnockback);
-                Debug.Log($"{comboType} on Worker - Knockback: {workerKnockback}");
+                if (enableDebugLogs) Debug.Log($"{comboType} on Worker - Knockback: {workerKnockback}");
             }
             else
             {
-                Debug.Log($"No Enemy_Basic or Worker component found on {other.gameObject.name}");
+                if (enableDebugLogs) Debug.Log($"No Enemy_Basic or Worker component found on {other.gameObject.name}");
             }
             // Removed the duplicate IKnockbackable check that was causing double knockback
         }
         else
         {
-            Debug.Log($"Object {other.gameObject.name} does not have Enemy tag");
+            if (enableDebugLogs) Debug.Log($"Object {other.gameObject.name} does not have Enemy tag");
         }
     }
 
@@ -214,7 +220,7 @@ public class WeaponScript : MonoBehaviour
 
     private bool ExecuteEnhancedParry(Enemy_Basic enemy, bool isPerfectParry)
     {
-        Debug.Log(isPerfectParry ? "PERFECT PARRY! Extended stun!" : "PARRY SUCCESS! Enemy stunned!");
+        if (enableDebugLogs) Debug.Log(isPerfectParry ? "PERFECT PARRY! Extended stun!" : "PARRY SUCCESS! Enemy stunned!");
         
         // Calculate reduced parry damage
         float totalMultiplier = parryDamageMultiplier; // 0.8f
@@ -253,7 +259,7 @@ public class WeaponScript : MonoBehaviour
         // Simple, consistent knockback
         enemy.GetKnockedBack(standardParryKnockback);
         
-        Debug.Log($"Parry: {parryDamage} damage, {stunDuration}s stun (Perfect: {isPerfectParry})");
+        if (enableDebugLogs) Debug.Log($"Parry: {parryDamage} damage, {stunDuration}s stun (Perfect: {isPerfectParry})");
         
         OnParrySuccess(isPerfectParry);
         
@@ -262,7 +268,7 @@ public class WeaponScript : MonoBehaviour
 
     private bool ExecuteEnhancedParry(Worker worker, bool isPerfectParry)
     {
-        Debug.Log(isPerfectParry ? "PERFECT PARRY! Worker stunned longer!" : "PARRY SUCCESS! Worker stunned!");
+        if (enableDebugLogs) Debug.Log(isPerfectParry ? "PERFECT PARRY! Worker stunned longer!" : "PARRY SUCCESS! Worker stunned!");
         
         // Calculate reduced parry damage
         float totalMultiplier = parryDamageMultiplier; // 0.8f
@@ -301,7 +307,7 @@ public class WeaponScript : MonoBehaviour
         // Simple, consistent knockback for workers
         worker.GetKnockedBack(standardParryKnockback);
         
-        Debug.Log($"Worker parry: {parryDamage} damage, {stunDuration}s stun (Perfect: {isPerfectParry})");
+        if (enableDebugLogs) Debug.Log($"Worker parry: {parryDamage} damage, {stunDuration}s stun (Perfect: {isPerfectParry})");
         
         OnParrySuccess(isPerfectParry);
         
@@ -310,7 +316,7 @@ public class WeaponScript : MonoBehaviour
     
     private void OnParrySuccess(bool isPerfectParry)
     {
-        Debug.Log($"Parry executed! Perfect: {isPerfectParry} - Focus: Extended stun for grappling!");
+        if (enableDebugLogs) Debug.Log($"Parry executed! Perfect: {isPerfectParry} - Focus: Extended stun for grappling!");
         
         // TODO: Simple feedback without slow motion:
         // - Brief screen shake for all parries
@@ -318,4 +324,7 @@ public class WeaponScript : MonoBehaviour
         // - UI feedback showing stun duration
         // - Particle effects or visual indicators
     }
+    
+
 }
+

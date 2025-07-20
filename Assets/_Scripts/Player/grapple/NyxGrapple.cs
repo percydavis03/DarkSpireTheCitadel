@@ -37,7 +37,8 @@ public class NyxGrapple : MonoBehaviour
     public float springDamper = 5f;
     
     [Header("Debug Settings")]
-    public bool enableDebugLogs = true;
+    [Tooltip("Enable to show grapple debug messages in console. Disabled by default for performance.")]
+    public bool enableDebugLogs = false; // Disabled by default - enable for debugging
     public bool showDebugRay = true;
     public bool useGizmos = true;
     public Color debugRayColor = Color.red;
@@ -140,8 +141,11 @@ public class NyxGrapple : MonoBehaviour
             renderer.material = mat;
         }
         
-        Debug.Log($"✅ Created grapple test cube at {spawnPosition}");
-        Debug.Log("🎯 Stand close to it, look at it, and hold G!");
+        if (enableDebugLogs)
+        {
+            Debug.Log($"✅ Created grapple test cube at {spawnPosition}");
+            Debug.Log("🎯 Stand close to it, look at it, and hold G!");
+        }
     }
     
     void LateUpdate()
@@ -251,7 +255,7 @@ public class NyxGrapple : MonoBehaviour
             targetingSystem = GetComponent<NyxTargetingSystem>();
             if (targetingSystem == null)
             {
-                Debug.LogWarning("NyxGrapple: No NyxTargetingSystem found. Grapple targeting will use fallback method.");
+                if (enableDebugLogs) Debug.LogWarning("NyxGrapple: No NyxTargetingSystem found. Grapple targeting will use fallback method.");
                 return;
             }
         }
@@ -284,7 +288,8 @@ public class NyxGrapple : MonoBehaviour
         
         // TEMPORARILY DISABLE targeting system to test fallback detection
         // Use targeting system if available
-        if (false) // targetingSystem != null)
+        /* DISABLED FOR TESTING - CAUSES UNREACHABLE CODE WARNING
+        if (targetingSystem != null)
         {
             // Get best grappleable target from targeting system
             var bestTarget = targetingSystem.BestTarget;
@@ -307,9 +312,10 @@ public class NyxGrapple : MonoBehaviour
         }
         else
         {
+        */
             // Fallback to original detection method if no targeting system
             DetectGrappleableInRangeFallback();
-        }
+        // }
         
         // Log state changes
         if (enableDebugLogs && wasInRange != isGrappleableInRange)

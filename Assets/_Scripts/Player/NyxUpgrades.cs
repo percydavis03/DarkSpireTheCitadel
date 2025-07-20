@@ -51,11 +51,11 @@ public class NyxUpgrades : MonoBehaviour
     public UpgradeEntry[] upgrades;
     
     [Header("Settings")]
-    [Tooltip("Check for changes every frame vs only on start")]
-    public bool continuousMonitoring = true;
+    [Tooltip("Check for changes every frame vs only on start - DISABLE for performance")]
+    public bool continuousMonitoring = false; // DISABLED - was causing lag
     
     [Tooltip("Enable debug logging")]
-    public bool enableDebugLogs = true;
+    public bool enableDebugLogs = false; // DISABLED - was causing spam
     
     [Header("Auto-Setup")]
     [Tooltip("Try to find save state automatically if not assigned")]
@@ -90,10 +90,11 @@ public class NyxUpgrades : MonoBehaviour
         // Apply initial states
         CheckAndApplyUpgrades();
         
-        if (enableDebugLogs)
-        {
-            Debug.Log($"NyxUpgrades: Initialized with {upgrades.Length} upgrades");
-        }
+        // Debug logs completely disabled for performance - was causing lag
+        // if (enableDebugLogs)
+        // {
+        //     Debug.Log($"NyxUpgrades: Initialized with {upgrades.Length} upgrades");
+        // }
     }
 
     private void Update()
@@ -169,10 +170,11 @@ public class NyxUpgrades : MonoBehaviour
             upgrade.lastKnownState = currentState;
             upgrade.isCurrentlyActive = currentState;
             
-            if (enableDebugLogs)
-            {
-                Debug.Log($"NyxUpgrades: Initialized '{upgrade.upgradeName}' - Property: '{upgrade.saveStateProperty}' - State: {currentState}");
-            }
+            // Debug logs completely disabled for performance - was causing lag
+            // if (enableDebugLogs)
+            // {
+            //     Debug.Log($"NyxUpgrades: Initialized '{upgrade.upgradeName}' - Property: '{upgrade.saveStateProperty}' - State: {currentState}");
+            // }
         }
     }
     
@@ -195,10 +197,11 @@ public class NyxUpgrades : MonoBehaviour
                 upgrade.lastKnownState = currentState;
                 upgrade.isCurrentlyActive = currentState;
                 
-                if (enableDebugLogs)
-                {
-                    Debug.Log($"NyxUpgrades: '{upgrade.upgradeName}' state changed to {currentState}");
-                }
+                // Debug logs completely disabled for performance - was causing lag
+                // if (enableDebugLogs)
+                // {
+                //     Debug.Log($"NyxUpgrades: '{upgrade.upgradeName}' state changed to {currentState}");
+                // }
             }
         }
     }
@@ -233,10 +236,11 @@ public class NyxUpgrades : MonoBehaviour
             // Trigger C# event
             OnUpgradeEnabled?.Invoke(upgrade.saveStateProperty);
             
-            if (enableDebugLogs)
-            {
-                Debug.Log($"NyxUpgrades: Triggered 'onUpgradeEnabled' for '{upgrade.upgradeName}'");
-            }
+            // Debug logs completely disabled for performance - was causing lag
+            // if (enableDebugLogs)
+            // {
+            //     Debug.Log($"NyxUpgrades: Triggered 'onUpgradeEnabled' for '{upgrade.upgradeName}'");
+            // }
         }
         else
         {
@@ -246,10 +250,11 @@ public class NyxUpgrades : MonoBehaviour
             // Trigger C# event
             OnUpgradeDisabled?.Invoke(upgrade.saveStateProperty);
             
-            if (enableDebugLogs)
-            {
-                Debug.Log($"NyxUpgrades: Triggered 'onUpgradeDisabled' for '{upgrade.upgradeName}'");
-            }
+            // Debug logs completely disabled for performance - was causing lag
+            // if (enableDebugLogs)
+            // {
+            //     Debug.Log($"NyxUpgrades: Triggered 'onUpgradeDisabled' for '{upgrade.upgradeName}'");
+            // }
         }
     }
     

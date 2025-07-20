@@ -25,15 +25,20 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
         }
+        else if (instance != this)
+        {
+            Debug.LogWarning("Found more than one Game Manager - destroying duplicate");
+            Destroy(gameObject);
+            return;
+        }
         isDead = false; 
     }
     void Start()
     {
-        if (instance != null)
-        {
-            Debug.LogWarning("Found more than one Game Manager");
-        }
-        instance = this;
+        // Don't override instance here - it's already set in Awake()
+        // if (instance != this) { Debug.LogWarning("Found more than one Game Manager"); }
+        // instance = this; // REMOVED - was causing singleton issues
+        
         //idk what this is here for
         Player = GameObject.FindWithTag("Player");
     }

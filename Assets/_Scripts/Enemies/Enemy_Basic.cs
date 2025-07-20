@@ -119,7 +119,7 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             return;
         }
         
-        // Check for required parameters
+        // Check for required parameters - DISABLED DEBUG SPAM
         bool hasIsHurting = false;
         bool hasIsRunning = false;
         bool hasIsAttacking = false;
@@ -131,10 +131,11 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             if (param.name == "IsAttacking") hasIsAttacking = true;
         }
         
-        Debug.Log($"Enemy {gameObject.name} Animator Parameters Check:");
-        Debug.Log($"  - IsHurting: {hasIsHurting}");
-        Debug.Log($"  - IsRunning: {hasIsRunning}"); 
-        Debug.Log($"  - IsAttacking: {hasIsAttacking}");
+        // DISABLED DEBUG SPAM - was causing lag
+        // Debug.Log($"Enemy {gameObject.name} Animator Parameters Check:");
+        // Debug.Log($"  - IsHurting: {hasIsHurting}");
+        // Debug.Log($"  - IsRunning: {hasIsRunning}"); 
+        // Debug.Log($"  - IsAttacking: {hasIsAttacking}");
         
         if (!hasIsHurting)
         {
@@ -465,7 +466,7 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     }
     private void OnTriggerEnter(Collider other)
     {
-        print("collide");
+        // print("collide"); // DISABLED - was causing spam
         // OLD SYSTEM - Now handled by WeaponScript for combo damage
         /*
         if (other.gameObject.CompareTag("Weapon"))
@@ -533,8 +534,8 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             }
         }
 
-        // Don't do any AI behaviors while stunned
-        if (isStunned)
+        // Don't do any AI behaviors while stunned or knocked down
+        if (isStunned || (anim != null && anim.GetBool("isKnockedDown")))
         {
             return;
         }
@@ -839,5 +840,28 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     public void AnimDied()
     {
         Death();
+    }
+    
+    // ===== KNOCKDOWN SYSTEM =====
+    
+    /// <summary>
+    /// Call this to make enemy get back up from knockdown
+    /// You can call this from your own code or animation events
+    /// </summary>
+    public void GetBackUp()
+    {
+        if (anim != null)
+        {
+            anim.SetBool("isKnockedDown", false);
+            Debug.Log($"Enemy {gameObject.name} getting back up");
+        }
+        
+        // Re-enable movement if not stunned or dead
+        if (!isStunned && !dead && agent != null && agent.enabled && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+            agent.velocity = Vector3.zero;
+            agent.speed = setSpeed;
+        }
     }
 }

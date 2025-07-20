@@ -147,8 +147,8 @@ public class Worker : MonoBehaviour
             }
         }
 
-        // Don't do any AI behaviors while stunned
-        if (isStunned)
+        // Don't do any AI behaviors while stunned or knocked down
+        if (isStunned || (anim != null && anim.GetBool("isKnockedDown")))
         {
             return;
         }
@@ -372,11 +372,15 @@ public class Worker : MonoBehaviour
         alreadyAttacked = false;
     }
 
-    private void StopMoving()
+    public void StopMoving()
     {
-        GetComponent<NavMeshAgent>().speed = 0;
-        agent.isStopped = true;
-        agent.enabled = false;
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
+        {
+            agent.speed = 0;
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero; // Clear velocity to prevent sliding
+            // Don't disable the agent - just stop it
+        }
     }
 
     //---------ENHANCED ANIMATION EVENTS FOR WORKER PARRY SYSTEM---------
@@ -583,6 +587,29 @@ public class Worker : MonoBehaviour
             b.transform.position = transform.position;
             b.transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
             b.transform.localScale = new Vector3(1, 1, 1);
+        }
+    }
+    
+    // ===== KNOCKDOWN SYSTEM =====
+    
+    /// <summary>
+    /// Call this to make worker get back up from knockdown
+    /// You can call this from your own code or animation events
+    /// </summary>
+    public void GetBackUp()
+    {
+        if (anim != null)
+        {
+            anim.SetBool("isKnockedDown", false);
+            Debug.Log($"Worker {gameObject.name} getting back up");
+        }
+        
+        // Re-enable movement if not stunned or dead
+        if (!isStunned && !dead && agent != null && agent.enabled)
+        {
+            agent.isStopped = false;
+            agent.velocity = Vector3.zero;
+            agent.speed = setSpeed;
         }
     }
 

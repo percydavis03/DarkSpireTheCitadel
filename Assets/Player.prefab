@@ -2135,7 +2135,6 @@ GameObject:
   - component: {fileID: 1775577702075524428}
   - component: {fileID: 2087216377694444195}
   - component: {fileID: 1239221200231884018}
-  - component: {fileID: 2739849937591202434}
   - component: {fileID: 6363766315917249685}
   - component: {fileID: 856932804566754245}
   - component: {fileID: 8208696784939523840}
@@ -2285,11 +2284,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thisGameSave: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
   swordHitbox: {fileID: 1658697661035905755}
+  isAttacking: 0
+  isSlashing: 0
   spinDistance: 0
   isComboing: 0
   comboCount: 0
   comboWindow: 1.5
   canComboNext: 0
+  useSimplifiedAttacks: 1
   attackAnimations:
   - isAttacking
   - isComboing
@@ -2319,6 +2321,7 @@ MonoBehaviour:
   decelerationSpeed: 15
   attackSound: {fileID: 0}
   inPickupZone: 0
+  enableAttackDebugLogs: 1
   useBlendTree: 1
   speedParameterName: Speed
   blendSpeed: 5
@@ -2330,78 +2333,7 @@ MonoBehaviour:
   invincibilityDuration: 0.6
   directionalRoll: 1
   canRollCancelAttacks: 1
---- !u!114 &2739849937591202434
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1154107589237833224}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a351a0e17152c7349a7d257f53e3069f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerSaveState: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
-  upgrades:
-  - upgradeName: 
-    saveStateProperty: 4
-    onUpgradeEnabled:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-          m_MethodName: SetActive
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-    onUpgradeDisabled:
-      m_PersistentCalls:
-        m_Calls: []
-    isCurrentlyActive: 0
-  - upgradeName: 
-    saveStateProperty: 1
-    onUpgradeEnabled:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 3282632805024006095}
-          m_TargetAssemblyTypeName: UnityEngine.Behaviour, UnityEngine
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-          m_MethodName: SetActive
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-    onUpgradeDisabled:
-      m_PersistentCalls:
-        m_Calls: []
-    isCurrentlyActive: 0
-  continuousMonitoring: 1
-  enableDebugLogs: 1
-  autoFindSaveState: 1
-  useGameManager: 1
+  rolling: 0
 --- !u!114 &6363766315917249685
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2588,6 +2520,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 880355fb6bb846e4eaab51c6b7afed88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enableAttackDebugLogs: 1
+  footHitbox: {fileID: 0}
 --- !u!114 &1302204275184489568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8399,6 +8333,7 @@ MonoBehaviour:
   heavyKnockback: {x: 12, y: 3, z: 12}
   comboParryWindow: 0.1
   comboParryBonus: 1.1
+  enableDebugLogs: 0
 --- !u!1 &1707337481270763488
 GameObject:
   m_ObjectHideFlags: 0
@@ -17476,6 +17411,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 880355fb6bb846e4eaab51c6b7afed88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enableAttackDebugLogs: 1
+  footHitbox: {fileID: 0}
 --- !u!1 &3358717872239056578
 GameObject:
   m_ObjectHideFlags: 0
@@ -19510,6 +19447,74 @@ Transform:
   - {fileID: 5121360834448230432}
   m_Father: {fileID: 5027049327062513868}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4852896817022549768
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6044008776912850506}
+  - component: {fileID: 4897781313592571311}
+  - component: {fileID: 7963142960358493776}
+  m_Layer: 0
+  m_Name: kick colider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6044008776912850506
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4852896817022549768}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.00069, y: -0.00644, z: 0.00005}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 47044841052045227}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &4897781313592571311
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4852896817022549768}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.01, y: 0.01, z: 0.01}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7963142960358493776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4852896817022549768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 432cf035bd8ca9647bd77a6f01c4aba7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kickForce: {x: 20, y: 5, z: 20}
+  enableDebugLogs: 1
 --- !u!1 &4858171308961385924
 GameObject:
   m_ObjectHideFlags: 0
@@ -47330,6 +47335,7 @@ MonoBehaviour:
   heavyKnockback: {x: 12, y: 3, z: 12}
   comboParryWindow: 0.1
   comboParryBonus: 1.1
+  enableDebugLogs: 0
 --- !u!1 &7632901661931008053 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5328149679179605632, guid: 0029171dc53593f49b254821bedc349c,
@@ -49753,6 +49759,10 @@ PrefabInstance:
     - {fileID: 5866666021909216657, guid: 1bea956888832004daa90949feb0fc2d, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 8044669281949152778, guid: 1bea956888832004daa90949feb0fc2d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6044008776912850506}
     - targetCorrespondingSourceObject: {fileID: 6502182839619065283, guid: 1bea956888832004daa90949feb0fc2d,
         type: 3}
       insertIndex: -1
@@ -49767,6 +49777,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 4550229995286727975}
   m_SourcePrefab: {fileID: 100100000, guid: 1bea956888832004daa90949feb0fc2d, type: 3}
+--- !u!4 &47044841052045227 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8044669281949152778, guid: 1bea956888832004daa90949feb0fc2d,
+    type: 3}
+  m_PrefabInstance: {fileID: 7999319957399177633}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &3282632805024006095 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -4427871611625441682, guid: 1bea956888832004daa90949feb0fc2d,

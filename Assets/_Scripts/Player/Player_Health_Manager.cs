@@ -33,16 +33,19 @@ public class Player_Health_Manager : MonoBehaviour
         {
             instance = this;
         }
+        else if (instance != this)
+        {
+            Debug.LogWarning("Found more than one Player Health Manager - destroying duplicate");
+            Destroy(gameObject);
+            return;
+        }
     }
 
     void Start()
     {
-        if (instance != null)
-
-        {
-            Debug.LogWarning("Found more than one Player Health Manager");
-        }
-        instance = this;
+        // Don't override instance here - it's already set in Awake()
+        // if (instance != this) { Debug.LogWarning("Found more than one Player Health Manager"); }
+        // instance = this; // REMOVED - was causing singleton issues
 
         
        
@@ -65,7 +68,7 @@ public class Player_Health_Manager : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            print("Dead");
+            // print("Dead"); // DISABLED - was causing spam
             //thisGameSave.Init();
             //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             //StartCoroutine(DeathScreen());
@@ -77,7 +80,7 @@ public class Player_Health_Manager : MonoBehaviour
     public void DamangePlayer(int f)
     {
         thisGameSave.hitpoints -= f;
-        print("gay sex");
+        // print("gay sex"); // DISABLED - inappropriate content removed
     }
     
     

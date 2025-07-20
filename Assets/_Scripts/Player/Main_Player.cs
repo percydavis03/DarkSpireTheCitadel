@@ -59,7 +59,7 @@ public class Main_Player : MonoBehaviour
         //ough.Play();
         Player_Movement.instance.FailSafe();
         Fade();
-        Debug.Log("ow");
+        // Debug.Log("ow"); // DISABLED - was causing spam
         //cameraShake.ShakeCamera(shakeIntensity, shakeTime);
         hurt.SetActive(true);
         StartCoroutine(Wait());
@@ -91,7 +91,7 @@ public class Main_Player : MonoBehaviour
         if (isFaded)
         {
             hurtScreen.DOFade(1, 0.3f);
-            print("dofadein");
+            // print("dofadein"); // DISABLED - was causing spam
             StartCoroutine(FadeWait(0.5f));
         }
     }
@@ -100,7 +100,7 @@ public class Main_Player : MonoBehaviour
         yield return new WaitForSeconds(seconds);
         hurtScreen.DOFade(0, 0.3f);
         hurt.SetActive(false);
-        print("dofadeout");
+        // print("dofadeout"); // DISABLED - was causing spam
         isFaded = true;
     }
 
@@ -118,7 +118,7 @@ public class Main_Player : MonoBehaviour
         if (other.gameObject.CompareTag("JumpReward"))
         {
             thisGameSave.canJump = true;
-            print("graduated from loser, can jump now");
+            // print("graduated from loser, can jump now"); // DISABLED - was causing spam
         }
     }
 

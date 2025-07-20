@@ -1216,3 +1216,30 @@ MonoBehaviour:
   attackRange: 3
   playerInSightRange: 0
   playerInAttackRange: 0
+--- !u!114 &2894756183920134512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7437412798293465260}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ee917a16eccda4a8a552bc2ea7f420, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canBeGrappled: 1
+  pullable: 1
+  isEnemy: 1
+  animator: {fileID: 8237691199550725041}
+  grapplePoint: {fileID: 7437412798293465260}
+  postReleaseStunDuration: 1
+  OnGrappleStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGrappleReleased:
+    m_PersistentCalls:
+      m_Calls: []
+  targetPriority: 4
+  showTargetEffects: 1
+  targetIndicator: {fileID: 0}

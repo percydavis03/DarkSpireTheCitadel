@@ -23,8 +23,8 @@ public class Player_Movement : MonoBehaviour
 
     //attacks
     public GameObject swordHitbox;
-    private bool isAttacking;
-    private bool isSlashing;
+    public bool isAttacking;
+    public bool isSlashing;
     public float spinDistance;
 
     //combo system
@@ -36,8 +36,14 @@ public class Player_Movement : MonoBehaviour
     public bool canComboNext = false; // Simple flag to allow next combo attack
 
     [Header("Animation Management")]
+    // Simplified: Use fewer parameters, rely more on animation events
+    public bool useSimplifiedAttacks = true; // Toggle for new system
     public string[] attackAnimations = {"isAttacking", "isComboing", "isSpinAttack", "AttackInt"};
     // 0: isAttacking, 1: isComboing, 2: isSpinAttack, 3: AttackInt (parameter name for int)
+
+    // New simplified state tracking
+    private float attackEndTimer = 0f;
+    private float maxAttackDuration = 3f; // Failsafe if animation events fail
 
     //slash attack
     public GameObject gauntletHitbox;
@@ -87,6 +93,10 @@ public class Player_Movement : MonoBehaviour
     public StudioEventEmitter attackSound;
     //arm
     public bool inPickupZone;
+    
+    [Header("Performance Settings")]
+    [Tooltip("Enable to show debug messages only during attacks to debug lag issues.")]
+    public bool enableAttackDebugLogs = true;
 
     // Blend Tree Support (1D Speed-based)
 [Header("Animation Blend Tree")]
@@ -123,7 +133,7 @@ public bool directionalRoll = true;
 public bool canRollCancelAttacks = true;
 
 // Roll state variables
-private bool rolling = false;
+public bool rolling = false;
 private bool canRoll = true;
 private Vector3 rollDirection;
 private float rollTimer = 0f;
@@ -163,12 +173,15 @@ private Coroutine rollCoroutine;
         cooldownTimer = 0f;
         rollTimer = 0f;
         
+        // Performance: Reduce failsafe timer for faster attack recovery
+        maxAttackDuration = 2f; // Reduced from 3f to 2f for better responsiveness
+        
         // Ensure grapple system is enabled
         NyxGrapple grappleSystem = GetComponent<NyxGrapple>();
         if (grappleSystem != null && !grappleSystem.enabled)
         {
             grappleSystem.enabled = true;
-            Debug.Log("Grapple system enabled automatically");
+            // Debug.Log("Grapple system enabled automatically"); // Removed for performance
         }
     }
     
@@ -221,18 +234,14 @@ private Coroutine rollCoroutine;
         }
         rolling = false;
     }
-    IEnumerator WaitUntil(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        anim.SetBool("isHurt", false);
-        anim.SetBool("isAttacking", false);
-        EndAttack();
-    }
+    // REMOVED: WaitUntil coroutine - now using animation events and failsafe timer
+    // This was causing race conditions with animation events
 
     IEnumerator ComboTimeout()
     {
         yield return new WaitForSeconds(comboWindow);
         // Combo window expired, reset combo
+        if (ShouldDebugAttacks()) Debug.Log("⏰ Combo window expired - resetting combo");
         ResetCombo();
     }
 
@@ -242,7 +251,20 @@ private Coroutine rollCoroutine;
         if (isComboing && comboCount < 3)
         {
             canComboNext = true;
-            Debug.Log($"Combo window opened for attack {comboCount + 1}");
+            if (ShouldDebugAttacks()) Debug.Log($"🎯 Combo window opened for attack {comboCount + 1}");
+            
+            // Start a timer to close the combo window if no input
+            StartCoroutine(CloseComboWindowAfterDelay(0.5f)); // Short window for responsive gameplay
+        }
+    }
+    
+    IEnumerator CloseComboWindowAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (canComboNext && !isAttacking)
+        {
+            canComboNext = false;
+            if (ShouldDebugAttacks()) Debug.Log($"⏰ Combo window closed - no input received");
         }
     }
 
@@ -284,32 +306,54 @@ private Coroutine rollCoroutine;
 
     public void FailSafe()
     {
-        StartCoroutine("WaitUntil", 0.5f);
+        // Simplified failsafe - immediately clear attack state
+        EndAttack();
         ResetCombo(); // Reset combo on failsafe
-       if(!canMove)
+        
+        // Ensure movement is enabled
+        if(!canMove)
         {
             canMove = true;
         }
-
-      /*if (canMove)
-        {
-            canMove = false;
-        }*/
+        
+        // Clear any lingering animation states
+        anim.SetBool("isHurt", false);
+        
+        if (ShouldDebugAttacks()) Debug.Log("🚨 FailSafe called - clearing all attack states");
     }
     public void EndAttack()
     {
+        // Clear attack state
+        isAttacking = false;
+        isSpinAttack = false;
+        canMove = true;
+        canRotate = true;
+        
+        // Clear failsafe timer
+        attackEndTimer = 0f;
+        
+        // Update animator
         anim.SetBool(attackAnimations[0], false); // isAttacking
         anim.SetBool(attackAnimations[2], false); // isSpinAttack
-        swordHitbox.SetActive(false);
-        canMove = true;
-        isAttacking = false;
-        canRotate = true;
-        isSpinAttack = false;
         
-        // Don't reset combo here - let it continue or timeout naturally
+        // Always ensure hitbox is disabled
+        if (swordHitbox != null)
+        {
+            swordHitbox.SetActive(false);
+        }
+        
+        // FIXED: Reset combo automatically if no input during window
+        // This prevents auto-continuing combos
+        if (isComboing && !canComboNext)
+        {
+            if (ShouldDebugAttacks()) Debug.Log("⚔️ Attack ended - combo will timeout if no input");
+        }
+        
+        if (ShouldDebugAttacks()) Debug.Log("⚔️ Attack ended via animation event or failsafe");
     }
     public void EndSlash()
     {
+        if (ShouldDebugAttacks()) Debug.Log("👊 EndSlash: Slash attack ended");
         anim.SetBool("isArmAttack", false);
         gauntletHitbox.SetActive(false);
         canMove = true;
@@ -329,11 +373,13 @@ private Coroutine rollCoroutine;
 
     public void SwordOn()
     {
+        if (ShouldDebugAttacks()) Debug.Log("⚔️ SwordOn: Hitbox activated");
         swordHitbox.SetActive(true);
         //attackSound.Play();
     }
     public void SwordOff()
     {
+        if (ShouldDebugAttacks()) Debug.Log("⚔️ SwordOff: Hitbox deactivated, rotation enabled");
         swordHitbox.SetActive(false);
         canRotate = true;
     }
@@ -342,6 +388,7 @@ private Coroutine rollCoroutine;
     {
         if (gauntletHitbox != null)
         {
+            if (ShouldDebugAttacks()) Debug.Log("👊 GauntletOn: Gauntlet hitbox activated");
             gauntletHitbox.SetActive(true);
         }
     }
@@ -350,6 +397,7 @@ private Coroutine rollCoroutine;
     {
         if (gauntletHitbox != null)
         {
+            if (ShouldDebugAttacks()) Debug.Log("👊 GauntletOff: Gauntlet hitbox deactivated");
             gauntletHitbox.SetActive(false);
         }
     }
@@ -545,7 +593,7 @@ private Coroutine rollCoroutine;
         {
             if(interact.IsPressed())
             {
-                print("got arm");
+                // print("got arm"); // Removed for performance
                 GetArm.instance.PickupArm();
             }
         }
@@ -558,7 +606,7 @@ private Coroutine rollCoroutine;
        
         if (openInfoMenu.WasPressedThisFrame()) //INFO MENU
         {
-            print("openmenu");
+            // print("openmenu"); // Removed for performance
             anim.SetBool("isRun", false);
             anim.SetBool("isWalk", false);
             MenuScript.instance.InfoMenu();
@@ -577,6 +625,17 @@ private Coroutine rollCoroutine;
         
         // Update attack states like Sam's approach
         UpdateAttackStates();
+        
+        // Failsafe timer to end attacks if animation events fail
+        if (isAttacking && attackEndTimer > 0f)
+        {
+            attackEndTimer -= Time.deltaTime;
+            if (attackEndTimer <= 0f)
+            {
+                if (ShouldDebugAttacks()) Debug.LogWarning("⏰ Attack failsafe timer expired - forcing attack end");
+                EndAttack();
+            }
+        }
         
         // Handle normal movement (not during roll)
         if (canMove && canTurn && !thisGameSave.inMenu && !rolling)
@@ -835,47 +894,85 @@ private Coroutine rollCoroutine;
         canTurn = true;
     }
 
-    // Helper method to safely set animator bool parameters
+    // Cached parameter hash lookup for performance
+    private Dictionary<string, int> parameterHashCache = new Dictionary<string, int>();
+    private Dictionary<string, bool> parameterExistsCache = new Dictionary<string, bool>();
+    
+    // Helper method to check if we should debug (only during attacks)
+    private bool ShouldDebugAttacks()
+    {
+        return enableAttackDebugLogs && (isAttacking || isSlashing || rolling);
+    }
+    
+
+
+    // Helper method to safely set animator bool parameters (OPTIMIZED)
     private void SafeSetAnimatorBool(string paramName, bool value)
     {
-        if (anim != null)
+        if (anim == null) return;
+        
+        // Use cached hash if available
+        if (!parameterHashCache.ContainsKey(paramName))
         {
-            // Check if parameter exists before trying to set it
+            // Check if parameter exists and cache the result
+            bool paramExists = false;
             foreach (AnimatorControllerParameter param in anim.parameters)
             {
                 if (param.name == paramName && param.type == AnimatorControllerParameterType.Bool)
                 {
-                    anim.SetBool(paramName, value);
-                    return;
+                    parameterHashCache[paramName] = Animator.StringToHash(paramName);
+                    paramExists = true;
+                    break;
                 }
             }
-            // If we reach here, parameter doesn't exist - log a warning only once
-            if (paramName == "isArmAttack")
+            parameterExistsCache[paramName] = paramExists;
+            
+            // Warn only once if parameter doesn't exist
+            if (!paramExists && paramName == "isArmAttack")
             {
                 Debug.LogWarning($"Animator parameter '{paramName}' not found - arm attack functionality may be disabled");
             }
         }
+        
+        // Set parameter if it exists
+        if (parameterExistsCache.TryGetValue(paramName, out bool cachedExists) && cachedExists)
+        {
+            anim.SetBool(parameterHashCache[paramName], value);
+        }
     }
 
-    // Helper method to safely set animator float parameters
+    // Helper method to safely set animator float parameters (OPTIMIZED)
     private void SafeSetAnimatorFloat(string paramName, float value)
     {
-        if (anim != null)
+        if (anim == null) return;
+        
+        // Use cached hash if available
+        if (!parameterHashCache.ContainsKey(paramName))
         {
-            // Check if parameter exists before trying to set it
+            // Check if parameter exists and cache the result
+            bool paramExists = false;
             foreach (AnimatorControllerParameter param in anim.parameters)
             {
                 if (param.name == paramName && param.type == AnimatorControllerParameterType.Float)
                 {
-                    anim.SetFloat(paramName, value);
-                    return;
+                    parameterHashCache[paramName] = Animator.StringToHash(paramName);
+                    paramExists = true;
+                    break;
                 }
             }
-            // If we reach here, parameter doesn't exist - log a warning only once
-            if (paramName == speedParameterName)
+            parameterExistsCache[paramName] = paramExists;
+            
+            // Warn only once if parameter doesn't exist
+            if (!paramExists && paramName == speedParameterName)
             {
                 Debug.LogWarning($"Animator parameter '{paramName}' not found - blend tree functionality may be disabled. Make sure to add a Float parameter named '{speedParameterName}' to your Animator.");
             }
+        }
+        
+        // Set parameter if it exists
+        if (parameterExistsCache.TryGetValue(paramName, out bool cachedExists) && cachedExists)
+        {
+            anim.SetFloat(parameterHashCache[paramName], value);
         }
     }
 
@@ -883,7 +980,7 @@ private Coroutine rollCoroutine;
     {
         if (slash.WasPressedThisFrame()  && !isSlashing && thisGameSave.hasArm ) //slash attack
         {
-            print("slash attack");
+            if (ShouldDebugAttacks()) Debug.Log("👊 Slash attack started");
             SafeSetAnimatorBool("isArmAttack", true);
             moveDirection = Vector3.zero;
             canRotate = false;
@@ -892,6 +989,7 @@ private Coroutine rollCoroutine;
         }
         else if (slash.WasPressedThisFrame() && isSlashing) //cancel slash
         {
+            if (ShouldDebugAttacks()) Debug.Log("👊 Slash attack cancelled by user input");
             SafeSetAnimatorBool("isArmAttack", false);
             if (gauntletHitbox != null)
             {
@@ -902,67 +1000,47 @@ private Coroutine rollCoroutine;
             canRotate = true;
         }
 
-        // SIMPLE COMBO ATTACK SYSTEM
+        // SIMPLIFIED COMBO ATTACK SYSTEM
         if (attack.WasPressedThisFrame() && thisGameSave.canAttack && !thisGameSave.inMenu)
         {
+            if (ShouldDebugAttacks()) Debug.Log($"🎮 Attack button pressed - isAttacking: {isAttacking}, isComboing: {isComboing}, canComboNext: {canComboNext}");
+            
             // Handle sprint attack (spin attack) - takes priority
             if (isSprint && !isAttacking)
             {
-                // Reset any existing combo for spin attack
-                ResetCombo();
-                
-                isSpinAttack = true;
-                anim.SetBool(attackAnimations[2], true); // isSpinAttack
-                SetAttackState();
-                Debug.Log("spinAttack");
+                PerformSpinAttack();
                 return;
             }
 
-            // Simple combo system - allow attack when not attacking OR when can combo next
-            if ((!isAttacking && !isSprint) || (isComboing && canComboNext && comboCount < 3))
+            // Regular combo system - ONLY continue if explicitly allowed
+            if (!isAttacking && !isSprint)
             {
-                // Start or continue combo
-                comboCount++;
-                if (comboCount > 3) comboCount = 1; // Reset to 1 after 3
-                
-                isComboing = true;
-                canComboNext = false; // Reset flag after using it
-                
-                // Update animator
-                anim.SetBool(attackAnimations[1], true);     // isComboing  
-                anim.SetInteger(attackAnimations[3], comboCount); // AttackInt
-                anim.SetBool(attackAnimations[0], true);     // isAttacking
-                SafeSetAnimatorBool("isArmAttack", false);
-                
-                // Set attack state
-                SetAttackState();
-                
-                // Start/restart combo timer
-                if (comboResetCoroutine != null)
-                {
-                    StopCoroutine(comboResetCoroutine);
-                }
-                comboResetCoroutine = StartCoroutine(ComboTimeout());
-                
-                Debug.Log($"Combo attack {comboCount}");
+                // Start new attack sequence
+                PerformComboAttack();
+            }
+            else if (isComboing && canComboNext && comboCount < 3)
+            {
+                // Continue combo ONLY if window is open and count < 3
+                PerformComboAttack();
             }
             else if (isAttacking && isSpinAttack) // Cancel spin attack
             {
-                anim.SetBool(attackAnimations[0], false); // isAttacking
-                anim.SetBool(attackAnimations[2], false); // isSpinAttack
-                ClearAttackState();
-                isSpinAttack = false;
+                CancelSpinAttack();
+            }
+            else if (ShouldDebugAttacks())
+            {
+                Debug.Log($"🚫 Attack input ignored - conditions not met");
             }
         }
 
-        // Handle hurt state
+        // Handle hurt state (only check when necessary)
         if (anim.GetBool("isHurt"))
         {
             canMove = true;
             GauntletOff();
             SafeSetAnimatorBool("isArmAttack", false);
             ResetCombo(); // Reset combo when hurt
-            Debug.Log("ishurting");
+            if (ShouldDebugAttacks()) Debug.Log("💥 Player hurt - resetting attack states");
         }
     }
 
@@ -970,15 +1048,27 @@ private Coroutine rollCoroutine;
 
     private void SetAttackState()
     {
-        // Centralized attack state setup like Sam's approach
-        StartCoroutine("WaitUntil", 2f);
+        // Simplified attack state setup - rely on animation events to end attacks
         moveDirection = Vector3.zero;
         canRotate = false;
         isAttacking = true;
         canMove = false;
         
+        // Start failsafe timer in case animation events fail
+        attackEndTimer = maxAttackDuration;
+        
+        if (ShouldDebugAttacks()) Debug.Log($"🎬 SetAttackState: Attack started with {maxAttackDuration}s failsafe timer");
+        
         // Enable combo after a short delay (allows for combo timing)
-        StartCoroutine(EnableComboAfterDelay(0.3f));
+        if (useSimplifiedAttacks)
+        {
+            // Shorter delay for more responsive combos
+            StartCoroutine(EnableComboAfterDelay(0.2f));
+        }
+        else
+        {
+            StartCoroutine(EnableComboAfterDelay(0.3f));
+        }
     }
 
     private void ClearAttackState()
@@ -1017,10 +1107,62 @@ private Coroutine rollCoroutine;
 
     private void UpdateAttackStates()
     {
-        // Simple state management
-        if (isAttacking)
+        // Simple state management - only run when necessary
+        if (isAttacking && canMove)
         {
             canMove = false;
+            if (ShouldDebugAttacks()) Debug.Log("🔒 UpdateAttackStates: Disabled movement during attack");
         }
+    }
+
+    // New helper methods for cleaner attack handling
+    private void PerformSpinAttack()
+    {
+        // Reset any existing combo for spin attack
+        ResetCombo();
+        
+        isSpinAttack = true;
+        
+        // Use existing boolean system (triggers don't exist in animator)
+        anim.SetBool(attackAnimations[2], true); // isSpinAttack
+        anim.SetBool(attackAnimations[0], true); // isAttacking
+        
+        SetAttackState();
+        if (ShouldDebugAttacks()) Debug.Log("🌀 Spin attack started");
+    }
+
+    private void PerformComboAttack()
+    {
+        // Start or continue combo
+        comboCount++;
+        if (comboCount > 3) comboCount = 1; // Reset to 1 after 3
+        
+        isComboing = true;
+        canComboNext = false; // Reset flag after using it
+        
+        // Update animator - use existing boolean system (triggers don't exist in animator)
+        anim.SetBool(attackAnimations[1], true);     // isComboing  
+        anim.SetInteger(attackAnimations[3], comboCount); // AttackInt
+        anim.SetBool(attackAnimations[0], true);     // isAttacking
+        
+        SafeSetAnimatorBool("isArmAttack", false);
+        
+        // Set attack state
+        SetAttackState();
+        
+        // Start/restart combo timer
+        if (comboResetCoroutine != null)
+        {
+            StopCoroutine(comboResetCoroutine);
+        }
+        comboResetCoroutine = StartCoroutine(ComboTimeout());
+        
+        if (ShouldDebugAttacks()) Debug.Log($"⚔️ Combo attack {comboCount} started");
+    }
+
+    private void CancelSpinAttack()
+    {
+        EndAttack();
+        Debug.Log("Spin attack cancelled");
     }
 }
