@@ -90,6 +90,12 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         dead = false;
         alreadyAttacked = false;
         
+        // Ensure root motion handler is set up
+        EnsureRootMotionHandler();
+        
+        // Check if animator has required parameters
+        CheckAnimatorParameters();
+        
         // Find the player reference properly
         if (player == null)
         {
@@ -102,6 +108,37 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             {
                 Debug.LogWarning($"Enemy {name}: Could not find Player GameObject with tag 'nyx'");
             }
+        }
+    }
+    
+    private void CheckAnimatorParameters()
+    {
+        if (anim == null)
+        {
+            Debug.LogError($"Enemy {gameObject.name}: Animator is null!");
+            return;
+        }
+        
+        // Check for required parameters
+        bool hasIsHurting = false;
+        bool hasIsRunning = false;
+        bool hasIsAttacking = false;
+        
+        foreach (AnimatorControllerParameter param in anim.parameters)
+        {
+            if (param.name == "IsHurting") hasIsHurting = true;
+            if (param.name == "IsRunning") hasIsRunning = true;
+            if (param.name == "IsAttacking") hasIsAttacking = true;
+        }
+        
+        Debug.Log($"Enemy {gameObject.name} Animator Parameters Check:");
+        Debug.Log($"  - IsHurting: {hasIsHurting}");
+        Debug.Log($"  - IsRunning: {hasIsRunning}"); 
+        Debug.Log($"  - IsAttacking: {hasIsAttacking}");
+        
+        if (!hasIsHurting)
+        {
+            Debug.LogError($"Enemy {gameObject.name}: Missing 'IsHurting' parameter in Animator Controller!");
         }
     }
     private void Awake()
@@ -136,8 +173,8 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
 
     public void TakeDamage()
     {
-        // Don't interrupt attack recovery animation
-        if (isInAttackRecovery) return;
+        // Allow damage during recovery but don't interrupt the animation
+        // if (isInAttackRecovery) return;
         
         isHit = true;
         anim.SetBool("IsRunning", false);
@@ -157,20 +194,26 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     // New method for combo-specific damage
     public void TakeComboDamage(int damage)
     {
-        // Don't take damage if stunned (parry already handled damage)
-        if (isStunned) return;
+        Debug.Log($"TakeComboDamage called on {gameObject.name} with damage: {damage}");
         
-        // Don't interrupt attack recovery animation
-        if (isInAttackRecovery) return;
+        // Don't take damage if stunned (parry already handled damage)
+        if (isStunned) 
+        {
+            Debug.Log($"Enemy {gameObject.name} is stunned - skipping damage");
+            return;
+        }
+        
+        // Allow damage during recovery but don't interrupt the animation
+        // if (isInAttackRecovery) return;
         
         isHit = true;
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsAttacking", false);
         
-        // Face the player when taking damage for better combat feedback
+        // Face the player when taking damage for better combat feedback (Y-axis only)
         if (player != null)
         {
-            transform.LookAt(player);
+            FacePlayerYAxisOnly();
         }
         
         KnockbackEntity(player);
@@ -178,10 +221,15 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         // Apply damage
         if (enemyHP > 0)
         {
+            Debug.Log($"Setting IsHurting=true on animator for {gameObject.name}");
             anim.SetBool("IsHurting", true);
             enemyHP = enemyHP - damage;
             print($"take {damage} damage, HP now: {enemyHP}");
             StartCoroutine(Wait(0.5f));
+        }
+        else
+        {
+            Debug.Log($"Enemy {gameObject.name} HP is 0 or less - not triggering hurt animation");
         }
     }
 
@@ -218,10 +266,10 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsHurting", false);
         
-        // Face the player when parried for better visual feedback
+        // Face the player when parried for better visual feedback (Y-axis only)
         if (player != null)
         {
-            transform.LookAt(player);
+            FacePlayerYAxisOnly();
         }
         
         // Apply stun
@@ -260,14 +308,11 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         anim.SetBool("IsStunned", false);
         
         // Re-enable movement
-        if (!dead && agent != null)
+        if (!dead && agent != null && agent.enabled && agent.isOnNavMesh)
         {
-            agent.enabled = true;
-            // Only set speed if agent is properly enabled and on NavMesh
-            if (agent.enabled && agent.isOnNavMesh)
-            {
-                GetComponent<NavMeshAgent>().speed = setSpeed;
-            }
+            agent.isStopped = false;
+            agent.velocity = Vector3.zero; // Clear any residual velocity
+            agent.speed = setSpeed;
         }
         
         stunCoroutine = null;
@@ -310,16 +355,13 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             yield return null;
         }
         
-        // Re-enable NavMesh agent
-        if (agent != null)
+        // Re-enable NavMesh movement
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
         {
             agent.Warp(transform.position);
-            agent.enabled = true;
-            
-            if (agent.enabled && agent.isOnNavMesh)
-            {
-                GetComponent<NavMeshAgent>().speed = setSpeed;
-            }
+            agent.isStopped = false;
+            agent.velocity = Vector3.zero; // Clear any residual velocity
+            agent.speed = setSpeed;
         }
         
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
@@ -329,17 +371,53 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     {
         if (agent != null && agent.enabled && agent.isOnNavMesh)
         {
-            GetComponent<NavMeshAgent>().speed = 0;
+            agent.speed = 0;
             agent.isStopped = true;
-            agent.enabled = false;
+            agent.velocity = Vector3.zero; // Clear velocity to prevent sliding
+            // Don't disable the agent - just stop it
         }
     }
     public void Reposition()
     {
-        transform.LookAt(player);
+        FacePlayerYAxisOnly();
+    }
+    
+    /// <summary>
+    /// Face the player only on Y-axis to prevent weird tilting
+    /// </summary>
+    private void FacePlayerYAxisOnly()
+    {
+        if (player == null) return;
+        
+        Vector3 directionToPlayer = (player.position - transform.position).normalized;
+        // Only use X and Z components, keep Y at 0 for horizontal-only rotation
+        directionToPlayer.y = 0;
+        
+        if (directionToPlayer.magnitude > 0.1f) // Avoid issues when too close
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+        }
+    }
+    
+    /// <summary>
+    /// Auto-add EnemyRootMotionHandler to animation source if missing
+    /// </summary>
+    private void EnsureRootMotionHandler()
+    {
+        if (animationSource != null && animationSource != gameObject)
+        {
+            EnemyRootMotionHandler rootMotionHandler = animationSource.GetComponent<EnemyRootMotionHandler>();
+            if (rootMotionHandler == null)
+            {
+                rootMotionHandler = animationSource.AddComponent<EnemyRootMotionHandler>();
+                Debug.Log($"Auto-added EnemyRootMotionHandler to {animationSource.name}");
+            }
+        }
     }
     public void StopHurt()
     {
+        Debug.Log($"StopHurt called on {gameObject.name} - setting IsHurting=false");
         anim.SetBool("IsHurting", false);
         isHit = false;
         print("stophurt");
@@ -370,20 +448,18 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         anim.SetBool("IsAttacking", false);
         anim.SetBool("IsAttacking2", false);
         
-        // Face player when stopping attack
+        // Face player when stopping attack (Y-axis only)
         if (player != null)
         {
-            transform.LookAt(player);
+            FacePlayerYAxisOnly();
         }
         
-        // Re-enable NavMesh after attack recovery animation completes
-        if (agent != null)
+        // Re-enable NavMesh movement after attack
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
         {
-            agent.enabled = true;
-            if (agent.enabled && agent.isOnNavMesh)
-            {
-                GetComponent<NavMeshAgent>().speed = setSpeed;
-            }
+            agent.isStopped = false;
+            agent.velocity = Vector3.zero; // Clear any residual velocity
+            agent.speed = setSpeed;
         }
         print("stop attacking");
     }
@@ -536,7 +612,7 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         if (agent != null && agent.enabled && agent.isOnNavMesh && player != null)
         {
             agent.SetDestination(player.position);
-            transform.LookAt(player); // Face player while chasing
+            FacePlayerYAxisOnly(); // Face player while chasing (Y-axis only)
         }
     }
 
@@ -561,10 +637,10 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
             GetComponent<NavMeshAgent>().speed = 0;
         }
         
-        // Face player during attack
+        // Face player during attack (Y-axis only)
         if (player != null)
         {
-            transform.LookAt(player);
+            FacePlayerYAxisOnly();
         }
 
         if (!alreadyAttacked)
@@ -658,31 +734,15 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         isInPerfectParryWindow = false;
         canBeParriedNow = false;
         
-        // Disable NavMesh during recovery dash animation
-        if (agent != null && agent.enabled)
+        // Keep NavMesh enabled but stop movement during recovery
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
         {
-            agent.enabled = false;
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
         }
     }
     
-    // Override root motion during recovery
-    private void OnAnimatorMove()
-    {
-        if (isInAttackRecovery && anim != null)
-        {
-            // Scale down the Z movement (adjust multiplier as needed)
-            Vector3 deltaPosition = anim.deltaPosition;
-            deltaPosition.z *= 0.3f; // Try 0.1f, 0.3f, 0.5f, 0.7f
-            
-            Debug.Log($"Recovery dash: Original Z={anim.deltaPosition.z}, Scaled Z={deltaPosition.z}");
-            transform.position += deltaPosition;
-        }
-        else if (anim != null)
-        {
-            // Normal root motion behavior
-            transform.position += anim.deltaPosition;
-        }
-    }
+    // Root motion is now handled by EnemyRootMotionHandler script on the animationSource child object
     
     // For multi-phase attacks - advance to next phase
     public void AnimNextAttackPhase()
@@ -759,15 +819,12 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         Debug.Log("Attack recovery animation complete");
         isInAttackRecovery = false;
         
-        // Re-enable NavMesh agent after recovery dash
-        if (agent != null)
+        // Re-enable NavMesh movement after recovery
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
         {
-            agent.enabled = true;
-            if (agent.enabled && agent.isOnNavMesh)
-            {
-                agent.Warp(transform.position); // Sync position
-                GetComponent<NavMeshAgent>().speed = setSpeed;
-            }
+            agent.isStopped = false;
+            agent.velocity = Vector3.zero; // Clear any residual velocity
+            agent.speed = setSpeed;
         }
     }
     public void AnimFallEnd()

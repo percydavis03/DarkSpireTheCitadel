@@ -67,6 +67,9 @@ public class Worker : MonoBehaviour
         dead = false;
         alreadyAttacked = false;
         
+        // Check if animator has required parameters
+        CheckAnimatorParameters();
+        
         // Find the player reference properly
         if (player == null)
         {
@@ -86,6 +89,37 @@ public class Worker : MonoBehaviour
         {
             gameObject.AddComponent<TargetableEnemy>();
             Debug.Log($"Auto-added TargetableEnemy component to Worker {name}");
+        }
+    }
+    
+    private void CheckAnimatorParameters()
+    {
+        if (anim == null)
+        {
+            Debug.LogError($"Worker {gameObject.name}: Animator is null!");
+            return;
+        }
+        
+        // Check for required parameters
+        bool hasIsHurting = false;
+        bool hasIsRunning = false;
+        bool hasIsAttacking = false;
+        
+        foreach (AnimatorControllerParameter param in anim.parameters)
+        {
+            if (param.name == "IsHurting") hasIsHurting = true;
+            if (param.name == "isRunning") hasIsRunning = true; // Note: Worker might use different casing
+            if (param.name == "IsAttacking") hasIsAttacking = true;
+        }
+        
+        Debug.Log($"Worker {gameObject.name} Animator Parameters Check:");
+        Debug.Log($"  - IsHurting: {hasIsHurting}");
+        Debug.Log($"  - isRunning: {hasIsRunning}"); 
+        Debug.Log($"  - IsAttacking: {hasIsAttacking}");
+        
+        if (!hasIsHurting)
+        {
+            Debug.LogError($"Worker {gameObject.name}: Missing 'IsHurting' parameter in Animator Controller!");
         }
     }
     private void Awake()
@@ -149,7 +183,7 @@ public class Worker : MonoBehaviour
         }
         
         agent.SetDestination(player.position);
-        transform.LookAt(player);
+        FacePlayerYAxisOnly();
     }
 
     private void AttackPlayer()
@@ -225,8 +259,14 @@ public class Worker : MonoBehaviour
     // New method for combo-specific damage
     public void TakeComboDamage(int damage)
     {
+        Debug.Log($"Worker TakeComboDamage called on {gameObject.name} with damage: {damage}");
+        
         // Don't take damage if stunned (parry already handled damage)
-        if (isStunned) return;
+        if (isStunned) 
+        {
+            Debug.Log($"Worker {gameObject.name} is stunned - skipping damage");
+            return;
+        }
         
         isHit = true;
         anim.SetBool("IsRunning", false);
@@ -235,10 +275,15 @@ public class Worker : MonoBehaviour
         // No knockback for workers - handled by WeaponScript if needed
         if (enemyHP != 0)
         {
+            Debug.Log($"Setting IsHurting=true on Worker animator for {gameObject.name}");
             anim.SetBool("IsHurting", true);
             enemyHP = enemyHP - damage;
             print($"literally take {damage} combo damage");
             StartCoroutine(Wait(0.5f));
+        }
+        else
+        {
+            Debug.Log($"Worker {gameObject.name} HP is 0 - not triggering hurt animation");
         }
     }
 
@@ -493,10 +538,28 @@ public class Worker : MonoBehaviour
     {
        
         anim.SetBool("IsAttacking", false);
-        transform.LookAt(player);
+        FacePlayerYAxisOnly();
         GetComponent<NavMeshAgent>().speed = setSpeed;
         ResetParryStates(); // Reset enhanced parry system states
         print("stop attacking");
+    }
+    
+    /// <summary>
+    /// Face the player only on Y-axis to prevent weird tilting
+    /// </summary>
+    private void FacePlayerYAxisOnly()
+    {
+        if (player == null) return;
+        
+        Vector3 directionToPlayer = (player.position - transform.position).normalized;
+        // Only use X and Z components, keep Y at 0 for horizontal-only rotation
+        directionToPlayer.y = 0;
+        
+        if (directionToPlayer.magnitude > 0.1f) // Avoid issues when too close
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+        }
     }
 
     public void Death()

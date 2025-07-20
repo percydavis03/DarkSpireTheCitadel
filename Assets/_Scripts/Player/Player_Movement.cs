@@ -162,6 +162,14 @@ private Coroutine rollCoroutine;
         canRoll = true;
         cooldownTimer = 0f;
         rollTimer = 0f;
+        
+        // Ensure grapple system is enabled
+        NyxGrapple grappleSystem = GetComponent<NyxGrapple>();
+        if (grappleSystem != null && !grappleSystem.enabled)
+        {
+            grappleSystem.enabled = true;
+            Debug.Log("Grapple system enabled automatically");
+        }
     }
     
     private void OnEnable() //need for input system

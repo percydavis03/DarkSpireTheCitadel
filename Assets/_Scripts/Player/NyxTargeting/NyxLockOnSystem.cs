@@ -14,14 +14,14 @@ public class NyxLockOnSystem : MonoBehaviour
     [Header("Lock-On Settings")]
     [SerializeField] private float lockOnRange = 20f;
     [SerializeField] private float lockOnLostDistance = 25f;
-    [SerializeField] private bool autoLockOnClosest = true;
+    [SerializeField] private bool autoLockOnClosest = false;
     
     [Header("Input")]
     [SerializeField] private PlayerInputActions playerControls;
     [SerializeField] private float cycleInputThreshold = 0.3f;
 
     [Header("Rotation Settings")]
-    [SerializeField] private bool enableAutoRotation = true;
+    [SerializeField] private bool enableAutoRotation = false;
     [SerializeField] private float rotationSpeed = 12f;
     [SerializeField] private bool onlyRotateWhenLocked = true;
     [SerializeField] private float rotationThreshold = 5f; // Don't rotate if already facing target within this angle

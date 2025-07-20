@@ -19,7 +19,7 @@ public class TargetingSystemSetup : EditorWindow
         GUILayout.Label("Nyx Targeting System Setup", EditorStyles.boldLabel);
         GUILayout.Space(10);
         
-        GUILayout.Label("This tool will automatically add ITargetable components to existing enemies and grappleable objects in the scene.");
+        GUILayout.Label("This tool will automatically add ITargetable components and fix collider sync issues for enemies.");
         GUILayout.Space(10);
         
         if (GUILayout.Button("Add TargetableEnemy to all Enemy_Basic components"))
@@ -88,9 +88,19 @@ public class TargetingSystemSetup : EditorWindow
                 // Mark the object as dirty so changes are saved
                 EditorUtility.SetDirty(enemy.gameObject);
             }
+            
+            // Also ensure root motion handler is set up for collider sync
+            if (enemy.animationSource != null && enemy.animationSource != enemy.gameObject)
+            {
+                if (enemy.animationSource.GetComponent<EnemyRootMotionHandler>() == null)
+                {
+                    enemy.animationSource.AddComponent<EnemyRootMotionHandler>();
+                    EditorUtility.SetDirty(enemy.animationSource);
+                }
+            }
         }
         
-        Debug.Log($"Added TargetableEnemy to {addedCount} Enemy_Basic objects");
+        Debug.Log($"Added TargetableEnemy and root motion handlers to {addedCount} Enemy_Basic objects");
     }
     
     private static void AddTargetableEnemyToWorkers()
@@ -108,9 +118,24 @@ public class TargetingSystemSetup : EditorWindow
                 // Mark the object as dirty so changes are saved
                 EditorUtility.SetDirty(worker.gameObject);
             }
+            
+            // Check if Worker has an animation source (may be different from Enemy_Basic)
+            Animator workerAnimator = worker.GetComponent<Animator>();
+            if (workerAnimator == null)
+            {
+                workerAnimator = worker.GetComponentInChildren<Animator>();
+                if (workerAnimator != null && workerAnimator.gameObject != worker.gameObject)
+                {
+                    if (workerAnimator.GetComponent<EnemyRootMotionHandler>() == null)
+                    {
+                        workerAnimator.gameObject.AddComponent<EnemyRootMotionHandler>();
+                        EditorUtility.SetDirty(workerAnimator.gameObject);
+                    }
+                }
+            }
         }
         
-        Debug.Log($"Added TargetableEnemy to {addedCount} Worker objects");
+        Debug.Log($"Added TargetableEnemy and root motion handlers to {addedCount} Worker objects");
     }
     
     private static void AddTargetableEnemyToBosses()
@@ -128,9 +153,24 @@ public class TargetingSystemSetup : EditorWindow
                 // Mark the object as dirty so changes are saved
                 EditorUtility.SetDirty(boss.gameObject);
             }
+            
+            // Check if Boss has an animation source
+            Animator bossAnimator = boss.GetComponent<Animator>();
+            if (bossAnimator == null)
+            {
+                bossAnimator = boss.GetComponentInChildren<Animator>();
+                if (bossAnimator != null && bossAnimator.gameObject != boss.gameObject)
+                {
+                    if (bossAnimator.GetComponent<EnemyRootMotionHandler>() == null)
+                    {
+                        bossAnimator.gameObject.AddComponent<EnemyRootMotionHandler>();
+                        EditorUtility.SetDirty(bossAnimator.gameObject);
+                    }
+                }
+            }
         }
         
-        Debug.Log($"Added TargetableEnemy to {addedCount} Boss objects");
+        Debug.Log($"Added TargetableEnemy and root motion handlers to {addedCount} Boss objects");
     }
     
     private static void VerifyGrappleableComponents()

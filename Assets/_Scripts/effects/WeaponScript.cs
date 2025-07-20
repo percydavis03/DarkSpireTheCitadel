@@ -71,15 +71,21 @@ public class WeaponScript : MonoBehaviour
     
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log($"WeaponScript collision with: {other.gameObject.name}, Tag: {other.gameObject.tag}");
+        
         if (other.gameObject.CompareTag("Enemy"))
         {
+            Debug.Log($"Enemy collision detected with {other.gameObject.name}");
+            
             // Enhanced parry check with precise timing
             if (parryEnabled && CheckForEnhancedParry(other))
             {
+                Debug.Log("Parry was executed, skipping normal damage");
                 return; // Parry handled, don't continue with normal damage
             }
             
             int damage = GetCurrentComboDamage();
+            Debug.Log($"Calculated damage: {damage}");
             
             // Determine combo knockback based on current combo count
             Vector3 knockbackForce = lightKnockback; // Default to combo 1
@@ -106,12 +112,14 @@ public class WeaponScript : MonoBehaviour
             
             if (other.TryGetComponent(out Enemy_Basic enemyBasic))
             {
+                Debug.Log($"Found Enemy_Basic component, calling TakeComboDamage({damage})");
                 enemyBasic.TakeComboDamage(damage);
                 enemyBasic.GetKnockedBack(knockbackForce);
                 Debug.Log($"{comboType} - Knockback: {knockbackForce}");
             }
             else if (other.TryGetComponent(out Worker worker))
             {
+                Debug.Log($"Found Worker component, calling TakeComboDamage({damage})");
                 worker.TakeComboDamage(damage);
                 
                 // Workers get slightly reduced knockback but still get knocked back
@@ -123,7 +131,15 @@ public class WeaponScript : MonoBehaviour
                 worker.GetKnockedBack(workerKnockback);
                 Debug.Log($"{comboType} on Worker - Knockback: {workerKnockback}");
             }
+            else
+            {
+                Debug.Log($"No Enemy_Basic or Worker component found on {other.gameObject.name}");
+            }
             // Removed the duplicate IKnockbackable check that was causing double knockback
+        }
+        else
+        {
+            Debug.Log($"Object {other.gameObject.name} does not have Enemy tag");
         }
     }
 

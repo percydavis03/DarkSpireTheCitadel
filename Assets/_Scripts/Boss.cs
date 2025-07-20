@@ -57,6 +57,24 @@ public class Boss : MonoBehaviour
         currentHealth = 400;
         //currentHealth = hurtManager.Health;
     }
+    
+    /// <summary>
+    /// Face the player only on Y-axis to prevent weird tilting
+    /// </summary>
+    private void FacePlayerYAxisOnly()
+    {
+        if (player == null) return;
+        
+        Vector3 directionToPlayer = (player.position - transform.position).normalized;
+        // Only use X and Z components, keep Y at 0 for horizontal-only rotation
+        directionToPlayer.y = 0;
+        
+        if (directionToPlayer.magnitude > 0.1f) // Avoid issues when too close
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+        }
+    }
     private void Awake()
     {
         if (instance == null)
@@ -70,7 +88,7 @@ public class Boss : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.LookAt(player);
+        FacePlayerYAxisOnly();
         boss.SetDestination(player.position);
         ShootAtPlayer();
         healthFill.fillAmount = currentHealth / maxHP;

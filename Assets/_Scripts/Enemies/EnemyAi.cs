@@ -132,7 +132,25 @@ public class EnemyAi : MonoBehaviour
     private void ChasePlayer()
     {
         agent.SetDestination(player.position);
-        transform.LookAt(player);
+        FacePlayerYAxisOnly();
+    }
+    
+    /// <summary>
+    /// Face the player only on Y-axis to prevent weird tilting
+    /// </summary>
+    private void FacePlayerYAxisOnly()
+    {
+        if (player == null) return;
+        
+        Vector3 directionToPlayer = (player.position - transform.position).normalized;
+        // Only use X and Z components, keep Y at 0 for horizontal-only rotation
+        directionToPlayer.y = 0;
+        
+        if (directionToPlayer.magnitude > 0.1f) // Avoid issues when too close
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+        }
     }
 
     private void AttackPlayer()
@@ -162,7 +180,7 @@ public class EnemyAi : MonoBehaviour
             //make sure enemy doesnt move
             agent.SetDestination(transform.position);
 
-            transform.LookAt(player);
+            FacePlayerYAxisOnly();
 
             
         }*/

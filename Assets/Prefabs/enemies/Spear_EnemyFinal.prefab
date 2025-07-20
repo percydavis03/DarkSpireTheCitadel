@@ -981,6 +981,9 @@ GameObject:
   - component: {fileID: 8853411899951149036}
   - component: {fileID: 3697629731749878271}
   - component: {fileID: 5062944618893276498}
+  - component: {fileID: 2307003142243156755}
+  - component: {fileID: 1540319993185730511}
+  - component: {fileID: 1932904333835786560}
   m_Layer: 0
   m_Name: Spear_EnemyFinal
   m_TagString: Enemy
@@ -1139,7 +1142,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   thisGameSave: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
-  isLock: 0
+  isLock: 1
   isSpeartwo: 0
   exit: {fileID: 0}
   enemyHP: 30
@@ -1157,7 +1160,7 @@ MonoBehaviour:
   isHit: 0
   dead: 0
   thisGuy: {fileID: 1814872507465041094}
-  player: {fileID: 3488818573682954259, guid: 286cc0691f4f6a041b42a56c044f50c6, type: 3}
+  player: {fileID: 0}
   healthFill: {fileID: 540862159057767731}
   waitThreshold: 0.05
   spear_hitbox: {fileID: 8727025427618301063}
@@ -1200,6 +1203,73 @@ MonoBehaviour:
   attackRange: 3
   playerInSightRange: 0
   playerInAttackRange: 0
+--- !u!114 &2307003142243156755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1814872507465041094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e29bef1322c0793438c60183cdc94cc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetType: 0
+  priority: 1
+  targetPoint: {fileID: 0}
+  canBeTargetedWhenDead: 0
+  targetIndicator: {fileID: 0}
+  showTargetEffects: 1
+  targetSelectedSound: {fileID: 0}
+  targetDeselectedSound: {fileID: 0}
+--- !u!114 &1540319993185730511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1814872507465041094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e29bef1322c0793438c60183cdc94cc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetType: 0
+  priority: 1
+  targetPoint: {fileID: 4460506296843802398}
+  canBeTargetedWhenDead: 0
+  targetIndicator: {fileID: 0}
+  showTargetEffects: 1
+  targetSelectedSound: {fileID: 0}
+  targetDeselectedSound: {fileID: 0}
+--- !u!114 &1932904333835786560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1814872507465041094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ee917a16eccda4a8a552bc2ea7f420, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canBeGrappled: 1
+  pullable: 1
+  isEnemy: 0
+  animator: {fileID: 118841175441764865}
+  grapplePoint: {fileID: 4460506296843802398}
+  postReleaseStunDuration: 1
+  OnGrappleStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGrappleReleased:
+    m_PersistentCalls:
+      m_Calls: []
+  targetPriority: 2
+  showTargetEffects: 1
+  targetIndicator: {fileID: 0}
 --- !u!1 &1887902235097528551
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,7 +7,7 @@ public class NyxGrapple : MonoBehaviour
 {
     [Header("Grapple Settings")]
     public float grappleRange = 10f;
-    public float grappleAngle = 30f;
+    public float grappleAngle = 120f;
     // public LayerMask grappleLayerMask = -1; // No longer needed - using tag-based detection only
     public Transform nyxTransform;
     public Transform grappleOrigin;
@@ -98,10 +98,50 @@ public class NyxGrapple : MonoBehaviour
     
     void Update()
     {
+        // TEMP: Create test cube with T key
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            CreateTestCube();
+        }
+        
         DetectGrappleableInRange();
         HandleGrappleInput();
         UpdateAnimator();
         CheckPullingConditions();
+    }
+    
+    void CreateTestCube()
+    {
+        Vector3 spawnPosition = grappleOrigin.position + grappleOrigin.forward * 3f + Vector3.up * 1f;
+        
+        // Create test cube
+        GameObject testCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        testCube.name = "GRAPPLE TEST CUBE";
+        testCube.transform.position = spawnPosition;
+        testCube.transform.localScale = Vector3.one * 0.5f;
+        
+        // Set tag
+        testCube.tag = "CanBeGrappled";
+        
+        // Add components
+        Grappleable grappleable = testCube.AddComponent<Grappleable>();
+        grappleable.canBeGrappled = true;
+        grappleable.pullable = true;
+        
+        Rigidbody rb = testCube.AddComponent<Rigidbody>();
+        rb.mass = 1f;
+        
+        // Make it bright green so it's visible
+        Renderer renderer = testCube.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            Material mat = new Material(Shader.Find("Standard"));
+            mat.color = Color.green;
+            renderer.material = mat;
+        }
+        
+        Debug.Log($"✅ Created grapple test cube at {spawnPosition}");
+        Debug.Log("🎯 Stand close to it, look at it, and hold G!");
     }
     
     void LateUpdate()
@@ -242,8 +282,9 @@ public class NyxGrapple : MonoBehaviour
         bool wasInRange = isGrappleableInRange;
         isGrappleableInRange = false;
         
+        // TEMPORARILY DISABLE targeting system to test fallback detection
         // Use targeting system if available
-        if (targetingSystem != null)
+        if (false) // targetingSystem != null)
         {
             // Get best grappleable target from targeting system
             var bestTarget = targetingSystem.BestTarget;
@@ -300,8 +341,11 @@ public class NyxGrapple : MonoBehaviour
                 float distance = Vector3.Distance(col.transform.position, rayOrigin);
                 Vector3 directionToTarget = (col.transform.position - rayOrigin).normalized;
                 float angleToTarget = Vector3.Angle(rayDirection, directionToTarget);
-                bool hasCorrectTag = col.CompareTag("CanBeGrappled");
-                Debug.Log($"  - {col.name}: Distance={distance:F1}, Angle={angleToTarget:F1}°, Tag={hasCorrectTag}");
+                bool hasCorrectTag = col.CompareTag("CanBeGrappled") || col.CompareTag("Enemy");
+                Grappleable grappleable = col.GetComponent<Grappleable>();
+                bool hasGrappleable = grappleable != null;
+                bool canBeGrappled = hasGrappleable && grappleable.canBeGrappled;
+                Debug.Log($"  - {col.name}: Distance={distance:F1}, Angle={angleToTarget:F1}°, Tag={col.tag}, ValidTag={hasCorrectTag}, HasGrappleable={hasGrappleable}, CanBeGrappled={canBeGrappled}");
             }
         }
         
@@ -314,7 +358,7 @@ public class NyxGrapple : MonoBehaviour
             Vector3 directionToTarget = (collider.transform.position - rayOrigin).normalized;
             float angleToTarget = Vector3.Angle(rayDirection, directionToTarget);
             
-            if (angleToTarget <= grappleAngle && collider.CompareTag("CanBeGrappled"))
+            if (angleToTarget <= grappleAngle && (collider.CompareTag("CanBeGrappled") || collider.CompareTag("Enemy")))
             {
                 RaycastHit[] hits = Physics.RaycastAll(rayOrigin, directionToTarget, grappleRange);
                 
