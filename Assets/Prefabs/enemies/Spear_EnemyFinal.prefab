@@ -981,7 +981,6 @@ GameObject:
   - component: {fileID: 8853411899951149036}
   - component: {fileID: 3697629731749878271}
   - component: {fileID: 5062944618893276498}
-  - component: {fileID: 2307003142243156755}
   - component: {fileID: 1540319993185730511}
   - component: {fileID: 1932904333835786560}
   m_Layer: 0
@@ -1110,7 +1109,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1814872507465041094}
   serializedVersion: 4
-  m_Mass: 30
+  m_Mass: 1
   m_Drag: 0.5
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -1125,9 +1124,9 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 112
+  m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!114 &5062944618893276498
 MonoBehaviour:
@@ -1203,26 +1202,6 @@ MonoBehaviour:
   attackRange: 3
   playerInSightRange: 0
   playerInAttackRange: 0
---- !u!114 &2307003142243156755
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1814872507465041094}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e29bef1322c0793438c60183cdc94cc4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetType: 0
-  priority: 1
-  targetPoint: {fileID: 0}
-  canBeTargetedWhenDead: 0
-  targetIndicator: {fileID: 0}
-  showTargetEffects: 1
-  targetSelectedSound: {fileID: 0}
-  targetDeselectedSound: {fileID: 0}
 --- !u!114 &1540319993185730511
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1259,7 +1238,7 @@ MonoBehaviour:
   pullable: 1
   isEnemy: 1
   animator: {fileID: 118841175441764865}
-  grapplePoint: {fileID: 4460506296843802398}
+  grapplePoint: {fileID: 4307003014438469044}
   postReleaseStunDuration: 1
   OnGrappleStarted:
     m_PersistentCalls:

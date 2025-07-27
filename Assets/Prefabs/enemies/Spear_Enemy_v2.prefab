@@ -1040,6 +1040,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6794348744460945096}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2d6b19d107c408f45a3f92d99b6ee678,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2894756183920134512}
   m_SourcePrefab: {fileID: 100100000, guid: 2d6b19d107c408f45a3f92d99b6ee678, type: 3}
 --- !u!4 &5216514928371077205 stripped
 Transform:
@@ -1202,6 +1206,31 @@ MonoBehaviour:
   healthFill: {fileID: 0}
   waitThreshold: 0.05
   spear_hitbox: {fileID: 5755686708581746545}
+  isStunned: 0
+  stunDuration: 2
+  defaultStunDuration: 2
+  canBeParried: 1
+  isInParryWindow: 0
+  isInPerfectParryWindow: 0
+  canBeParriedNow: 0
+  currentAttackPhase: 0
+  maxAttackPhases: 1
+  isInAttackStartup: 0
+  isInAttackActive: 0
+  isInAttackRecovery: 0
+  parryDifficulty: 2
+  difficultyParryWindows:
+  - 0.4
+  - 0.3
+  - 0.2
+  - 0.1
+  - 0.05
+  difficultyPerfectWindows:
+  - 0.1
+  - 0.08
+  - 0.06
+  - 0.04
+  - 0.02
   agent: {fileID: 7102033918456084811}
   whatIsGround:
     serializedVersion: 2
@@ -1232,7 +1261,7 @@ MonoBehaviour:
   pullable: 1
   isEnemy: 1
   animator: {fileID: 8237691199550725041}
-  grapplePoint: {fileID: 7437412798293465260}
+  grapplePoint: {fileID: 7817456361604219414}
   postReleaseStunDuration: 1
   OnGrappleStarted:
     m_PersistentCalls:
@@ -1243,3 +1272,9 @@ MonoBehaviour:
   targetPriority: 4
   showTargetEffects: 1
   targetIndicator: {fileID: 0}
+--- !u!4 &7817456361604219414 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2d6b19d107c408f45a3f92d99b6ee678,
+    type: 3}
+  m_PrefabInstance: {fileID: 7779852190674642429}
+  m_PrefabAsset: {fileID: 0}

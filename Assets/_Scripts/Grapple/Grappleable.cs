@@ -12,6 +12,9 @@ public class Grappleable : MonoBehaviour, ITargetable
     public Animator animator;
     public Transform grapplePoint; // The specific point where the grapple wrist will attach
     
+    [Header("Player Save State Reference")]
+    public PlayerSaveState playerSaveState; // Reference to check if player has arm upgrade
+    
     [Header("Enemy Settings")]
     private NavMeshAgent navAgent;
     private Worker workerScript;
@@ -47,6 +50,12 @@ public class Grappleable : MonoBehaviour, ITargetable
     { 
         get 
         {
+            // FIRST CHECK: Player must have arm upgrade to grapple anything
+            if (playerSaveState != null && !playerSaveState.hasArm)
+            {
+                return false;
+            }
+            
             // Use existing Grappleable logic for determining if it can be targeted
             if (!canBeGrappled) return false;
             if (isBeingGrappled) return false;
@@ -60,6 +69,36 @@ public class Grappleable : MonoBehaviour, ITargetable
     
     void Start()
     {
+        // Auto-find PlayerSaveState if not assigned
+        if (playerSaveState == null)
+        {
+            // Try to find it from a Worker component first (if this is an enemy)
+            Worker worker = GetComponent<Worker>();
+            if (worker != null && worker.thisGameSave != null)
+            {
+                playerSaveState = worker.thisGameSave;
+            }
+            else
+            {
+                // Fallback: search for any object with PlayerSaveState in the scene
+                Worker[] allWorkers = FindObjectsOfType<Worker>();
+                foreach (Worker w in allWorkers)
+                {
+                    if (w.thisGameSave != null)
+                    {
+                        playerSaveState = w.thisGameSave;
+                        break;
+                    }
+                }
+                
+                // If still not found, log a warning
+                if (playerSaveState == null)
+                {
+                    Debug.LogWarning($"Grappleable {name}: Could not find PlayerSaveState reference. Grappling will be disabled until hasArm=true is verified.");
+                }
+            }
+        }
+        
         // Handle rigid body based on pullable setting
         Rigidbody rb = GetComponent<Rigidbody>();
         if (!pullable && rb != null)
@@ -225,6 +264,13 @@ public class Grappleable : MonoBehaviour, ITargetable
     // Called when this object starts being grappled
     public virtual void StartGrapple()
     {
+        // FIRST CHECK: Player must have arm upgrade to grapple anything
+        if (playerSaveState != null && !playerSaveState.hasArm)
+        {
+            Debug.LogWarning($"{gameObject.name}: Cannot be grappled - Player does not have arm upgrade (hasArm=false)");
+            return;
+        }
+        
         if (!canBeGrappled) return;
         
         isBeingGrappled = true;
