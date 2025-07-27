@@ -23,7 +23,7 @@ public class PlayerSaveState : ScriptableObject
     
     [Header("Player Upgrades")]
     public bool hasArm;
-    public bool hasSword;
+//    public bool hasSword;
     
     public int GetComboDamage(int comboCount)
     {
