@@ -132,13 +132,18 @@ public bool directionalRoll = true;
 [Tooltip("If true, can cancel attacks with roll")]
 public bool canRollCancelAttacks = true;
 
-// Roll state variables
-public bool rolling = false;
-private bool canRoll = true;
-private Vector3 rollDirection;
-private float rollTimer = 0f;
-private float cooldownTimer = 0f;
-private Coroutine rollCoroutine;
+    // Roll state variables
+    public bool rolling = false;
+    private bool canRoll = true;
+    private Vector3 rollDirection;
+    private float rollTimer = 0f;
+    private float cooldownTimer = 0f;
+    private Coroutine rollCoroutine;
+    
+    [Header("Root Motion Integration")]
+    [Tooltip("When true, uses root motion for roll movement instead of script-based movement")]
+    public bool useRootMotionForRoll = false;
+    private NyxRootMotionHandler rootMotionHandler;
 
     private void Awake()
     {
@@ -172,6 +177,13 @@ private Coroutine rollCoroutine;
         canRoll = true;
         cooldownTimer = 0f;
         rollTimer = 0f;
+        
+        // Initialize root motion handler reference
+        rootMotionHandler = animationSource.GetComponent<NyxRootMotionHandler>();
+        if (rootMotionHandler == null)
+        {
+            Debug.LogWarning("NyxRootMotionHandler not found on animation source. Root motion for rolls will not work.");
+        }
         
         // Performance: Reduce failsafe timer for faster attack recovery
         maxAttackDuration = 2f; // Reduced from 3f to 2f for better responsiveness
@@ -497,12 +509,17 @@ private Coroutine rollCoroutine;
         // Animation
         anim.SetBool("isRolling", true);
         
-        // Start roll movement coroutine
-        if (rollCoroutine != null)
+        // Start roll movement - either root motion or script-based
+        if (!useRootMotionForRoll)
         {
-            StopCoroutine(rollCoroutine);
+            // Use script-based roll movement (legacy system)
+            if (rollCoroutine != null)
+            {
+                StopCoroutine(rollCoroutine);
+            }
+            rollCoroutine = StartCoroutine(RollMovement());
         }
-        rollCoroutine = StartCoroutine(RollMovement());
+        // If using root motion, movement will be handled by the animation and OnAnimatorMove
         
         Debug.Log($"Roll started in direction: {rollDirection}");
     }
@@ -545,15 +562,20 @@ private Coroutine rollCoroutine;
         rolling = false;
         anim.SetBool("isRolling", false);
         
-        // Stop roll movement
+        // Stop script-based roll movement (if active)
         if (rollCoroutine != null)
         {
             StopCoroutine(rollCoroutine);
             rollCoroutine = null;
         }
         
+        // Reset root motion flag
+        useRootMotionForRoll = false;
+        
         // Restore damage after invincibility period
         StartCoroutine(RestoreVulnerability());
+        
+        Debug.Log("Roll ended - returning to normal movement");
     }
     
     private IEnumerator RestoreVulnerability()
@@ -570,6 +592,38 @@ private Coroutine rollCoroutine;
     public void StopRolling()
     {
         EndRoll();
+    }
+    
+    /// <summary>
+    /// Sets whether to use root motion for roll movement.
+    /// Called by NyxRootMotionHandler to switch between root motion and script-based movement.
+    /// </summary>
+    public void SetUseRootMotionForRoll(bool useRootMotion)
+    {
+        useRootMotionForRoll = useRootMotion;
+        
+        if (useRootMotion && rollCoroutine != null)
+        {
+            // Stop script-based movement when switching to root motion
+            StopCoroutine(rollCoroutine);
+            rollCoroutine = null;
+        }
+    }
+    
+    /// <summary>
+    /// Gets the current roll direction for root motion calculations
+    /// </summary>
+    public Vector3 GetRollDirection()
+    {
+        return rollDirection;
+    }
+    
+    /// <summary>
+    /// Returns true if the player is currently rolling
+    /// </summary>
+    public bool IsRolling()
+    {
+        return rolling;
     }
 
     public void ApplyKnockback(Vector3 knockbackForce)
