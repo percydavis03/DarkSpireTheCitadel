@@ -1024,6 +1024,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 4901870364831612017}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 28cf48f10c921dc489abc7ae80125414,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8689707170857743974}
   m_SourcePrefab: {fileID: 100100000, guid: 28cf48f10c921dc489abc7ae80125414, type: 3}
 --- !u!4 &272639563770598306 stripped
 Transform:
@@ -1137,8 +1141,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   thisGameSave: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
-  isLock: 0
-  exit: {fileID: 0}
   enemyHP: 30
   maxEnemyHP: 30
   damageTaken: 0
@@ -1150,14 +1152,7 @@ MonoBehaviour:
   enemyDrop: {fileID: 4880142512257894004, guid: 34b30e28348534848b79175c911087b2,
     type: 3}
   anim: {fileID: 8140749804513430018}
-  animationSource: {fileID: 0}
-  shovelHitbox: {fileID: 0}
-  isHit: 0
-  dead: 0
-  thisGuy: {fileID: 728773405014425244}
-  player: {fileID: 0}
-  healthFill: {fileID: 0}
-  waitThreshold: 0.05
+  shovelHitbox: {fileID: 8274799616547859530}
   isStunned: 0
   stunDuration: 2
   defaultStunDuration: 2
@@ -1165,24 +1160,11 @@ MonoBehaviour:
   isInParryWindow: 0
   isInPerfectParryWindow: 0
   canBeParriedNow: 0
-  currentAttackPhase: 0
-  maxAttackPhases: 1
   isInAttackStartup: 0
   isInAttackActive: 0
   isInAttackRecovery: 0
-  parryDifficulty: 1
-  difficultyParryWindows:
-  - 0.5
-  - 0.4
-  - 0.3
-  - 0.2
-  - 0.1
-  difficultyPerfectWindows:
-  - 0.15
-  - 0.12
-  - 0.1
-  - 0.08
-  - 0.05
+  workerParryWindow: 0.3
+  workerPerfectWindow: 0.1
   agent: {fileID: 5412214325326819484}
   whatIsGround:
     serializedVersion: 2
@@ -1190,13 +1172,15 @@ MonoBehaviour:
   whatIsPlayer:
     serializedVersion: 2
     m_Bits: 128
-  walkPoint: {x: 0, y: 0, z: 0}
-  walkPointRange: 0
-  timeBetweenAttacks: 1
+  isHit: 0
+  dead: 0
+  player: {fileID: 0}
   sightRange: 13
   attackRange: 2
   playerInSightRange: 0
   playerInAttackRange: 0
+  timeBetweenAttacks: 1
+  thisGuy: {fileID: 728773405014425244}
 --- !u!54 &5307427152406966463
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1222,7 +1206,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 32
+  m_Constraints: 84
   m_CollisionDetection: 0
 --- !u!114 &4901870364831612017
 MonoBehaviour:
@@ -1241,6 +1225,7 @@ MonoBehaviour:
   isEnemy: 1
   animator: {fileID: 8140749804513430018}
   grapplePoint: {fileID: 272639563770598306}
+  playerSaveState: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
   postReleaseStunDuration: 1
   OnGrappleStarted:
     m_PersistentCalls:
@@ -1251,6 +1236,80 @@ MonoBehaviour:
   targetPriority: 2
   showTargetEffects: 1
   targetIndicator: {fileID: 0}
+--- !u!114 &8689707170857743974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728773405014425244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2fbf3409c817554a8f084f16cefe7a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thisGameSave: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
+  isLock: 1
+  isSpeartwo: 0
+  exit: {fileID: 0}
+  enemyHP: 30
+  maxEnemyHP: 30
+  damageTaken: 0
+  setSpeed: 7
+  bloodSplats:
+  - {fileID: 2116165384315778508, guid: 64549c95cef36824abd60b3abc4fd81d, type: 3}
+  - {fileID: 2116165384315778508, guid: 1406c2d0c30ed0346aebe50fa1578e53, type: 3}
+  randomListObject: 0
+  enemyDrop: {fileID: 4880142512257894004, guid: 34b30e28348534848b79175c911087b2,
+    type: 3}
+  anim: {fileID: 8140749804513430018}
+  animationSource: {fileID: 728773405014425244}
+  isHit: 0
+  dead: 0
+  thisGuy: {fileID: 728773405014425244}
+  player: {fileID: 0}
+  healthFill: {fileID: 0}
+  waitThreshold: 0.05
+  spear_hitbox: {fileID: 8274799616547859530}
+  isStunned: 0
+  stunDuration: 2
+  defaultStunDuration: 2
+  canBeParried: 1
+  isInParryWindow: 0
+  isInPerfectParryWindow: 0
+  canBeParriedNow: 0
+  currentAttackPhase: 0
+  maxAttackPhases: 1
+  isInAttackStartup: 0
+  isInAttackActive: 0
+  isInAttackRecovery: 0
+  parryDifficulty: 2
+  difficultyParryWindows:
+  - 0.4
+  - 0.3
+  - 0.2
+  - 0.1
+  - 0.05
+  difficultyPerfectWindows:
+  - 0.1
+  - 0.08
+  - 0.06
+  - 0.04
+  - 0.02
+  agent: {fileID: 5412214325326819484}
+  whatIsGround:
+    serializedVersion: 2
+    m_Bits: 64
+  whatIsPlayer:
+    serializedVersion: 2
+    m_Bits: 128
+  walkPoint: {x: 2, y: 2, z: 2}
+  walkPointRange: 1
+  timeBetweenAttacks: 1
+  sightRange: 12
+  attackRange: 3
+  playerInSightRange: 0
+  playerInAttackRange: 0
 --- !u!4 &2263580631328111621 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: 28cf48f10c921dc489abc7ae80125414,
@@ -1370,6 +1429,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 056a711dfb3ff30469eb870da6f7449b, type: 3}
+--- !u!1 &8274799616547859530 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3717455943181703497, guid: 056a711dfb3ff30469eb870da6f7449b,
+    type: 3}
+  m_PrefabInstance: {fileID: 4702584933147555075}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8390783776869733975 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3832841971864658772, guid: 056a711dfb3ff30469eb870da6f7449b,
