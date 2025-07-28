@@ -363,6 +363,10 @@ private Coroutine rollCoroutine;
     public void GotHit()
     {
         anim.SetBool("isHurt", true);
+        
+        // Immediately reset combo when player takes damage
+        ResetCombo();
+        if (ShouldDebugAttacks()) Debug.Log("💥 Player hurt - combo reset immediately");
     }
 
     public void Recover()
@@ -370,6 +374,14 @@ private Coroutine rollCoroutine;
         anim.SetBool("isHurt", false);
     }
 
+    public void EndHurt()
+    {
+        if (ShouldDebugAttacks()) Debug.Log("💥 EndHurt: Hurt state ended via animation event");
+        anim.SetBool("isHurt", false);
+        // Optionally re-enable movement if it was disabled during hurt
+        canMove = true;
+        canRotate = true;
+    }
 
     public void SwordOn()
     {

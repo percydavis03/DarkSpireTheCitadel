@@ -99,53 +99,10 @@ public class NyxGrapple : MonoBehaviour
     
     void Update()
     {
-        // TEMP: Create test cube with T key
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            CreateTestCube();
-        }
-        
         DetectGrappleableInRange();
         HandleGrappleInput();
         UpdateAnimator();
         CheckPullingConditions();
-    }
-    
-    void CreateTestCube()
-    {
-        Vector3 spawnPosition = grappleOrigin.position + grappleOrigin.forward * 3f + Vector3.up * 1f;
-        
-        // Create test cube
-        GameObject testCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        testCube.name = "GRAPPLE TEST CUBE";
-        testCube.transform.position = spawnPosition;
-        testCube.transform.localScale = Vector3.one * 0.5f;
-        
-        // Set tag
-        testCube.tag = "CanBeGrappled";
-        
-        // Add components
-        Grappleable grappleable = testCube.AddComponent<Grappleable>();
-        grappleable.canBeGrappled = true;
-        grappleable.pullable = true;
-        
-        Rigidbody rb = testCube.AddComponent<Rigidbody>();
-        rb.mass = 1f;
-        
-        // Make it bright green so it's visible
-        Renderer renderer = testCube.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            Material mat = new Material(Shader.Find("Standard"));
-            mat.color = Color.green;
-            renderer.material = mat;
-        }
-        
-        if (enableDebugLogs)
-        {
-            Debug.Log($"✅ Created grapple test cube at {spawnPosition}");
-            Debug.Log("🎯 Stand close to it, look at it, and hold G!");
-        }
     }
     
     void LateUpdate()

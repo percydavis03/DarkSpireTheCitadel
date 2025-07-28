@@ -2522,6 +2522,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enableAttackDebugLogs: 1
   footHitbox: {fileID: 0}
+  footKnockbackData: {fileID: 0}
+  footKnockbackMultiplier: 2
+  footAttackRange: 3
+  enemyLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  enableFootDebugLogs: 1
 --- !u!114 &1302204275184489568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2662,6 +2669,9 @@ MonoBehaviour:
   lockOnLostDistance: 25
   autoLockOnClosest: 1
   cycleInputThreshold: 0.3
+  lockOnCooldown: 0.3
+  inputDebounceTime: 0.5
+  enableDebugLogs: 1
   enableAutoRotation: 1
   rotationSpeed: 12
   onlyRotateWhenLocked: 1
@@ -15131,7 +15141,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 309865338705156792}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.61717165
+  m_Size: 0.6171716
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -17413,6 +17423,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enableAttackDebugLogs: 1
   footHitbox: {fileID: 0}
+  footKnockbackData: {fileID: 0}
+  footKnockbackMultiplier: 2
+  footAttackRange: 3
+  enemyLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  enableFootDebugLogs: 1
 --- !u!1 &3358717872239056578
 GameObject:
   m_ObjectHideFlags: 0
@@ -19457,10 +19474,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6044008776912850506}
   - component: {fileID: 4897781313592571311}
-  - component: {fileID: 7963142960358493776}
   m_Layer: 0
   m_Name: kick colider
-  m_TagString: Untagged
+  m_TagString: NyxFoot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -19474,8 +19490,8 @@ Transform:
   m_GameObject: {fileID: 4852896817022549768}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.00069, y: -0.00644, z: 0.00005}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.00069, y: -0.00644, z: -0.006}
+  m_LocalScale: {x: 1.96, y: 3.4, z: 3.27}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 47044841052045227}
@@ -19499,22 +19515,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.01, y: 0.01, z: 0.01}
+  m_Size: {x: 0.01, y: 0.01, z: -0.02}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7963142960358493776
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4852896817022549768}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 432cf035bd8ca9647bd77a6f01c4aba7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  kickForce: {x: 20, y: 5, z: 20}
-  enableDebugLogs: 1
 --- !u!1 &4858171308961385924
 GameObject:
   m_ObjectHideFlags: 0
@@ -31907,7 +31909,7 @@ Transform:
   m_GameObject: {fileID: 6273563783167962138}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -93.678604, y: -8.333384, z: -42.634468}
+  m_LocalPosition: {x: -93.058304, y: -8.333384, z: -42.634468}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
