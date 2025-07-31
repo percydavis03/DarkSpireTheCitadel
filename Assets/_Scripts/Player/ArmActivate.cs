@@ -49,10 +49,25 @@ public class ArmActivate : MonoBehaviour
         deathScreen.alpha = end;
         yield return new WaitForSeconds(0.5f);
         //theArm.SetActive(false);
-        nyxWthArm.SetActive(true);
-        oldNyx.SetActive(false);
-        block.SetActive(false);
+        //nyxWthArm.SetActive(true);
+        //oldNyx.SetActive(false);
+        //block.SetActive(false);
+        // Temporarily disable NyxUpgrades to prevent prefab switching
+        NyxUpgrades nyxUpgrades = FindObjectOfType<NyxUpgrades>();
+        bool wasEnabled = false;
+        if (nyxUpgrades != null)
+        {
+            wasEnabled = nyxUpgrades.enabled;
+            nyxUpgrades.enabled = false;
+        }
+        
         thisGameSave.hasArm = true;
+        
+        // Re-enable NyxUpgrades after a frame
+        if (nyxUpgrades != null)
+        {
+            nyxUpgrades.enabled = wasEnabled;
+        }
         yield return new WaitForSeconds(3f);
         StartCoroutine(FadeCanvasGroupOut(deathScreen.alpha, 0, 3f));
     }
@@ -64,7 +79,7 @@ public class ArmActivate : MonoBehaviour
         while (elapsedTime < fadeDuration)
         {
             elapsedTime += Time.deltaTime;
-            newdeathScreen.alpha = Mathf.Lerp(start, end, elapsedTime / duration);
+            deathScreen.alpha = Mathf.Lerp(start, end, elapsedTime / duration);
             yield return null;
         }
         deathScreen.alpha = end;

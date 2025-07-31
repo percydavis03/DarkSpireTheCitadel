@@ -1027,8 +1027,22 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 28cf48f10c921dc489abc7ae80125414,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 5789617607900761348}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 28cf48f10c921dc489abc7ae80125414,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 8689707170857743974}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 28cf48f10c921dc489abc7ae80125414,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 240598904198042100}
   m_SourcePrefab: {fileID: 100100000, guid: 28cf48f10c921dc489abc7ae80125414, type: 3}
+--- !u!4 &96492180210885670 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 28cf48f10c921dc489abc7ae80125414,
+    type: 3}
+  m_PrefabInstance: {fileID: 494400201238234061}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &272639563770598306 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 366175167995203695, guid: 28cf48f10c921dc489abc7ae80125414,
@@ -1135,7 +1149,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 728773405014425244}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e7aac58f7fabc834abcd8ebac71350c1, type: 3}
   m_Name: 
@@ -1236,6 +1250,26 @@ MonoBehaviour:
   targetPriority: 2
   showTargetEffects: 1
   targetIndicator: {fileID: 0}
+--- !u!114 &5789617607900761348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728773405014425244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e29bef1322c0793438c60183cdc94cc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetType: 0
+  priority: 1
+  targetPoint: {fileID: 96492180210885670}
+  canBeTargetedWhenDead: 0
+  targetIndicator: {fileID: 0}
+  showTargetEffects: 1
+  targetSelectedSound: {fileID: 0}
+  targetDeselectedSound: {fileID: 0}
 --- !u!114 &8689707170857743974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1310,6 +1344,37 @@ MonoBehaviour:
   attackRange: 3
   playerInSightRange: 0
   playerInAttackRange: 0
+--- !u!114 &240598904198042100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728773405014425244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df7242632f073af43ade44ed0ba87b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mass: 1
+  canReceiveKnockback: 1
+  hasNavMeshAgent: 1
+  disableNavMeshDuringKnockback: 1
+  warpNavMeshAfterKnockback: 1
+  animator: {fileID: 8140749804513430018}
+  knockbackBoolParameter: isKnockedBack
+  knockbackTriggerParameter: knockbackTrigger
+  audioSource: {fileID: 0}
+  effectSpawnPoint: {fileID: 0}
+  OnKnockbackStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnKnockbackEnd:
+    m_PersistentCalls:
+      m_Calls: []
+  OnKnockbackProgress:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &2263580631328111621 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: 28cf48f10c921dc489abc7ae80125414,

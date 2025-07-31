@@ -42,17 +42,23 @@ public class ArmGuy : MonoBehaviour
     }
     public void Die()
     {
+        if (dead) return; // Only die once
         
         dead = true;
-        hisArm.SetActive(false);
-        yourNewArm.SetActive(true);
-        hisWords.SetActive(false);
+        
+        // Add null checks before accessing GameObjects
+        if (hisArm != null)
+            hisArm.SetActive(false);
+        if (yourNewArm != null)
+            yourNewArm.SetActive(true);
+        if (hisWords != null)
+            hisWords.SetActive(false);
             //yourNewArmPicture.SetActive(true);
     }
     // Update is called once per frame
     void Update()
     {
-        if (health <= 0)
+        if (health <= 0 && !dead)
         {
             Die();
         }

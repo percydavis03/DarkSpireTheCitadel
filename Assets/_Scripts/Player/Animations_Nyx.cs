@@ -40,7 +40,8 @@ public class Animations_Nyx : MonoBehaviour
         weaponScript = FindObjectOfType<WeaponScript>();
         if (weaponScript == null)
         {
-            Debug.LogWarning("Animations_Nyx: No WeaponScript found - finisher attacks may not work!");
+            // WeaponScript is optional - only needed for advanced finisher attacks
+            Debug.Log("Animations_Nyx: No WeaponScript found. This is normal if using basic combat system.");
         }
         
         // Auto-load FootKnockbackData if not assigned

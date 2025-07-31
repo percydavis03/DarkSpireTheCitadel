@@ -983,6 +983,7 @@ GameObject:
   - component: {fileID: 5062944618893276498}
   - component: {fileID: 1540319993185730511}
   - component: {fileID: 1932904333835786560}
+  - component: {fileID: 3172927457328170398}
   m_Layer: 0
   m_Name: Spear_EnemyFinal
   m_TagString: Enemy
@@ -1239,6 +1240,7 @@ MonoBehaviour:
   isEnemy: 1
   animator: {fileID: 118841175441764865}
   grapplePoint: {fileID: 4307003014438469044}
+  playerSaveState: {fileID: 11400000, guid: a12d7966e954ef94fb466eef59099702, type: 2}
   postReleaseStunDuration: 1
   OnGrappleStarted:
     m_PersistentCalls:
@@ -1249,6 +1251,37 @@ MonoBehaviour:
   targetPriority: 2
   showTargetEffects: 1
   targetIndicator: {fileID: 0}
+--- !u!114 &3172927457328170398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1814872507465041094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df7242632f073af43ade44ed0ba87b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mass: 1
+  canReceiveKnockback: 1
+  hasNavMeshAgent: 1
+  disableNavMeshDuringKnockback: 1
+  warpNavMeshAfterKnockback: 1
+  animator: {fileID: 0}
+  knockbackBoolParameter: isKnockedBack
+  knockbackTriggerParameter: knockbackTrigger
+  audioSource: {fileID: 0}
+  effectSpawnPoint: {fileID: 0}
+  OnKnockbackStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnKnockbackEnd:
+    m_PersistentCalls:
+      m_Calls: []
+  OnKnockbackProgress:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1887902235097528551
 GameObject:
   m_ObjectHideFlags: 0

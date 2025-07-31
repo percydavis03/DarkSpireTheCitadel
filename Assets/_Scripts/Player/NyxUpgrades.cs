@@ -87,8 +87,8 @@ public class NyxUpgrades : MonoBehaviour
         // Initialize all upgrades
         InitializeUpgrades();
         
-        // Apply initial states
-        CheckAndApplyUpgrades();
+        // Force apply all currently active upgrades on scene load
+        ForceApplyCurrentUpgrades();
         
         // Debug logs completely disabled for performance - was causing lag
         // if (enableDebugLogs)
@@ -262,6 +262,45 @@ public class NyxUpgrades : MonoBehaviour
     public void ForceCheckUpgrades()
     {
         CheckAndApplyUpgrades();
+    }
+    
+    /// <summary>
+    /// Publicly accessible method to force apply all currently active upgrades.
+    /// Useful for manually triggering upgrades after scene changes or state updates.
+    /// </summary>
+    public void ForceApplyAllActiveUpgrades()
+    {
+        ForceApplyCurrentUpgrades();
+    }
+    
+    /// <summary>
+    /// Forces all currently active upgrades to trigger their events.
+    /// This is used on scene load to ensure upgrades are properly applied.
+    /// </summary>
+    private void ForceApplyCurrentUpgrades()
+    {
+        for (int i = 0; i < upgrades.Length; i++)
+        {
+            var upgrade = upgrades[i];
+            
+            if (upgrade.saveStateProperty == SaveStateProperty.None)
+                continue;
+                
+            // Get current state from save
+            bool currentState = GetSaveStateProperty(upgrade.saveStateProperty);
+            
+            // If the upgrade is currently active, force trigger its events
+            if (currentState)
+            {
+                TriggerUpgradeEvents(upgrade, true);
+                upgrade.isCurrentlyActive = true;
+                
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"NyxUpgrades: Force-applied upgrade '{upgrade.upgradeName}' on scene load");
+                }
+            }
+        }
     }
     
     public void TriggerUpgradeByName(string upgradeName, bool isEnabled)

@@ -28,6 +28,11 @@ public class GetArm : MonoBehaviour
     }
     public void PickupArm()
     {
+        // Clean up the pickup state before destroying
+        Player_Movement.instance.inPickupZone = false;
+        pickupText.SetActive(false);
+        canPickup = false;
+        
         ArmActivate.instance.AddArm();
         Destroy(gameObject);
     }

@@ -21,7 +21,7 @@ public class SimpleNyxLockOn : MonoBehaviour
     [SerializeField] private string[] enemyTags = {"Enemy"}; // Enemy tags to look for
     
     [Header("Player Rotation")]
-    [SerializeField] private bool enableAutoRotation = true;
+    [SerializeField] private bool enableAutoRotation = false; // Disabled to prevent camera movement when switching targets
     [SerializeField] private float rotationSpeed = 5f;
     [SerializeField] private bool smoothRotation = true;
     
@@ -455,6 +455,7 @@ public class SimpleNyxLockOn : MonoBehaviour
     
     private void RotateTowardsTarget()
     {
+        // Auto-rotation disabled by default to prevent camera movement when switching targets
         if (currentLockedTarget == null || playerTransform == null) return;
         
         // Calculate direction to target
