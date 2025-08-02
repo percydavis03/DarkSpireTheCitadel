@@ -26,6 +26,13 @@ public class KnockbackManager : MonoBehaviour
     [Header("Default Settings")]
     [SerializeField] private KnockbackData defaultKnockbackData;
     
+    [Header("Foot Attack Settings")]
+    [SerializeField] [Tooltip("Multiplier for foot attack knockback force (2x = twice as strong as normal)")]
+    private float footAttackMultiplier = 2f;
+    
+    [SerializeField] [Tooltip("Range for foot attack area-of-effect")]
+    private float footAttackRange = 3f;
+    
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
     [SerializeField] private bool showDebugRays = false;
@@ -143,6 +150,54 @@ public class KnockbackManager : MonoBehaviour
     }
     
     /// <summary>
+    /// Apply knockback to all targets within a spherical area
+    /// </summary>
+    /// <param name="center">Center of the area effect</param>
+    /// <param name="radius">Radius of effect</param>
+    /// <param name="layerMask">Layer mask to filter targets</param>
+    /// <param name="knockbackData">Knockback configuration</param>
+    /// <param name="multiplier">Force multiplier</param>
+    /// <param name="requireTag">Optional tag requirement for targets</param>
+    /// <returns>Number of targets successfully knocked back</returns>
+    public int ApplyAreaKnockback(Vector3 center, float radius, LayerMask layerMask, KnockbackData knockbackData = null, float multiplier = 1f, string requireTag = null)
+    {
+        Collider[] targets = Physics.OverlapSphere(center, radius, layerMask);
+        int successCount = 0;
+        
+        foreach (Collider target in targets)
+        {
+            // Skip if tag requirement not met
+            if (!string.IsNullOrEmpty(requireTag) && !target.gameObject.CompareTag(requireTag))
+                continue;
+            
+            // Apply knockback
+            if (ApplyKnockback(target, center, knockbackData, multiplier))
+            {
+                successCount++;
+            }
+        }
+        
+        if (enableDebugLogs)
+        {
+            Debug.Log($"Area knockback: Affected {successCount}/{targets.Length} targets within {radius} units");
+        }
+        
+        return successCount;
+    }
+    
+    /// <summary>
+    /// Apply foot attack knockback using the configured foot attack settings
+    /// </summary>
+    /// <param name="center">Center of the foot attack</param>
+    /// <param name="layerMask">Layer mask to filter targets</param>
+    /// <param name="requireTag">Optional tag requirement for targets (default: "Enemy")</param>
+    /// <returns>Number of targets successfully knocked back</returns>
+    public int ApplyFootAttackKnockback(Vector3 center, LayerMask layerMask, string requireTag = "Enemy")
+    {
+        return ApplyAreaKnockback(center, footAttackRange, layerMask, defaultKnockbackData, footAttackMultiplier, requireTag);
+    }
+    
+    /// <summary>
     /// Register a knockback as active (called by KnockbackReceiver)
     /// </summary>
     internal void RegisterActiveKnockback(IKnockbackReceiver receiver)
@@ -168,6 +223,16 @@ public class KnockbackManager : MonoBehaviour
     /// Get count of currently active knockbacks
     /// </summary>
     public int ActiveKnockbackCount => activeKnockbacks.Count;
+    
+    /// <summary>
+    /// Get the configured foot attack multiplier
+    /// </summary>
+    public float FootAttackMultiplier => footAttackMultiplier;
+    
+    /// <summary>
+    /// Get the configured foot attack range
+    /// </summary>
+    public float FootAttackRange => footAttackRange;
     
     /// <summary>
     /// Check if a specific receiver is currently being knocked back
@@ -215,5 +280,9 @@ public class KnockbackManager : MonoBehaviour
         {
             Debug.LogWarning("KnockbackManager: No default knockback data assigned. Some operations may fail.");
         }
+        
+        // Validate foot attack settings
+        footAttackMultiplier = Mathf.Max(0.1f, footAttackMultiplier);
+        footAttackRange = Mathf.Max(0.1f, footAttackRange);
     }
 } 

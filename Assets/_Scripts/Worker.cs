@@ -487,9 +487,21 @@ public class Worker : MonoBehaviour
     
     //---------SIMPLE KNOCKBACK SYSTEM FOR WORKERS---------
     
+    // Add knockback cooldown to prevent double knockback
+    private float lastKnockbackTime = -1f;
+    private float knockbackCooldown = 0.5f; // Prevent multiple knockbacks within 0.5 seconds
+    
     public void GetKnockedBack(Vector3 force)
     {
+        // FIXED: Prevent double knockback with cooldown check
+        if (Time.time - lastKnockbackTime < knockbackCooldown)
+        {
+            Debug.Log($"Skipped Worker GetKnockedBack - too soon after last knockback ({Time.time - lastKnockbackTime:F2}s ago)");
+            return;
+        }
+        
         Debug.Log("Worker knocked back - keeping it simple!");
+        lastKnockbackTime = Time.time;
         StopMoving();
         StartCoroutine(ApplySimpleKnockback(force));
     }

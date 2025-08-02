@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eca77d4411d03ed40b87be15e31cc484, type: 3}
   m_Name: Heavy Knockback
   m_EditorClassIdentifier: 
-  knockbackDistance: 10
+  knockbackDistance: 5
   duration: 0.5
+  impactPause: 0.15
+  recoveryTime: 0.2
   movementCurve:
     serializedVersion: 2
     m_Curve:
@@ -47,12 +49,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  minimumDistance: 0.1
-  maximumDistance: 10
-  impactPause: 0.15
-  pauseActions: 1
-  recoveryTime: 0.2
   knockbackSound: {fileID: 0}
   impactEffect: {fileID: 0}
-  massInfluence: 0.3
-  referenceMass: 1
+  massEffect: 0.3
