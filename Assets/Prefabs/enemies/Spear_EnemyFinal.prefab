@@ -3840,7 +3840,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 9164295094643541625, guid: 39f8e54880f29b245bae5fab183b26f9,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2751971875871666369}
   m_SourcePrefab: {fileID: 100100000, guid: 39f8e54880f29b245bae5fab183b26f9, type: 3}
 --- !u!4 &916168404269090818 stripped
 Transform:
@@ -3854,6 +3858,24 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 446563035485094654}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2751971875871666369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8727025427618301063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e7f84e9bc2538649a8eb646d37cdb2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponKnockbackData: {fileID: 11400000, guid: 464d1ec0d5872e24ab0f2e291381e474,
+    type: 2}
+  knockbackMultiplier: 1
+  weaponDamage: 1
+  dealsDamage: 1
+  enableDebugLogs: 1
 --- !u!1001 &5868637599522305297
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3931,7 +3953,7 @@ PrefabInstance:
     - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
         type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
         type: 3}
@@ -3940,9 +3962,54 @@ PrefabInstance:
       objectReference: {fileID: 128311214272304559}
     - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
         type: 3}
-      propertyPath: m_Materials.Array.size
-      value: 5
+      propertyPath: m_AABB.m_Center.x
+      value: -0.0018708082
       objectReference: {fileID: 0}
+    - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
+        type: 3}
+      propertyPath: m_AABB.m_Center.y
+      value: -0.0074024163
+      objectReference: {fileID: 0}
+    - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
+        type: 3}
+      propertyPath: m_AABB.m_Center.z
+      value: -0.0023637433
+      objectReference: {fileID: 0}
+    - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
+        type: 3}
+      propertyPath: m_AABB.m_Extent.x
+      value: 0.01621665
+      objectReference: {fileID: 0}
+    - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
+        type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 0.04571822
+      objectReference: {fileID: 0}
+    - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
+        type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.014403233
+      objectReference: {fileID: 0}
+    - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
+        type: 3}
+      propertyPath: m_Bones.Array.size
+      value: 26
+      objectReference: {fileID: 0}
+    - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: dd13459add6175c4c885c6501a365128, type: 2}
+    - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 6b5e12b87200ba140ad0b6fc07fa6db0, type: 2}
     - target: {fileID: 7704285338715721031, guid: 95486d7602fcbfc48a5f75e2945d6c6b,
         type: 3}
       propertyPath: m_Materials.Array.data[4]

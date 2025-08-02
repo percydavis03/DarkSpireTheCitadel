@@ -2,10 +2,16 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 /// <summary>
 /// Simple and lightweight lock-on system for Nyx
 /// Allows cycling through enemies in camera view with middle mouse button
+/// Features:
+/// - Highlights all targetable enemies in camera view
+/// - Special highlight for locked target vs in-view enemies
+/// - Automatic highlight management when enemies enter/leave view
+/// - Integration with TargetableEnemy component highlighting system
 /// </summary>
 public class SimpleNyxLockOn : MonoBehaviour
 {
@@ -29,6 +35,10 @@ public class SimpleNyxLockOn : MonoBehaviour
     [SerializeField] private GameObject lockOnIndicatorPrefab;
     [SerializeField] private float indicatorHeightOffset = 2f;
     
+    [Header("Enemy Highlighting")]
+    [SerializeField] private bool highlightEnemiesInView = true; // Highlight all targetable enemies
+    [SerializeField] private bool useTargetableEnemyHighlighting = true; // Use TargetableEnemy component highlighting
+    
     [Header("Input")]
     [SerializeField] private PlayerInputActions playerControls;
     [SerializeField] private bool useScrollWheel = true; // Use scroll wheel instead of middle mouse if preferred
@@ -38,6 +48,7 @@ public class SimpleNyxLockOn : MonoBehaviour
     
     // Private variables
     private List<Transform> enemiesInView = new List<Transform>();
+    private List<Transform> previousEnemiesInView = new List<Transform>(); // Track previous frame for highlight changes
     private int currentTargetIndex = -1; // -1 means no target locked
     private Transform currentLockedTarget;
     private GameObject currentIndicator;
@@ -96,6 +107,12 @@ public class SimpleNyxLockOn : MonoBehaviour
     {
         cycleTargetAction?.Disable();
         ClearLockOn();
+        
+        // Clear all enemy highlights when disabling
+        if (highlightEnemiesInView && useTargetableEnemyHighlighting)
+        {
+            ClearAllEnemyHighlights();
+        }
     }
     
     void Update()
@@ -137,6 +154,10 @@ public class SimpleNyxLockOn : MonoBehaviour
     
     private void UpdateEnemiesInView()
     {
+        // Store previous enemies for highlight management
+        previousEnemiesInView.Clear();
+        previousEnemiesInView.AddRange(enemiesInView);
+        
         enemiesInView.Clear();
         
         // Find all potential enemies
@@ -181,6 +202,12 @@ public class SimpleNyxLockOn : MonoBehaviour
         // Sort by distance (closest first)
         enemiesInView = enemiesInView.OrderBy(enemy => 
             Vector3.Distance(nyxTransform.position, enemy.position)).ToList();
+        
+        // Update enemy highlights
+        if (highlightEnemiesInView && useTargetableEnemyHighlighting)
+        {
+            UpdateEnemyHighlights();
+        }
         
         // Check if current locked target is still valid
         if (currentLockedTarget != null)
@@ -433,13 +460,24 @@ public class SimpleNyxLockOn : MonoBehaviour
     {
         if (target == null) return;
         
-        // Clear previous target's highlight
+        // Clear previous target's locked highlight (but it may still have in-view highlight)
         if (currentLockedTarget != null)
         {
             TargetableEnemy previousTargetable = currentLockedTarget.GetComponent<TargetableEnemy>();
             if (previousTargetable != null)
             {
                 previousTargetable.OnTargetDeselected();
+                
+                // If previous target is still in view, restore its in-view highlight
+                if (enemiesInView.Contains(currentLockedTarget) && highlightEnemiesInView && useTargetableEnemyHighlighting)
+                {
+                    var highlightRenderer = GetEnemyHighlightRenderer(previousTargetable);
+                    if (highlightRenderer != null)
+                    {
+                        highlightRenderer.enabled = true;
+                        DebugLog($"Restored in-view highlight for previous target: {currentLockedTarget.name}");
+                    }
+                }
             }
         }
         
@@ -448,7 +486,7 @@ public class SimpleNyxLockOn : MonoBehaviour
         
         DebugLog($"Locked onto: {target.name} (Index: {currentTargetIndex})");
         
-        // Activate new target's highlight
+        // Activate new target's locked highlight (this overrides any in-view highlight)
         TargetableEnemy targetableEnemy = target.GetComponent<TargetableEnemy>();
         if (targetableEnemy != null)
         {
@@ -461,13 +499,24 @@ public class SimpleNyxLockOn : MonoBehaviour
     
     private void ClearLockOn()
     {
-        // Clear target's highlight
+        // Clear target's locked highlight but potentially restore in-view highlight
         if (currentLockedTarget != null)
         {
             TargetableEnemy targetableEnemy = currentLockedTarget.GetComponent<TargetableEnemy>();
             if (targetableEnemy != null)
             {
                 targetableEnemy.OnTargetDeselected();
+                
+                // If the target is still in view, restore its in-view highlight
+                if (enemiesInView.Contains(currentLockedTarget) && highlightEnemiesInView && useTargetableEnemyHighlighting)
+                {
+                    var highlightRenderer = GetEnemyHighlightRenderer(targetableEnemy);
+                    if (highlightRenderer != null)
+                    {
+                        highlightRenderer.enabled = true;
+                        DebugLog($"Restored in-view highlight after unlocking: {currentLockedTarget.name}");
+                    }
+                }
             }
         }
         
@@ -615,6 +664,105 @@ public class SimpleNyxLockOn : MonoBehaviour
         return indicator;
     }
     
+    private void UpdateEnemyHighlights()
+    {
+        // Remove highlights from enemies no longer in view
+        foreach (Transform enemy in previousEnemiesInView)
+        {
+            if (!enemiesInView.Contains(enemy) && enemy != currentLockedTarget)
+            {
+                RemoveEnemyHighlight(enemy);
+            }
+        }
+        
+        // Add highlights to new enemies in view
+        foreach (Transform enemy in enemiesInView)
+        {
+            if (!previousEnemiesInView.Contains(enemy) && enemy != currentLockedTarget)
+            {
+                AddEnemyHighlight(enemy);
+            }
+        }
+    }
+    
+    private void AddEnemyHighlight(Transform enemy)
+    {
+        if (enemy == null) return;
+        
+        TargetableEnemy targetableEnemy = enemy.GetComponent<TargetableEnemy>();
+        if (targetableEnemy != null)
+        {
+            // Directly enable the highlight renderer for enemies in view (not locked)
+            // This avoids setting isCurrentlyTargeted = true for multiple enemies
+            var highlightRenderer = GetEnemyHighlightRenderer(targetableEnemy);
+            if (highlightRenderer != null)
+            {
+                highlightRenderer.enabled = true;
+                DebugLog($"Added in-view highlight to enemy: {enemy.name}");
+            }
+            else
+            {
+                // Fallback: use the regular target selection if no highlight renderer found
+                targetableEnemy.OnTargetSelected();
+                DebugLog($"Added fallback highlight to enemy in view: {enemy.name}");
+            }
+        }
+    }
+    
+    private void RemoveEnemyHighlight(Transform enemy)
+    {
+        if (enemy == null) return;
+        
+        TargetableEnemy targetableEnemy = enemy.GetComponent<TargetableEnemy>();
+        if (targetableEnemy != null)
+        {
+            // Only disable highlight if this enemy is not the currently locked target
+            if (enemy != currentLockedTarget)
+            {
+                var highlightRenderer = GetEnemyHighlightRenderer(targetableEnemy);
+                if (highlightRenderer != null)
+                {
+                    highlightRenderer.enabled = false;
+                    DebugLog($"Removed in-view highlight from enemy: {enemy.name}");
+                }
+                else
+                {
+                    // Fallback: use regular deselection if no highlight renderer found
+                    targetableEnemy.OnTargetDeselected();
+                    DebugLog($"Removed fallback highlight from enemy: {enemy.name}");
+                }
+            }
+        }
+    }
+    
+    private SkinnedMeshRenderer GetEnemyHighlightRenderer(TargetableEnemy targetableEnemy)
+    {
+        // Use reflection to access the private enemyHighlightRenderer field
+        var highlightField = typeof(TargetableEnemy).GetField("enemyHighlightRenderer", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        
+        if (highlightField != null)
+        {
+            return (SkinnedMeshRenderer)highlightField.GetValue(targetableEnemy);
+        }
+        
+        return null;
+    }
+    
+    private void ClearAllEnemyHighlights()
+    {
+        // Clear highlights from all previously highlighted enemies
+        foreach (Transform enemy in previousEnemiesInView)
+        {
+            RemoveEnemyHighlight(enemy);
+        }
+        
+        foreach (Transform enemy in enemiesInView)
+        {
+            RemoveEnemyHighlight(enemy);
+        }
+    }
+    
     private void DebugLog(string message)
     {
         if (showDebugInfo)
@@ -632,6 +780,29 @@ public class SimpleNyxLockOn : MonoBehaviour
     public void SetRotationEnabled(bool enabled)
     {
         enableAutoRotation = enabled;
+    }
+    
+    public void SetEnemyHighlightingEnabled(bool enabled)
+    {
+        bool wasEnabled = highlightEnemiesInView;
+        highlightEnemiesInView = enabled;
+        
+        // If we're disabling highlighting, clear all current highlights
+        if (wasEnabled && !enabled)
+        {
+            ClearAllEnemyHighlights();
+        }
+        // If we're enabling highlighting, apply highlights to current enemies in view
+        else if (!wasEnabled && enabled && useTargetableEnemyHighlighting)
+        {
+            foreach (Transform enemy in enemiesInView)
+            {
+                if (enemy != currentLockedTarget)
+                {
+                    AddEnemyHighlight(enemy);
+                }
+            }
+        }
     }
     
     // Debug visualization
