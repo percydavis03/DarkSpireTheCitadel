@@ -2187,7 +2187,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3717455943181703497, guid: 056a711dfb3ff30469eb870da6f7449b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8563159870441471124}
   m_SourcePrefab: {fileID: 100100000, guid: 056a711dfb3ff30469eb870da6f7449b, type: 3}
 --- !u!1 &8274799616547859530 stripped
 GameObject:
@@ -2195,6 +2199,24 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 4702584933147555075}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8563159870441471124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8274799616547859530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e7f84e9bc2538649a8eb646d37cdb2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponKnockbackData: {fileID: 11400000, guid: 464d1ec0d5872e24ab0f2e291381e474,
+    type: 2}
+  knockbackMultiplier: 1
+  weaponDamage: 1
+  dealsDamage: 1
+  enableDebugLogs: 1
 --- !u!4 &8390783776869733975 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3832841971864658772, guid: 056a711dfb3ff30469eb870da6f7449b,

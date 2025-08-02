@@ -8,7 +8,7 @@ public class QuickTargetingSetup : MonoBehaviour
 {
     [Header("Auto Setup")]
     [SerializeField] private bool setupOnStart = true;
-    [SerializeField] private bool enableDebugLogs = true;
+    [SerializeField] private bool enableDebugLogs = false; // Disabled to reduce console spam
     
     void Start()
     {

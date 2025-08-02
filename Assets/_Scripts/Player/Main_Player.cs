@@ -22,7 +22,7 @@ public class Main_Player : MonoBehaviour
     bool damageCooldown;
     public CanvasGroup hurtScreen;
     private bool isFaded;
-    [SerializeField] private float knockbackForce = 5f; // Force of the knockback
+    [SerializeField] private float knockbackForce = 15f; // Force of the knockback - increased for more noticeable effect
 
     [Header("Camera Shake")]
     [SerializeField] private CameraShakeController cameraShake;
@@ -54,30 +54,77 @@ public class Main_Player : MonoBehaviour
 
     public void TakeDamage()
     {
+        Debug.Log($"🚨 LEGACY TakeDamage() called! This shouldn't happen if enemies are hitting player properly.");
+        // Legacy method - use random direction for backward compatibility
+        Vector3 randomDirection = new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)).normalized;
+        Debug.Log($"🚨 Generated random direction: {randomDirection}, magnitude: {randomDirection.magnitude}");
+        TakeDamageFromEnemy(null, randomDirection);
+    }
+    
+    public void TakeDamageFromEnemy(Transform enemyTransform, Vector3? overrideDirection = null)
+    {
         damageCooldown = true;
         GameManager.instance.DamagePlayer();
         //ough.Play();
-        Player_Movement.instance.FailSafe();
+        
+        // Clear attack states but don't interfere with knockback
+        Player_Movement.instance.EndAttack();
+        Player_Movement.instance.ResetCombo();
+        
         Fade();
         // Debug.Log("ow"); // DISABLED - was causing spam
         //cameraShake.ShakeCamera(shakeIntensity, shakeTime);
         hurt.SetActive(true);
         StartCoroutine(Wait());
         Player_Movement.instance.GotHit();
+        
+        Debug.LogError("=== MAIN_PLAYER DAMAGE DEBUG START ===");
 
         // Apply knockback - use safe direction calculation
         Vector3 knockbackDirection = Vector3.forward; // Default direction
-        if (Player != null)
+        
+        if (overrideDirection.HasValue)
         {
-            knockbackDirection = (transform.position - Player.transform.position).normalized;
+            knockbackDirection = overrideDirection.Value;
+            Debug.Log($"🚀 Using override direction: {knockbackDirection}");
+        }
+        else if (enemyTransform != null)
+        {
+            // Calculate direction from enemy to player (push player away from enemy)
+            knockbackDirection = (transform.position - enemyTransform.position).normalized;
+            Debug.Log($"🚀 Knockback direction calculated: Enemy at {enemyTransform.position}, Player at {transform.position}, Direction: {knockbackDirection}");
         }
         else
         {
-            // Fallback: use a random direction if Player is not assigned
+            // Fallback: use a random direction
             knockbackDirection = new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)).normalized;
+            Debug.Log($"🚀 Using fallback random knockback direction: {knockbackDirection}");
         }
+        
+        // Safety check: ensure we have a valid direction
+        if (knockbackDirection.magnitude < 0.1f)
+        {
+            // Emergency fallback: use forward direction
+            knockbackDirection = Vector3.forward;
+            Debug.LogWarning($"🚨 Zero knockback direction detected! Using emergency fallback: {knockbackDirection}");
+        }
+        
         knockbackDirection.y = 0; // Keep knockback horizontal
-        Player_Movement.instance.ApplyKnockback(knockbackDirection * knockbackForce);
+        knockbackDirection = knockbackDirection.normalized; // Ensure it's normalized
+        
+        Vector3 finalKnockbackForce = knockbackDirection * knockbackForce;
+        Debug.Log($"🚀 Final knockback calculation: Direction={knockbackDirection}, Force={knockbackForce}, Result={finalKnockbackForce}");
+        
+        // Final safety check
+        if (finalKnockbackForce.magnitude < 0.1f)
+        {
+            Debug.LogError($"🚨 CRITICAL: Final knockback force is too small! Force={finalKnockbackForce}");
+            finalKnockbackForce = Vector3.forward * knockbackForce; // Emergency override
+        }
+        
+        Debug.LogError("=== ABOUT TO APPLY KNOCKBACK ===");
+        Player_Movement.instance.ApplyKnockback(finalKnockbackForce);
+        Debug.LogError("=== MAIN_PLAYER DAMAGE DEBUG END ===");
 
         randomListObject = Random.Range(0, bloodSplats.Count);
         GameObject b = Instantiate(bloodSplats[randomListObject]);
@@ -106,11 +153,13 @@ public class Main_Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.LogError($"=== ONTRIGGERENTER CALLED with {other.gameObject.name}, tag: {other.gameObject.tag} ===");
         if (other.gameObject.CompareTag("Enemy"))
         {
            if (!damageCooldown && !isDead && canTakeDamage)
             {
-                TakeDamage();
+                Debug.LogError($"=== CALLING TakeDamageFromEnemy with enemy: {other.transform.name} ===");
+                TakeDamageFromEnemy(other.transform);
                 
             }
             StartCoroutine(Wait());

@@ -3355,6 +3355,7 @@ GameObject:
   - component: {fileID: 7654316554005201538}
   - component: {fileID: 6924006636409368054}
   - component: {fileID: 1086384699534197566}
+  - component: {fileID: 7190015691073476662}
   m_Layer: 0
   m_Name: SPEAR
   m_TagString: Untagged
@@ -3450,6 +3451,24 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!114 &7190015691073476662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8579913537441600507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e7f84e9bc2538649a8eb646d37cdb2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponKnockbackData: {fileID: 11400000, guid: 464d1ec0d5872e24ab0f2e291381e474,
+    type: 2}
+  knockbackMultiplier: 1
+  weaponDamage: 1
+  dealsDamage: 1
+  enableDebugLogs: 1
 --- !u!1 &8703262014188857393
 GameObject:
   m_ObjectHideFlags: 0

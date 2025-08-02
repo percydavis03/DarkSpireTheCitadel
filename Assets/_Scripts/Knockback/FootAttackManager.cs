@@ -27,7 +27,7 @@ public class FootAttackManager : MonoBehaviour
     
     [Header("Debug")]
     [Tooltip("Enable debug logs for foot attacks")]
-    public bool enableDebugLogs = true;
+    public bool enableDebugLogs = false; // Disabled to reduce console spam
     
     [Tooltip("Show debug visualization in scene view")]
     public bool showDebugGizmos = true;

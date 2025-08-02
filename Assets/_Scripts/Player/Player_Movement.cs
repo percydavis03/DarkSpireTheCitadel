@@ -522,7 +522,7 @@ public bool canRollCancelAttacks = true;
         }
         // If using root motion, movement will be handled by the animation and OnAnimatorMove
         
-        Debug.Log($"Roll started in direction: {rollDirection}");
+        // Debug log removed to reduce console spam
     }
     
     private IEnumerator RollMovement()
@@ -576,7 +576,7 @@ public bool canRollCancelAttacks = true;
         // Restore damage after invincibility period
         StartCoroutine(RestoreVulnerability());
         
-        Debug.Log("Roll ended - returning to normal movement");
+        // Debug log removed to reduce console spam
     }
     
     private IEnumerator RestoreVulnerability()
@@ -629,18 +629,21 @@ public bool canRollCancelAttacks = true;
 
     public void ApplyKnockback(Vector3 knockbackForce)
     {
+        Debug.Log($"🚀 KNOCKBACK APPLIED: Force={knockbackForce}, Magnitude={knockbackForce.magnitude}");
         // Apply the knockback force to the current movement
         moveDirection = knockbackForce;
         // Temporarily disable movement control but allow rotation
         canMove = false;
         canRotate = true;
-        // Re-enable movement after a short delay
+        Debug.Log($"🚀 Knockback state: canMove={canMove}, moveDirection={moveDirection}");
+        // Re-enable movement after a longer delay for more noticeable knockback
         StartCoroutine(EnableMovementAfterKnockback());
     }
 
     private IEnumerator EnableMovementAfterKnockback()
     {
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.5f); // Increased from 0.3f for more noticeable knockback
+        Debug.Log("🚀 KNOCKBACK ENDED: Restoring player movement");
         canMove = true;
         moveDirection = Vector3.zero;
     }
@@ -648,7 +651,11 @@ public bool canRollCancelAttacks = true;
     {
         if (thisGameSave.inMenu)
         {
-            moveDirection = new Vector3(0, 0, 0);
+            // Only override movement if player can move (don't interfere with knockback)
+            if (canMove)
+            {
+                moveDirection = new Vector3(0, 0, 0);
+            }
             anim.SetBool("isRun", false);
             anim.SetBool("isWalk", false);
         }
@@ -731,8 +738,11 @@ public bool canRollCancelAttacks = true;
                 Time.deltaTime * (targetVelocity.magnitude > 0.1f ? accelerationSpeed : decelerationSpeed)
             );
 
-            // Apply movement
-            moveDirection = new Vector3(currentVelocity.x, moveDirection.y, currentVelocity.z);
+            // Apply movement (but don't override knockback)
+            if (canMove)
+            {
+                moveDirection = new Vector3(currentVelocity.x, moveDirection.y, currentVelocity.z);
+            }
         }
         else if (rolling)
         {
@@ -1068,10 +1078,7 @@ public bool canRollCancelAttacks = true;
         }
 
         // SIMPLIFIED COMBO ATTACK SYSTEM
-        if (attack.WasPressedThisFrame())
-        {
-            Debug.Log($"Attack input detected - canAttack: {thisGameSave.canAttack}, inMenu: {thisGameSave.inMenu}");
-        }
+        // Attack input debug removed to reduce console spam
         
         if (attack.WasPressedThisFrame() && thisGameSave.canAttack && !thisGameSave.inMenu)
         {
@@ -1099,10 +1106,7 @@ public bool canRollCancelAttacks = true;
             {
                 CancelSpinAttack();
             }
-            else if (ShouldDebugAttacks())
-            {
-                Debug.Log($"🚫 Attack input ignored - conditions not met");
-            }
+            // Attack input ignored debug removed to reduce console spam
         }
 
         // Handle hurt state (only check when necessary)
@@ -1235,6 +1239,6 @@ public bool canRollCancelAttacks = true;
     private void CancelSpinAttack()
     {
         EndAttack();
-        Debug.Log("Spin attack cancelled");
+                    // Debug log removed to reduce console spam
     }
 }
