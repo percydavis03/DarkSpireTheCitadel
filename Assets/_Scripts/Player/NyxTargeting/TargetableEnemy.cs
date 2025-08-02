@@ -15,6 +15,8 @@ public class TargetableEnemy : MonoBehaviour, ITargetable
     [Header("Visual Feedback")]
     [SerializeField] private GameObject targetIndicator; // Optional visual indicator when targeted
     [SerializeField] private bool showTargetEffects = true;
+    [SerializeField] private bool useNewHighlightSystem = true; // Use the new mesh highlight system
+    [SerializeField] private SkinnedMeshRenderer enemyHighlightRenderer; // Manually assign the Enemy Highlight renderer
     
     [Header("Audio")]
     [SerializeField] private AudioClip targetSelectedSound;
@@ -84,6 +86,12 @@ public class TargetableEnemy : MonoBehaviour, ITargetable
             audioSource.volume = 0.5f;
         }
         
+        // Validate highlight renderer assignment
+        if (useNewHighlightSystem && enemyHighlightRenderer == null)
+        {
+            Debug.LogWarning($"TargetableEnemy on {gameObject.name}: Using new highlight system but Enemy Highlight Renderer is not assigned!");
+        }
+        
         // Auto-assign target point if not set
         if (targetPoint == null)
         {
@@ -143,7 +151,19 @@ public class TargetableEnemy : MonoBehaviour, ITargetable
         // Apply target highlight effect
         if (showTargetEffects)
         {
-            ApplyTargetHighlight();
+            if (useNewHighlightSystem && enemyHighlightRenderer != null)
+            {
+                enemyHighlightRenderer.enabled = true;
+                Debug.Log($"TargetableEnemy: Enabled highlight renderer for {gameObject.name}");
+            }
+            else
+            {
+                if (useNewHighlightSystem && enemyHighlightRenderer == null)
+                {
+                    Debug.LogWarning($"TargetableEnemy: {gameObject.name} is set to use new highlight system but Enemy Highlight Renderer is not assigned!");
+                }
+                ApplyTargetHighlight();
+            }
         }
         
         // Notify enemy components if they have target selection logic
@@ -182,7 +202,14 @@ public class TargetableEnemy : MonoBehaviour, ITargetable
         // Remove target highlight effect
         if (showTargetEffects)
         {
-            RemoveTargetHighlight();
+            if (useNewHighlightSystem && enemyHighlightRenderer != null)
+            {
+                enemyHighlightRenderer.enabled = false;
+            }
+            else
+            {
+                RemoveTargetHighlight();
+            }
         }
     }
     

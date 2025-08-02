@@ -26,7 +26,7 @@ public class NyxLockOnSystem : MonoBehaviour
     [SerializeField] private float inputDebounceTime = 0.5f; // Increased to reduce message spam
     
     [Header("Debug")]
-    [SerializeField] private bool enableDebugLogs = true; // Can be disabled after testing
+    [SerializeField] private bool enableDebugLogs = false; // Disabled to reduce console spam
 
     [Header("Rotation Settings")]
     [SerializeField] private bool enableAutoRotation = false; // Disabled to prevent camera movement
@@ -46,6 +46,7 @@ public class NyxLockOnSystem : MonoBehaviour
     [SerializeField] private GameObject redDotPrefab;
     [SerializeField] private float dotHeight = 3f;
     [SerializeField] private float dotScale = 0.5f;
+    [SerializeField] private bool useRedDotIndicator = true; // Disable this to use only the new mesh highlight system
     
     // Dependencies
     private NyxTargetingSystem targetingSystem;
@@ -466,7 +467,13 @@ public class NyxLockOnSystem : MonoBehaviour
         
         Debug.Log($"NyxLockOn: Locked onto target: {target.Transform.name} (index: {currentTargetIndex})");
         target.OnTargetSelected();
-        ShowRedDot(target);
+        
+        // Only show red dot if enabled (disable this to use new mesh highlight system)
+        if (useRedDotIndicator)
+        {
+            ShowRedDot(target);
+        }
+        
         OnTargetLocked?.Invoke(target);
         
         // Reset cooldown warning timer for smooth experience

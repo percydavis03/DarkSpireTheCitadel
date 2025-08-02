@@ -210,12 +210,12 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     // New method for combo-specific damage
     public void TakeComboDamage(int damage)
     {
-        Debug.Log($"TakeComboDamage called on {gameObject.name} with damage: {damage}");
+        // Debug log removed to reduce console spam
         
         // Don't take damage if stunned (parry already handled damage)
         if (isStunned) 
         {
-            Debug.Log($"Enemy {gameObject.name} is stunned - skipping damage");
+            // Debug log removed to reduce console spam
             return;
         }
         
@@ -237,7 +237,7 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         // Apply damage
         if (enemyHP > 0)
         {
-            Debug.Log($"Setting IsHurting=true on animator for {gameObject.name}");
+            // Debug log removed to reduce console spam
             anim.SetBool("IsHurting", true);
             enemyHP = enemyHP - damage;
             print($"take {damage} damage, HP now: {enemyHP}");

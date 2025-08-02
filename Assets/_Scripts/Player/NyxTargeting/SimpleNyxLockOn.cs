@@ -433,10 +433,27 @@ public class SimpleNyxLockOn : MonoBehaviour
     {
         if (target == null) return;
         
+        // Clear previous target's highlight
+        if (currentLockedTarget != null)
+        {
+            TargetableEnemy previousTargetable = currentLockedTarget.GetComponent<TargetableEnemy>();
+            if (previousTargetable != null)
+            {
+                previousTargetable.OnTargetDeselected();
+            }
+        }
+        
         currentLockedTarget = target;
         currentTargetIndex = enemiesInView.IndexOf(target);
         
         DebugLog($"Locked onto: {target.name} (Index: {currentTargetIndex})");
+        
+        // Activate new target's highlight
+        TargetableEnemy targetableEnemy = target.GetComponent<TargetableEnemy>();
+        if (targetableEnemy != null)
+        {
+            targetableEnemy.OnTargetSelected();
+        }
         
         // Show indicator
         ShowIndicator();
@@ -444,6 +461,16 @@ public class SimpleNyxLockOn : MonoBehaviour
     
     private void ClearLockOn()
     {
+        // Clear target's highlight
+        if (currentLockedTarget != null)
+        {
+            TargetableEnemy targetableEnemy = currentLockedTarget.GetComponent<TargetableEnemy>();
+            if (targetableEnemy != null)
+            {
+                targetableEnemy.OnTargetDeselected();
+            }
+        }
+        
         currentLockedTarget = null;
         currentTargetIndex = -1;
         

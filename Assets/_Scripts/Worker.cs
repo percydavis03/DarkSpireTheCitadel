@@ -259,12 +259,12 @@ public class Worker : MonoBehaviour
     // New method for combo-specific damage
     public void TakeComboDamage(int damage)
     {
-        Debug.Log($"Worker TakeComboDamage called on {gameObject.name} with damage: {damage}");
+        // Debug log removed to reduce console spam
         
         // Don't take damage if stunned (parry already handled damage)
         if (isStunned) 
         {
-            Debug.Log($"Worker {gameObject.name} is stunned - skipping damage");
+            // Debug log removed to reduce console spam
             return;
         }
         
