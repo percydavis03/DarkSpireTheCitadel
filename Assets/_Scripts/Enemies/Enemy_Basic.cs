@@ -172,6 +172,10 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         StopHurt();
     }
 
+    // Add knockback cooldown to prevent double knockback
+    private float lastKnockbackTime = -1f;
+    private float knockbackCooldown = 0.5f; // Prevent multiple knockbacks within 0.5 seconds
+
     public void TakeDamage()
     {
         // Allow damage during recovery but don't interrupt the animation
@@ -182,7 +186,18 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         anim.SetBool("IsAttacking", false);
         KnockbackEntity(player);
        
-        GetKnockedBack(new Vector3(100, 100, 100));
+        // FIXED: Only apply knockback if not recently knocked back (prevents double knockback)
+        if (Time.time - lastKnockbackTime > knockbackCooldown)
+        {
+            GetKnockedBack(new Vector3(100, 100, 100));
+            lastKnockbackTime = Time.time;
+            print("Applied damage knockback");
+        }
+        else
+        {
+            print("Skipped damage knockback - too soon after last knockback");
+        }
+        
         if (enemyHP != 0)
         {
             anim.SetBool("IsHurting", true);
@@ -329,7 +344,15 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
 
     public void GetKnockedBack(Vector3 force)
     {
+        // FIXED: Prevent double knockback with cooldown check
+        if (Time.time - lastKnockbackTime < knockbackCooldown)
+        {
+            print($"Skipped GetKnockedBack - too soon after last knockback ({Time.time - lastKnockbackTime:F2}s ago)");
+            return;
+        }
+        
         print("knockback");
+        lastKnockbackTime = Time.time;
         StopMoving();
         // Simple knockback without complex physics
         StartCoroutine(SimpleKnockback(force));

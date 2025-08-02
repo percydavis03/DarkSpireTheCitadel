@@ -182,7 +182,8 @@ public bool canRollCancelAttacks = true;
         rootMotionHandler = animationSource.GetComponent<NyxRootMotionHandler>();
         if (rootMotionHandler == null)
         {
-            Debug.LogWarning("NyxRootMotionHandler not found on animation source. Root motion for rolls will not work.");
+            // Root motion handler is optional - only needed for specific roll animations
+            Debug.Log("NyxRootMotionHandler not found on animation source. This is normal if not using root motion animations.");
         }
         
         // Performance: Reduce failsafe timer for faster attack recovery
@@ -1067,6 +1068,11 @@ public bool canRollCancelAttacks = true;
         }
 
         // SIMPLIFIED COMBO ATTACK SYSTEM
+        if (attack.WasPressedThisFrame())
+        {
+            Debug.Log($"Attack input detected - canAttack: {thisGameSave.canAttack}, inMenu: {thisGameSave.inMenu}");
+        }
+        
         if (attack.WasPressedThisFrame() && thisGameSave.canAttack && !thisGameSave.inMenu)
         {
             if (ShouldDebugAttacks()) Debug.Log($"🎮 Attack button pressed - isAttacking: {isAttacking}, isComboing: {isComboing}, canComboNext: {canComboNext}");

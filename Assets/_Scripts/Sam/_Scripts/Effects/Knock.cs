@@ -2,6 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// ⚠️ LEGACY/DEPRECATED ⚠️
+/// This knockback system is deprecated. Use the new KnockbackManager system instead.
+/// See Assets/_Scripts/Knockback/ for the modern, industry-standard system.
+/// 
+/// Migration: Replace GetComponent<Knock>() with GetComponent<KnockbackReceiver>()
+/// and use KnockbackManager.Instance.ApplyKnockback() instead of KnockBack() method.
+/// </summary>
+[System.Obsolete("Use KnockbackManager and KnockbackReceiver system instead. See Assets/_Scripts/Knockback/", false)]
 public class Knock : MonoBehaviour
 {
     public bool knockBack;  

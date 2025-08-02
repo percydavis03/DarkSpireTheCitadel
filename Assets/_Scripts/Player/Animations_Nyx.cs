@@ -146,6 +146,16 @@ public class Animations_Nyx : MonoBehaviour
         }
     }
     
+    // End arm/gauntlet attack animation event
+    public void EndSlash()
+    {
+        if (playerMovement != null)
+        {
+            if (ShouldDebugAttacks()) Debug.Log("🎬 EndSlash: Arm/gauntlet attack animation event triggered");
+            playerMovement.EndSlash(); // Call the proper EndSlash function in Player_Movement
+        }
+    }
+    
     public void StoppedMoving()
     {
         if (playerMovement != null)
@@ -347,11 +357,10 @@ public class Animations_Nyx : MonoBehaviour
     /// <summary>
     /// Legacy knockdown system (fallback only)
     /// ENHANCED: Also clears hurt states to prevent conflicts
+    /// FIXED: No longer calls GetKnockedBack to prevent double knockback with KnockbackReceiver
     /// </summary>
     private void ApplyLegacyKnockdown(Collider enemyCollider)
     {
-        Vector3 kickForce = new Vector3(20, 5, 20); // Default legacy force
-        
         // Handle Enemy_Basic
         if (enemyCollider.TryGetComponent(out Enemy_Basic enemyBasic))
         {
@@ -363,15 +372,15 @@ public class Animations_Nyx : MonoBehaviour
                 enemyBasic.anim.SetBool("IsAttacking", false);
                 enemyBasic.isHit = false; // Clear hit flag
                 
-                // Now apply knockdown
+                // Now apply knockdown (animation only - knockback handled by KnockbackManager)
                 enemyBasic.anim.SetBool("isKnockedDown", true);
                 enemyBasic.StopMoving();
                 
-                // Apply legacy knockback force
-                enemyBasic.GetKnockedBack(kickForce);
+                // REMOVED: No longer calling GetKnockedBack to prevent double knockback
+                // The KnockbackManager should handle the actual movement
                 
                 if (enableFootDebugLogs) 
-                    Debug.Log($"🦵 Enemy_Basic {enemyBasic.name} KNOCKED DOWN (legacy)! Cleared hurt states.");
+                    Debug.Log($"🦵 Enemy_Basic {enemyBasic.name} KNOCKED DOWN (legacy animation only)! Cleared hurt states.");
             }
         }
         // Handle Worker
@@ -384,12 +393,12 @@ public class Animations_Nyx : MonoBehaviour
                 worker.anim.SetBool("IsRunning", false);
                 worker.anim.SetBool("IsAttacking", false);
                 
-                // Now apply knockdown
+                // Now apply knockdown (animation only - knockback handled by KnockbackManager)
                 worker.anim.SetBool("isKnockedDown", true);
                 worker.StopMoving();
                 
                 if (enableFootDebugLogs) 
-                    Debug.Log($"🦵 Worker {worker.name} KNOCKED DOWN (legacy)! Cleared hurt states.");
+                    Debug.Log($"🦵 Worker {worker.name} KNOCKED DOWN (legacy animation only)! Cleared hurt states.");
             }
         }
     }

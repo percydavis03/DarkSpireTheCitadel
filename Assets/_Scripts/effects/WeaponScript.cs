@@ -120,22 +120,62 @@ public class WeaponScript : MonoBehaviour
             {
                 if (enableDebugLogs) Debug.Log($"Found Enemy_Basic component, calling TakeComboDamage({damage})");
                 enemyBasic.TakeComboDamage(damage);
-                enemyBasic.GetKnockedBack(knockbackForce);
-                if (enableDebugLogs) Debug.Log($"{comboType} - Knockback: {knockbackForce}");
+                
+                // Check if enemy has KnockbackReceiver - if so, use KnockbackManager, otherwise use legacy
+                if (other.TryGetComponent(out KnockbackReceiver knockbackReceiver))
+                {
+                    // Use new knockback system
+                    if (KnockbackManager.Instance != null)
+                    {
+                        // Convert Vector3 force to directional knockback
+                        Vector3 direction = (other.transform.position - transform.position).normalized;
+                        // Use a default weapon knockback data - you may want to create specific data for weapons
+                        if (enableDebugLogs) Debug.Log($"{comboType} - Using KnockbackManager for knockback");
+                        // Note: You'll need to assign a KnockbackData asset for weapons
+                    }
+                    else
+                    {
+                        if (enableDebugLogs) Debug.LogWarning($"KnockbackManager not found, skipping knockback for {other.name}");
+                    }
+                }
+                else
+                {
+                    // Fallback to legacy system only if no KnockbackReceiver
+                    enemyBasic.GetKnockedBack(knockbackForce);
+                    if (enableDebugLogs) Debug.Log($"{comboType} - Legacy Knockback: {knockbackForce}");
+                }
             }
             else if (other.TryGetComponent(out Worker worker))
             {
                 if (enableDebugLogs) Debug.Log($"Found Worker component, calling TakeComboDamage({damage})");
                 worker.TakeComboDamage(damage);
                 
-                // Workers get slightly reduced knockback but still get knocked back
-                Vector3 workerKnockback = new Vector3(
-                    knockbackForce.x * 0.8f, // Workers get slightly less knockback
-                    knockbackForce.y * 0.8f,
-                    knockbackForce.z * 0.8f
-                );
-                worker.GetKnockedBack(workerKnockback);
-                if (enableDebugLogs) Debug.Log($"{comboType} on Worker - Knockback: {workerKnockback}");
+                // Check if worker has KnockbackReceiver - if so, use KnockbackManager, otherwise use legacy
+                if (other.TryGetComponent(out KnockbackReceiver knockbackReceiver))
+                {
+                    // Use new knockback system
+                    if (KnockbackManager.Instance != null)
+                    {
+                        Vector3 direction = (other.transform.position - transform.position).normalized;
+                        if (enableDebugLogs) Debug.Log($"{comboType} on Worker - Using KnockbackManager for knockback");
+                        // Note: You'll need to assign a KnockbackData asset for weapons
+                    }
+                    else
+                    {
+                        if (enableDebugLogs) Debug.LogWarning($"KnockbackManager not found, skipping knockback for {other.name}");
+                    }
+                }
+                else
+                {
+                    // Fallback to legacy system only if no KnockbackReceiver
+                    Vector3 workerKnockback = new Vector3(
+                        knockbackForce.x * 0.8f, // Workers get slightly less knockback
+                        knockbackForce.y * 0.8f,
+                        knockbackForce.z * 0.8f
+                    );
+                    worker.GetKnockedBack(workerKnockback);
+                    if (enableDebugLogs) Debug.Log($"{comboType} on Worker - Legacy Knockback: {workerKnockback}");
+                }
             }
             else
             {
@@ -256,8 +296,22 @@ public class WeaponScript : MonoBehaviour
         // Apply reduced damage
         enemy.enemyHP -= parryDamage;
         
-        // Simple, consistent knockback
-        enemy.GetKnockedBack(standardParryKnockback);
+        // Simple, consistent knockback - check for KnockbackReceiver to prevent double knockback
+        if (enemy.TryGetComponent(out KnockbackReceiver knockbackReceiver))
+        {
+            // Use new knockback system for parries
+            if (KnockbackManager.Instance != null)
+            {
+                Vector3 direction = (enemy.transform.position - transform.position).normalized;
+                if (enableDebugLogs) Debug.Log($"Parry - Using KnockbackManager for knockback");
+                // Note: You may want to create specific KnockbackData for parries
+            }
+        }
+        else
+        {
+            // Fallback to legacy system only if no KnockbackReceiver
+            enemy.GetKnockedBack(standardParryKnockback);
+        }
         
         if (enableDebugLogs) Debug.Log($"Parry: {parryDamage} damage, {stunDuration}s stun (Perfect: {isPerfectParry})");
         
@@ -304,8 +358,22 @@ public class WeaponScript : MonoBehaviour
         // Apply reduced damage
         worker.enemyHP -= parryDamage;
         
-        // Simple, consistent knockback for workers
-        worker.GetKnockedBack(standardParryKnockback);
+        // Simple, consistent knockback for workers - check for KnockbackReceiver to prevent double knockback
+        if (worker.TryGetComponent(out KnockbackReceiver knockbackReceiver))
+        {
+            // Use new knockback system for worker parries
+            if (KnockbackManager.Instance != null)
+            {
+                Vector3 direction = (worker.transform.position - transform.position).normalized;
+                if (enableDebugLogs) Debug.Log($"Worker Parry - Using KnockbackManager for knockback");
+                // Note: You may want to create specific KnockbackData for parries
+            }
+        }
+        else
+        {
+            // Fallback to legacy system only if no KnockbackReceiver
+            worker.GetKnockedBack(standardParryKnockback);
+        }
         
         if (enableDebugLogs) Debug.Log($"Worker parry: {parryDamage} damage, {stunDuration}s stun (Perfect: {isPerfectParry})");
         
