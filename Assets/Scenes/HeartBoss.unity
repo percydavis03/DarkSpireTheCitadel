@@ -12615,7 +12615,7 @@ Transform:
   m_GameObject: {fileID: 650016099}
   serializedVersion: 2
   m_LocalRotation: {x: 0.12854317, y: 0.17216258, z: -0.022665627, w: 0.9763827}
-  m_LocalPosition: {x: -6.1546936, y: 11.370121, z: -21.122385}
+  m_LocalPosition: {x: -6.1027527, y: 11.370121, z: -21.141287}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12903,6 +12903,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4294895277541800022, guid: 3fba4c863cd56c840ad2a392b28cc0c8,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4294895277541800022, guid: 3fba4c863cd56c840ad2a392b28cc0c8,
         type: 3}
@@ -15947,6 +15952,12 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -3262789968867269347, guid: 2e2a44f4a9f9abc48880e30daefe9234, type: 3}
+--- !u!4 &1213746423 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7532818358899961418, guid: f041864c8b27c7248a1e1e012f3a3cc9,
+    type: 3}
+  m_PrefabInstance: {fileID: 1521147721}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1223844457
 GameObject:
   m_ObjectHideFlags: 0
@@ -19031,7 +19042,7 @@ PrefabInstance:
     - target: {fileID: 222445111304655754, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.1546936
+      value: -6.1027527
       objectReference: {fileID: 0}
     - target: {fileID: 222445111304655754, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -19041,7 +19052,7 @@ PrefabInstance:
     - target: {fileID: 222445111304655754, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -21.122385
+      value: -21.141287
       objectReference: {fileID: 0}
     - target: {fileID: 222445111304655754, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -19237,6 +19248,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2087216377694444195, guid: f041864c8b27c7248a1e1e012f3a3cc9,
+        type: 3}
+      propertyPath: healthBarAnimDuration
+      value: 0.9
       objectReference: {fileID: 0}
     - target: {fileID: 2112676384190966741, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -20710,7 +20726,7 @@ Transform:
   m_GameObject: {fileID: 1699208831}
   serializedVersion: 2
   m_LocalRotation: {x: 0.12854317, y: 0.17216258, z: -0.022665627, w: 0.9763827}
-  m_LocalPosition: {x: -6.1546936, y: 11.370121, z: -21.122385}
+  m_LocalPosition: {x: -6.1027527, y: 11.370121, z: -21.141287}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -24843,7 +24859,7 @@ PrefabInstance:
         type: 3}
       propertyPath: player
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1213746423}
     - target: {fileID: 2446843999360598034, guid: 415f83432673b1e41a413500ad622649,
         type: 3}
       propertyPath: yippie
@@ -24940,6 +24956,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 1103639657}
   - {fileID: 2096448572}
+  - {fileID: 1521147721}
   - {fileID: 466855894}
   - {fileID: 1089037452}
   - {fileID: 2044731010}
@@ -24952,7 +24969,6 @@ SceneRoots:
   - {fileID: 252207020}
   - {fileID: 1386026752}
   - {fileID: 1015983363}
-  - {fileID: 1521147721}
   - {fileID: 1818211246}
   - {fileID: 846791278}
   - {fileID: 1840773778}

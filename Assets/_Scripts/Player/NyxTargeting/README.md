@@ -53,19 +53,19 @@ The targeting system consists of several components working together:
 
 ## Input Setup
 
-The targeting system has been set up with **RB/LB on controller** and **scroll wheel on mouse** for easy target cycling!
+The targeting system has been set up with **RB/LB on controller** and **E/R keys on keyboard** for easy target cycling!
 
 ### ✅ Already Set Up For You!
 
 The `CycleTargets` input action has been added to your `PlayerInputActions` with these bindings:
 - **Controller**: LB (previous target) / RB (next target)  
-- **Mouse**: Scroll wheel up/down
+- **Keyboard**: E (previous target) / R (next target)
 - **Auto Lock-On**: Automatically locks onto enemies when you start cycling
 
 ### How It Works
 
-1. **Scroll or press RB/LB** - Automatically locks onto the nearest enemy and starts cycling
-2. **Continue scrolling/pressing** - Cycles through all available targets
+1. **Press E/R or RB/LB** - Automatically locks onto the nearest enemy and starts cycling
+2. **Continue pressing** - Cycles through all available targets
 3. **Stop input** - Maintains lock on current target  
 4. **Move away or target dies** - Automatically releases lock-on
 
@@ -95,7 +95,7 @@ If you want a dedicated lock-on toggle button:
 
 ### Lock-On Controls
 - **RB/LB on Controller**: Cycle through targets (auto-locks when you start cycling)
-- **Mouse Scroll Wheel**: Cycle through targets (scroll up/down)
+- **E/R Keys on Keyboard**: Cycle through targets (E=previous, R=next)
 - **Auto-Release**: Lock-on automatically releases if target dies or moves too far
 - **Visual Feedback**: Targets highlight when locked on (red for enemies, green/blue for objects)
 

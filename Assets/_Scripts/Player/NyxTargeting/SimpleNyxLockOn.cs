@@ -61,6 +61,15 @@ public class SimpleNyxLockOn : MonoBehaviour
     
     void Awake()
     {
+        // Check if new NyxLockOnSystem is present - if so, disable this old system
+        var newLockOnSystem = GetComponent<NyxLockOnSystem>();
+        if (newLockOnSystem != null)
+        {
+            Debug.LogWarning("SimpleNyxLockOn: Found new NyxLockOnSystem on same GameObject. Disabling SimpleNyxLockOn to prevent conflicts. Please remove this component when ready.");
+            this.enabled = false;
+            return;
+        }
+        
         // Auto-find components if not assigned
         if (nyxTransform == null)
         {

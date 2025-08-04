@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using PixelCrushers;
 
 /// <summary>
 /// Simple lock-on system for Nyx that shows a red dot above targeted enemies
@@ -18,7 +19,6 @@ public class NyxLockOnSystem : MonoBehaviour
     
     [Header("Input")]
     [SerializeField] private PlayerInputActions playerControls;
-    [SerializeField] private float cycleInputThreshold = 0.3f;
     
     // Add cooldown to prevent immediate reactivation
     [Header("Timing")]
@@ -26,7 +26,7 @@ public class NyxLockOnSystem : MonoBehaviour
     [SerializeField] private float inputDebounceTime = 0.5f; // Increased to reduce message spam
     
     [Header("Debug")]
-    [SerializeField] private bool enableDebugLogs = false; // Disabled to reduce console spam
+    [SerializeField] private bool enableDebugLogs = true; // Temporarily enabled to debug E/R key input
 
     [Header("Rotation Settings")]
     [SerializeField] private bool enableAutoRotation = false; // Disabled to prevent camera movement
@@ -99,10 +99,22 @@ public class NyxLockOnSystem : MonoBehaviour
             if (playerMovement != null && playerMovement.playerControls != null)
             {
                 playerControls = playerMovement.playerControls;
+                Debug.Log("NyxLockOnSystem: Found PlayerInputActions on Player_Movement component");
             }
             else
             {
-                playerControls = new PlayerInputActions();
+                // Try to find it on parent object
+                var parentPlayerMovement = GetComponentInParent<Player_Movement>();
+                if (parentPlayerMovement != null && parentPlayerMovement.playerControls != null)
+                {
+                    playerControls = parentPlayerMovement.playerControls;
+                    Debug.Log("NyxLockOnSystem: Found PlayerInputActions on parent Player_Movement component");
+                }
+                else
+                {
+                    playerControls = new PlayerInputActions();
+                    Debug.LogWarning("NyxLockOnSystem: Could not find existing PlayerInputActions, created new instance. This may not receive input properly.");
+                }
             }
         }
         
@@ -114,6 +126,13 @@ public class NyxLockOnSystem : MonoBehaviour
         if (targetingSystem == null)
         {
             Debug.LogError("NyxLockOnSystem requires NyxTargetingSystem component!");
+        }
+        
+        // Check for conflicting SimpleNyxLockOn system
+        var simpleNyxLockOn = GetComponent<SimpleNyxLockOn>();
+        if (simpleNyxLockOn != null)
+        {
+            Debug.LogWarning("NyxLockOnSystem: Found SimpleNyxLockOn component on the same GameObject! This will cause highlighting conflicts. Please disable SimpleNyxLockOn component to use the new system.");
         }
         
         // Create simple red dot if not assigned
@@ -129,6 +148,11 @@ public class NyxLockOnSystem : MonoBehaviour
         {
             cycleTargets = playerControls.General.CycleTargets;
             cycleTargets.Enable();
+            Debug.Log("NyxLockOnSystem: Input actions enabled successfully");
+        }
+        else
+        {
+            Debug.LogError("NyxLockOnSystem: playerControls is null! Input won't work.");
         }
         
         if (targetingSystem != null)
@@ -314,28 +338,63 @@ public class NyxLockOnSystem : MonoBehaviour
             }
         }
         
-        if (autoLockOnClosest && !isLockOnActive && lockableTargets.Count > 0)
-        {
-            // Respect cooldown even for automatic lock-on
-            if (!isInCooldown)
-            {
-                var closestTarget = targetingSystem.GetClosestTargetTo(nyxTransform.position);
-                if (closestTarget != null && (closestTarget.TargetType == TargetType.Enemy || closestTarget.TargetType == TargetType.Boss))
-                {
-                    LockOnToTarget(closestTarget);
-                }
-            }
-        }
+        // Auto-lock disabled - user must manually activate with E/R keys
+        // if (autoLockOnClosest && !isLockOnActive && lockableTargets.Count > 0)
+        // {
+        //     // Respect cooldown even for automatic lock-on
+        //     if (!isInCooldown)
+        //     {
+        //         var closestTarget = targetingSystem.GetClosestTargetTo(nyxTransform.position);
+        //         if (closestTarget != null && (closestTarget.TargetType == TargetType.Enemy || closestTarget.TargetType == TargetType.Boss))
+        //         {
+        //             LockOnToTarget(closestTarget);
+        //         }
+        //     }
+        // }
     }
     
     private void HandleTargetCycling()
     {
-        if (cycleTargets == null) return;
+        if (cycleTargets == null)
+        {
+            DebugLog("CycleTargets input action is null!");
+            return;
+        }
         
         float cycleInput = cycleTargets.ReadValue<float>();
         
-        // Only process input on input edge (when input changes from low to high threshold)
-        if (Mathf.Abs(cycleInput) > cycleInputThreshold && Mathf.Abs(lastCycleInput) <= cycleInputThreshold)
+        // Force debug logs to always show - something is wrong
+        Debug.Log($"FORCE DEBUG - Input: current={cycleInput:F3}, last={lastCycleInput:F3}, enableDebugLogs={enableDebugLogs}");
+        
+        // Force debug for all key presses
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            Debug.Log("FORCE DEBUG - Unity Input: E key pressed!");
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Debug.Log("FORCE DEBUG - Unity Input: R key pressed!");
+        }
+        
+        // Simplified input detection - try both edge detection and direct key checking
+        bool inputDetected = false;
+        
+        // Method 1: Edge detection (original)
+        if (Mathf.Abs(cycleInput) > 0.5f && Mathf.Abs(lastCycleInput) <= 0.5f)
+        {
+            Debug.Log($"FORCE DEBUG - Method 1 triggered: {cycleInput} (was: {lastCycleInput})");
+            inputDetected = true;
+        }
+        
+        // Method 2: Direct Unity Input (backup)
+        if (!inputDetected && (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.R)))
+        {
+            cycleInput = Input.GetKeyDown(KeyCode.E) ? -1f : 1f;
+            Debug.Log($"FORCE DEBUG - Method 2 triggered: {cycleInput}");
+            inputDetected = true;
+        }
+        
+        if (inputDetected)
         {
             if (!isLockOnActive && lockableTargets.Count > 0)
             {
@@ -443,13 +502,16 @@ public class NyxLockOnSystem : MonoBehaviour
     {
         if (target == null || !target.CanBeTargeted) 
         {
-            Debug.Log("NyxLockOn: Cannot lock onto invalid target");
+            DebugLog("Cannot lock onto invalid target");
             return;
         }
         
         // Release previous target cleanly
         if (currentLockedTarget != null)
         {
+            // Hide red dot BEFORE deselecting to prevent multiple highlights
+            HideRedDot();
+            DebugLog($"Calling OnTargetDeselected for: {currentLockedTarget.Transform.name}");
             currentLockedTarget.OnTargetDeselected();
         }
         
@@ -460,12 +522,13 @@ public class NyxLockOnSystem : MonoBehaviour
         if (currentTargetIndex == -1)
         {
             // Target not in list, add it and use index 0
-            Debug.Log("NyxLockOn: Target not in lockable list, adding it");
+            DebugLog("Target not in lockable list, adding it");
             lockableTargets.Insert(0, target);
             currentTargetIndex = 0;
         }
         
-        Debug.Log($"NyxLockOn: Locked onto target: {target.Transform.name} (index: {currentTargetIndex})");
+        DebugLog($"Locked onto target: {target.Transform.name} (index: {currentTargetIndex})");
+        DebugLog($"Calling OnTargetSelected for: {target.Transform.name}");
         target.OnTargetSelected();
         
         // Only show red dot if enabled (disable this to use new mesh highlight system)
@@ -607,7 +670,7 @@ public class NyxLockOnSystem : MonoBehaviour
         if (currentTargetIndex <= 0)
         {
             // We're at the first target, cancel lock-on instead of cycling
-            Debug.Log("NyxLockOn: At first target - cancelling lock-on");
+            DebugLog("At first target - cancelling lock-on");
             ReleaseLockOn();
             return;
         }
@@ -653,6 +716,9 @@ public class NyxLockOnSystem : MonoBehaviour
     {
         if (target?.Transform == null) return;
         
+        // Always hide any existing red dot first to prevent multiple highlights
+        HideRedDot();
+        
         if (currentRedDot == null)
         {
             if (redDotPrefab != null)
@@ -669,6 +735,7 @@ public class NyxLockOnSystem : MonoBehaviour
         {
             currentRedDot.SetActive(true);
             UpdateRedDotPosition(target.Transform);
+            DebugLog($"Red dot shown for target: {target.Transform.name}");
         }
     }
     
@@ -783,6 +850,8 @@ public class NyxLockOnSystem : MonoBehaviour
         
         return dot;
     }
+    
+
     
     void OnDrawGizmos()
     {

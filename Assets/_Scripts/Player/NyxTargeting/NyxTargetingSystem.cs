@@ -31,6 +31,22 @@ public class NyxTargetingSystem : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false; // DISABLED - was causing lag spam
     [SerializeField] private bool showDebugVisualization = true;
+    [SerializeField] private float debugLogInterval = 2.0f; // Only log every N seconds to prevent spam
+    
+    // Debug throttling
+    private float lastDebugLogTime = 0f;
+    
+    /// <summary>
+    /// Helper method to log debug messages with throttling to prevent spam
+    /// </summary>
+    private void ThrottledDebugLog(string message)
+    {
+        if (enableDebugLogs && Time.time - lastDebugLogTime >= debugLogInterval)
+        {
+            Debug.Log($"NyxTargetingSystem: {message}");
+            lastDebugLogTime = Time.time;
+        }
+    }
     [SerializeField] private Color coneColor = Color.blue;
     [SerializeField] private Color targetLineColor = Color.green;
     [SerializeField] private Color blockedLineColor = Color.red;
@@ -112,10 +128,8 @@ public class NyxTargetingSystem : MonoBehaviour
         // Step 4: Notify listeners of updates
         OnTargetsUpdated?.Invoke(validTargets);
         
-        if (enableDebugLogs)
-        {
-            Debug.Log($"Targeting Update: {availableTargets.Count} potential, {validTargets.Count} valid targets. Best: {(bestTarget != null ? bestTarget.Transform.name : "None")}");
-        }
+        // Only log debug messages occasionally to prevent spam
+        ThrottledDebugLog($"Targeting Update: {availableTargets.Count} potential, {validTargets.Count} valid targets. Best: {(bestTarget != null ? bestTarget.Transform.name : "None")}");
     }
     
     /// <summary>
@@ -194,16 +208,14 @@ public class NyxTargetingSystem : MonoBehaviour
             float angle = Vector3.Angle(forward, directionToTarget);
             if (angle > effectiveAngle)
             {
-                if (enableDebugLogs)
-                    Debug.Log($"Target {target.Transform.name} outside angle: {angle:F1}° (max: {effectiveAngle}°)");
+                // Removed: This was causing spam - angle checks happen very frequently
                 continue;
             }
             
             // Check line of sight if required
             if (requireLineOfSight && !HasLineOfSight(origin, targetPosition))
             {
-                if (enableDebugLogs)
-                    Debug.Log($"Target {target.Transform.name} blocked by obstacle");
+                // Removed: This was causing spam - line of sight checks happen very frequently
                 continue;
             }
             

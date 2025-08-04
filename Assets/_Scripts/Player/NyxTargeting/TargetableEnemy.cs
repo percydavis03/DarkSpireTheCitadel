@@ -134,6 +134,13 @@ public class TargetableEnemy : MonoBehaviour, ITargetable
     
     public void OnTargetSelected()
     {
+        // Prevent conflicts if already targeted by another system
+        if (isCurrentlyTargeted)
+        {
+            Debug.LogWarning($"TargetableEnemy: {gameObject.name} is already targeted! Multiple targeting systems may be active. Check for duplicate NyxLockOnSystem/SimpleNyxLockOn components.");
+            return;
+        }
+        
         isCurrentlyTargeted = true;
         
         // Play sound effect
@@ -154,7 +161,6 @@ public class TargetableEnemy : MonoBehaviour, ITargetable
             if (useNewHighlightSystem && enemyHighlightRenderer != null)
             {
                 enemyHighlightRenderer.enabled = true;
-                Debug.Log($"TargetableEnemy: Enabled highlight renderer for {gameObject.name}");
             }
             else
             {
