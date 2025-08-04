@@ -19,10 +19,13 @@ public class Main_Player : MonoBehaviour
     public List<GameObject> bloodSplats = new List<GameObject>();
     public int randomListObject;
     public GameObject hurt;
+    public GameObject glow;
     bool damageCooldown;
     public CanvasGroup hurtScreen;
+    public CanvasGroup hurtGlow;
     private bool isFaded;
     [SerializeField] private float knockbackForce = 15f; // Force of the knockback - increased for more noticeable effect
+   
 
     [Header("Camera Shake")]
     [SerializeField] private CameraShakeController cameraShake;
@@ -54,6 +57,7 @@ public class Main_Player : MonoBehaviour
 
     public void TakeDamage()
     {
+
         Debug.Log($"🚨 LEGACY TakeDamage() called! This shouldn't happen if enemies are hitting player properly.");
         // Legacy method - use random direction for backward compatibility
         Vector3 randomDirection = new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)).normalized;
@@ -75,6 +79,7 @@ public class Main_Player : MonoBehaviour
         // Debug.Log("ow"); // DISABLED - was causing spam
         //cameraShake.ShakeCamera(shakeIntensity, shakeTime);
         hurt.SetActive(true);
+        glow.SetActive(true);
         StartCoroutine(Wait());
         Player_Movement.instance.GotHit();
         
@@ -138,7 +143,7 @@ public class Main_Player : MonoBehaviour
         if (isFaded)
         {
             hurtScreen.DOFade(1, 0.3f);
-            // print("dofadein"); // DISABLED - was causing spam
+            hurtGlow.DOFade(1, 0.1f);
             StartCoroutine(FadeWait(0.5f));
         }
     }
@@ -146,8 +151,9 @@ public class Main_Player : MonoBehaviour
     {
         yield return new WaitForSeconds(seconds);
         hurtScreen.DOFade(0, 0.3f);
+        hurtScreen.DOFade(0, 0.1f);
+        glow.SetActive(false);
         hurt.SetActive(false);
-        // print("dofadeout"); // DISABLED - was causing spam
         isFaded = true;
     }
 

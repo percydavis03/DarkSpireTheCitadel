@@ -92,7 +92,7 @@ public class Corruption : MonoBehaviour
     {
         heartBeat.Play();
         corruptionGlow.SetActive(true);
-        Player_Health_Manager.GetInstance().DamangePlayer(1);
+       //damage
         yield return new WaitForSeconds(2f);
 
     }

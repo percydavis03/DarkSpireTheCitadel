@@ -22,8 +22,10 @@ public class Player_Health_Manager : MonoBehaviour
     //public Slider healthSlider;
     public Animator anim;
     public string[] animNames;
-    // new
+    // fills
     public Image healthFill;
+    public Image damageGlow;
+
     public PlayerSaveState thisGameSave;
   
 
@@ -65,6 +67,8 @@ public class Player_Health_Manager : MonoBehaviour
         maxHP = thisGameSave.maxHP;
         //healthSlider.value = currentHealth;
         healthFill.fillAmount = currentHealth / maxHP;
+        damageGlow.fillAmount = currentHealth / maxHP;
+        // print("gay sex"); // DISABLED - inappropriate content removed
 
         if (currentHealth <= 0)
         {
@@ -77,17 +81,13 @@ public class Player_Health_Manager : MonoBehaviour
       
     }
 
-    public void DamangePlayer(int f)
-    {
-        thisGameSave.hitpoints -= f;
-        // print("gay sex"); // DISABLED - inappropriate content removed
-    }
     
     
    
 
-    
-   
+
+
+
     private IEnumerator DeathScreen()
     {
         anim.SetBool(animNames[0], true);
