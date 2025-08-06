@@ -2202,7 +2202,6 @@ GameObject:
   - component: {fileID: 3481393364203808334}
   - component: {fileID: 1481794033222216808}
   - component: {fileID: 2486048015007352420}
-  - component: {fileID: 4174075841023760719}
   - component: {fileID: 6027539891366021649}
   m_Layer: 7
   m_Name: Player
@@ -2739,6 +2738,7 @@ MonoBehaviour:
   autoFindNyx: 0
   mainCamera: {fileID: 0}
   autoFindCamera: 1
+  useCameraOnlyTargeting: 1
   lockOnRange: 20
   lockOnLostDistance: 25
   autoLockOnClosest: 1
@@ -2788,39 +2788,6 @@ MonoBehaviour:
   useGizmos: 0
   debugRayColor: {r: 1, g: 0, b: 0, a: 1}
   debugHitColor: {r: 0, g: 1, b: 0, a: 1}
---- !u!114 &4174075841023760719
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1154107589237833224}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c35aa3f5fd52d824eb35e71162b588e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  nyxTransform: {fileID: 7532818358899961418}
-  playerTransform: {fileID: 7532818358899961418}
-  playerCamera: {fileID: 0}
-  lockOnRange: 50
-  cameraFieldOfView: 60
-  enemyLayers:
-    serializedVersion: 2
-    m_Bits: 5
-  enemyTags:
-  - Enemy
-  - Boss
-  enableAutoRotation: 1
-  rotationSpeed: 20
-  smoothRotation: 1
-  lockOnIndicatorPrefab: {fileID: 287009170033980275, guid: ffcba48034191a548a4b6cc49799ec0f,
-    type: 3}
-  indicatorHeightOffset: 0.5
-  highlightEnemiesInView: 1
-  useTargetableEnemyHighlighting: 1
-  useScrollWheel: 1
-  showDebugInfo: 0
 --- !u!114 &6027539891366021649
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -36,7 +36,7 @@ public class NyxLockOnSystem : MonoBehaviour
     [SerializeField] private bool enableDebugLogs = false;
 
     [Header("Rotation Settings")]
-    [SerializeField] private bool enableAutoRotation = false; // Disabled to prevent camera movement
+    [SerializeField] private bool enableAutoRotation = true; // Enable rotation to face locked-on targets
     [SerializeField] private float rotationSpeed = 12f;
     [SerializeField] private bool onlyRotateWhenLocked = true;
     [SerializeField] private float rotationThreshold = 5f; // Don't rotate if already facing target within this angle

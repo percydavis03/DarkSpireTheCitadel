@@ -80,6 +80,10 @@ public class Player_Movement : MonoBehaviour
     private float targetRotation = 0;
     private float rotationVelocity;
     public float RotationSmoothTime = 0.12f;
+    
+    [Header("Lock-On Integration")]
+    [Tooltip("Reference to lock-on system for rotation integration")]
+    private NyxLockOnSystem lockOnSystem;
 
     public bool canTurn = true;
     private float prevRotation;
@@ -171,6 +175,9 @@ public bool canRollCancelAttacks = true;
         targetSpeed = thisGameSave.playerSpeed;
         animatorSpeed = 0f;
         targetAnimatorSpeed = 0f;
+        
+        // Initialize lock-on system references
+        lockOnSystem = FindObjectOfType<NyxLockOnSystem>();
         
         // Initialize roll variables
         rolling = false;
@@ -752,7 +759,9 @@ public bool canRollCancelAttacks = true;
         }
 
         // Handle rotation (not during roll)
-        if (!rolling && moveDirection.magnitude > 0.1f && canRotate)
+        // Only rotate based on movement if not locked onto a target (let lock-on system handle rotation when locked)
+        bool isLockedOn = lockOnSystem != null && lockOnSystem.IsLockOnActive;
+        if (!rolling && moveDirection.magnitude > 0.1f && canRotate && !isLockedOn)
         {
             Vector3 rotationDirection = new Vector3(moveDirection.x, 0, moveDirection.z).normalized;
             if (rotationDirection != Vector3.zero)
