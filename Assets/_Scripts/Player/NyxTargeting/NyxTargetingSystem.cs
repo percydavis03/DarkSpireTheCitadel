@@ -9,7 +9,7 @@ using UnityEngine;
 public class NyxTargetingSystem : MonoBehaviour
 {
     [Header("Targeting Settings")]
-    [SerializeField] private float targetingRange = 15f;
+    [SerializeField] private float targetingRange = 30f;
     [SerializeField] private float targetingAngle = 75f; // Increased from 45f to be more forgiving
     [SerializeField] private LayerMask obstacleLayerMask = -1;
     [SerializeField] private Transform targetingOrigin;

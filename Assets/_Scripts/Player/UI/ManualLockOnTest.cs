@@ -139,7 +139,7 @@ public class ManualLockOnTest : MonoBehaviour
             GUILayout.Label($"Has Target: {lockOnSystem.HasTarget}");
             if (lockOnSystem.HasTarget)
             {
-                GUILayout.Label($"Target: {lockOnSystem.CurrentTarget?.Transform.name}");
+                GUILayout.Label($"Target: {lockOnSystem.CurrentTarget?.name}");
             }
         }
         

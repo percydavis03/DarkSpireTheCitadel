@@ -179,15 +179,15 @@ public class Animations_Nyx : MonoBehaviour
     {
         if (footAttackManager != null)
         {
-            if (ShouldDebugAttacks()) Debug.Log("🎬 ActivateFoot: Triggering FootAttackManager");
+          ///  if (ShouldDebugAttacks()) Debug.Log("🎬 ActivateFoot: Triggering FootAttackManager");
             
             int enemiesHit = footAttackManager.ActivateFootAttack();
             
-            if (ShouldDebugAttacks()) Debug.Log($"🎬 ActivateFoot: FootAttackManager hit {enemiesHit} enemies");
+           // if (ShouldDebugAttacks()) Debug.Log($"🎬 ActivateFoot: FootAttackManager hit {enemiesHit} enemies");
         }
         else
         {
-            Debug.LogWarning("🎬 ActivateFoot: FootAttackManager not available! Foot attack will not work. Please assign FootAttackManager in the inspector.");
+          //  Debug.LogWarning("🎬 ActivateFoot: FootAttackManager not available! Foot attack will not work. Please assign FootAttackManager in the inspector.");
         }
     }
 

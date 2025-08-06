@@ -78,9 +78,9 @@ public class LockOnInputTester : MonoBehaviour
                 {
                     Debug.Log("🔄 Cycling to next target...");
                     if (cycleInput > 0)
-                        lockOnSystem.CycleNextTarget();
+                        lockOnSystem.CycleTargetRight();
                     else
-                        lockOnSystem.CyclePreviousTarget();
+                        lockOnSystem.CycleTargetLeft();
                 }
             }
             else

@@ -31,7 +31,7 @@ public class SettingsManager : MonoBehaviour
                 if (_instance == null)
                 {
                     // Auto-create if doesn't exist
-                    GameObject settingsObject = new GameObject("SettingsManager");
+                   GameObject settingsObject = new GameObject("SettingsManager");
                     _instance = settingsObject.AddComponent<SettingsManager>();
                     DontDestroyOnLoad(settingsObject);
                 }
@@ -103,11 +103,11 @@ public class SettingsManager : MonoBehaviour
             environmentBus = RuntimeManager.GetBus(environmentBusPath);
             voiceBus = RuntimeManager.GetBus(voiceBusPath);
             
-            Debug.Log("SettingsManager: FMOD buses initialized successfully");
+           // Debug.Log("SettingsManager: FMOD buses initialized successfully");
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"SettingsManager: Failed to initialize FMOD buses: {e.Message}");
+           // Debug.LogError($"SettingsManager: Failed to initialize FMOD buses: {e.Message}");
         }
     }
     
@@ -120,7 +120,7 @@ public class SettingsManager : MonoBehaviour
         
         if (settingsData == null)
         {
-            Debug.LogWarning($"SettingsManager: Could not find {settingsFileName} in Resources folder. Please create one using the menu: Assets > Create > DarkSpire > Settings > Game Settings Data");
+           // Debug.LogWarning($"SettingsManager: Could not find {settingsFileName} in Resources folder. Please create one using the menu: Assets > Create > DarkSpire > Settings > Game Settings Data");
         }
     }
     
@@ -131,7 +131,7 @@ public class SettingsManager : MonoBehaviour
     {
         if (settingsData == null)
         {
-            Debug.LogError("SettingsManager: No settings data assigned!");
+           // Debug.LogError("SettingsManager: No settings data assigned!");
             return;
         }
         
@@ -158,7 +158,7 @@ public class SettingsManager : MonoBehaviour
         
         settingsData.ValidateSettings();
         
-        Debug.Log("SettingsManager: Settings loaded from PlayerPrefs");
+       // Debug.Log("SettingsManager: Settings loaded from PlayerPrefs");
     }
     
     /// <summary>
@@ -191,7 +191,7 @@ public class SettingsManager : MonoBehaviour
         
         PlayerPrefs.Save();
         
-        Debug.Log("SettingsManager: Settings saved to PlayerPrefs");
+       // Debug.Log("SettingsManager: Settings saved to PlayerPrefs");
     }
     
     /// <summary>
@@ -230,7 +230,7 @@ public class SettingsManager : MonoBehaviour
         // Apply resolution
         Screen.SetResolution(settingsData.ResolutionWidth, settingsData.ResolutionHeight, Screen.fullScreen);
         
-        Debug.Log($"SettingsManager: Applied display settings - Mode: {settingsData.WindowMode}, Resolution: {settingsData.ResolutionWidth}x{settingsData.ResolutionHeight}");
+      //  Debug.Log($"SettingsManager: Applied display settings - Mode: {settingsData.WindowMode}, Resolution: {settingsData.ResolutionWidth}x{settingsData.ResolutionHeight}");
     }
     
     /// <summary>
@@ -249,11 +249,11 @@ public class SettingsManager : MonoBehaviour
             SetBusVolume(environmentBus, settingsData.EnvironmentVolume, settingsData.EnvironmentMuted);
             SetBusVolume(voiceBus, settingsData.VoiceVolume, settingsData.VoiceMuted);
             
-            Debug.Log($"SettingsManager: Applied audio settings - Master: {settingsData.MasterVolume}, Music: {settingsData.MusicVolume}, SFX: {settingsData.SFXVolume}, Environment: {settingsData.EnvironmentVolume}, Voice: {settingsData.VoiceVolume}");
+          //  Debug.Log($"SettingsManager: Applied audio settings - Master: {settingsData.MasterVolume}, Music: {settingsData.MusicVolume}, SFX: {settingsData.SFXVolume}, Environment: {settingsData.EnvironmentVolume}, Voice: {settingsData.VoiceVolume}");
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"SettingsManager: Error applying audio settings: {e.Message}");
+          //  Debug.LogError($"SettingsManager: Error applying audio settings: {e.Message}");
         }
     }
     

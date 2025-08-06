@@ -1,10 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using System.Linq;
 using PixelCrushers;
 
 /// <summary>
-/// Simple lock-on system for Nyx that shows a red dot above targeted enemies
+/// Camera-relative lock-on system for Nyx that shows a red dot above targeted enemies.
+/// E = cycle left (camera-relative), R = cycle right (camera-relative)
+/// Automatically unlocks when no more targets exist in the selected direction.
 /// </summary>
 public class NyxLockOnSystem : MonoBehaviour
 {
@@ -12,9 +15,14 @@ public class NyxLockOnSystem : MonoBehaviour
     [SerializeField] private Transform nyxTransform;
     [SerializeField] private bool autoFindNyx = true;
     
+    [Header("Camera")]
+    [SerializeField] private Camera mainCamera;
+    [SerializeField] private bool autoFindCamera = true;
+    
     [Header("Lock-On Settings")]
-    [SerializeField] private float lockOnRange = 20f;
-    [SerializeField] private float lockOnLostDistance = 25f;
+    [SerializeField] private bool useCameraOnlyTargeting = true; // Pure camera-based targeting (ignore distance)
+    [SerializeField] private float lockOnRange = 35f; // Only used if useCameraOnlyTargeting is false
+    [SerializeField] private float lockOnLostDistance = 40f;
     [SerializeField] private bool autoLockOnClosest = false; // Disabled by default for better control
     
     [Header("Input")]
@@ -22,11 +30,10 @@ public class NyxLockOnSystem : MonoBehaviour
     
     // Add cooldown to prevent immediate reactivation
     [Header("Timing")]
-    [SerializeField] private float lockOnCooldown = 0.3f; // Increased for smoother feel
-    [SerializeField] private float inputDebounceTime = 0.5f; // Increased to reduce message spam
+    [SerializeField] private float lockOnCooldown = 0.3f;
     
     [Header("Debug")]
-    [SerializeField] private bool enableDebugLogs = true; // Temporarily enabled to debug E/R key input
+    [SerializeField] private bool enableDebugLogs = false;
 
     [Header("Rotation Settings")]
     [SerializeField] private bool enableAutoRotation = false; // Disabled to prevent camera movement
@@ -39,7 +46,6 @@ public class NyxLockOnSystem : MonoBehaviour
     
     // Add cooldown tracking
     private float lastLockOnReleaseTime;
-    private float lastCooldownWarningTime; // Prevent spam warnings
     private bool isInCooldown => Time.time - lastLockOnReleaseTime < lockOnCooldown;
     
     [Header("Simple Red Dot")]
@@ -48,20 +54,17 @@ public class NyxLockOnSystem : MonoBehaviour
     [SerializeField] private float dotScale = 0.5f;
     [SerializeField] private bool useRedDotIndicator = true; // Disable this to use only the new mesh highlight system
     
-    // Dependencies
-    private NyxTargetingSystem targetingSystem;
+    // Dependencies (removed - now using simple camera-based targeting)
     
     // Lock-on state
-    private ITargetable currentLockedTarget;
+    private Transform currentLockedTarget;
     private bool isLockOnActive;
-    private List<ITargetable> lockableTargets;
-    private int currentTargetIndex;
     
     // Simple red dot
     private GameObject currentRedDot;
     
     // Events
-    public System.Action<ITargetable> OnTargetLocked;
+    public System.Action<Transform> OnTargetLocked;
     public System.Action OnLockOnReleased;
     
     // Helper method for debug logging
@@ -71,7 +74,7 @@ public class NyxLockOnSystem : MonoBehaviour
     }
     
     // Properties
-    public ITargetable CurrentTarget => currentLockedTarget;
+    public Transform CurrentTarget => currentLockedTarget;
     public bool IsLockOnActive => isLockOnActive;
     public bool HasTarget => currentLockedTarget != null;
     public Transform NyxTransform => nyxTransform;
@@ -92,41 +95,36 @@ public class NyxLockOnSystem : MonoBehaviour
             }
         }
         
+        // Find main camera if not assigned
+        if (mainCamera == null && autoFindCamera)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                mainCamera = FindObjectOfType<Camera>();
+            }
+            if (mainCamera == null)
+            {
+                Debug.LogError("NyxLockOnSystem: Could not find main camera!");
+            }
+        }
+        
         // Get PlayerInputActions
         if (playerControls == null)
         {
-            var playerMovement = GetComponent<Player_Movement>();
-            if (playerMovement != null && playerMovement.playerControls != null)
+            var playerMovement = GetComponent<Player_Movement>() ?? GetComponentInParent<Player_Movement>();
+            if (playerMovement?.playerControls != null)
             {
                 playerControls = playerMovement.playerControls;
-                Debug.Log("NyxLockOnSystem: Found PlayerInputActions on Player_Movement component");
             }
             else
             {
-                // Try to find it on parent object
-                var parentPlayerMovement = GetComponentInParent<Player_Movement>();
-                if (parentPlayerMovement != null && parentPlayerMovement.playerControls != null)
-                {
-                    playerControls = parentPlayerMovement.playerControls;
-                    Debug.Log("NyxLockOnSystem: Found PlayerInputActions on parent Player_Movement component");
-                }
-                else
-                {
-                    playerControls = new PlayerInputActions();
-                    Debug.LogWarning("NyxLockOnSystem: Could not find existing PlayerInputActions, created new instance. This may not receive input properly.");
-                }
+                playerControls = new PlayerInputActions();
+                Debug.LogWarning("NyxLockOnSystem: Could not find existing PlayerInputActions, created new instance.");
             }
         }
         
-        // Initialize collections
-        lockableTargets = new List<ITargetable>();
-        
-        // Find targeting system
-        targetingSystem = GetComponent<NyxTargetingSystem>();
-        if (targetingSystem == null)
-        {
-            Debug.LogError("NyxLockOnSystem requires NyxTargetingSystem component!");
-        }
+        // Simplified targeting - no targeting system dependency needed
         
         // Check for conflicting SimpleNyxLockOn system
         var simpleNyxLockOn = GetComponent<SimpleNyxLockOn>();
@@ -135,11 +133,11 @@ public class NyxLockOnSystem : MonoBehaviour
             Debug.LogWarning("NyxLockOnSystem: Found SimpleNyxLockOn component on the same GameObject! This will cause highlighting conflicts. Please disable SimpleNyxLockOn component to use the new system.");
         }
         
-        // Create simple red dot if not assigned
-        if (redDotPrefab == null)
-        {
-            CreateSimpleRedDot();
-        }
+        // Red dot creation commented out
+        // if (redDotPrefab == null)
+        // {
+        //     CreateSimpleRedDot();
+        // }
     }
     
     void OnEnable()
@@ -148,33 +146,18 @@ public class NyxLockOnSystem : MonoBehaviour
         {
             cycleTargets = playerControls.General.CycleTargets;
             cycleTargets.Enable();
-            Debug.Log("NyxLockOnSystem: Input actions enabled successfully");
         }
         else
         {
             Debug.LogError("NyxLockOnSystem: playerControls is null! Input won't work.");
         }
         
-        if (targetingSystem != null)
-        {
-            targetingSystem.OnTargetsUpdated += OnTargetsUpdated;
-            targetingSystem.ConfigureTargeting(
-                lockOnRange, 
-                120f,
-                new TargetType[] { TargetType.Enemy, TargetType.Boss }, 
-                true
-            );
-        }
+        // No targeting system setup needed - using camera-based targeting
     }
     
     void OnDisable()
     {
         cycleTargets?.Disable();
-        
-        if (targetingSystem != null)
-        {
-            targetingSystem.OnTargetsUpdated -= OnTargetsUpdated;
-        }
         
         ReleaseLockOn();
     }
@@ -185,45 +168,27 @@ public class NyxLockOnSystem : MonoBehaviour
         
         UpdateLockOnState();
         HandleTargetCycling();
-        UpdateRedDot();
+        // UpdateRedDot(); // Commented out
         HandleTargetRotation();
         
-        // Debug: Log lock-on state changes (reduced frequency for less spam)
-        if (enableDebugLogs && Time.frameCount % 240 == 0) // Every 4 seconds at 60fps instead of 2
-        {
-            DebugLog($"Status - IsActive: {isLockOnActive}, Target: {(currentLockedTarget?.Transform.name ?? "None")}, TargetCount: {lockableTargets.Count}, RedDotActive: {(currentRedDot?.activeInHierarchy ?? false)}, InCooldown: {isInCooldown}");
-        }
+
     }
     
     private void UpdateLockOnState()
     {
         if (isLockOnActive && currentLockedTarget != null)
         {
-            // Check if player is hurt and release lock-on to avoid conflicts
-            if (Player_Movement.instance != null && Player_Movement.instance.anim != null)
-            {
-                if (Player_Movement.instance.anim.GetBool("isHurt"))
-                {
-                    DebugLog("Player is hurt - releasing lock-on to prevent conflicts");
-                    ReleaseLockOn();
-                    return;
-                }
-            }
-            
             // Check if target is still valid
             try
             {
-                if (currentLockedTarget.Transform == null || !currentLockedTarget.CanBeTargeted)
+                if (currentLockedTarget == null || !currentLockedTarget.gameObject.activeInHierarchy || !IsEnemyAlive(currentLockedTarget.gameObject))
                 {
                     DebugLog("Target is no longer valid - releasing lock-on");
                     ReleaseLockOn();
                     return;
                 }
                 
-                Vector3 targetPos = currentLockedTarget.TargetPoint != null ? 
-                    currentLockedTarget.TargetPoint.position : 
-                    currentLockedTarget.Transform.position;
-                
+                Vector3 targetPos = currentLockedTarget.position;
                 float distance = Vector3.Distance(nyxTransform.position, targetPos);
                 
                 if (distance > lockOnLostDistance)
@@ -249,20 +214,18 @@ public class NyxLockOnSystem : MonoBehaviour
         if (onlyRotateWhenLocked && !isLockOnActive) return;
         
         // Get the target to rotate towards
-        ITargetable targetToFace = isLockOnActive ? currentLockedTarget : null;
+        Transform targetToFace = isLockOnActive ? currentLockedTarget : null;
         
         // If not locked on but we have targets and auto-rotation is enabled, face closest
-        if (!isLockOnActive && lockableTargets.Count > 0 && !onlyRotateWhenLocked)
+        if (!isLockOnActive && targetToFace == null && !onlyRotateWhenLocked)
         {
             targetToFace = GetClosestTarget();
         }
         
-        if (targetToFace?.Transform == null) return;
+        if (targetToFace == null) return;
         
         // Calculate direction to target
-        Vector3 targetPos = targetToFace.TargetPoint != null ? 
-            targetToFace.TargetPoint.position : 
-            targetToFace.Transform.position;
+        Vector3 targetPos = targetToFace.position;
         
         Vector3 directionToTarget = (targetPos - nyxTransform.position).normalized;
         
@@ -286,19 +249,19 @@ public class NyxLockOnSystem : MonoBehaviour
         );
     }
     
-    private ITargetable GetClosestTarget()
+    private Transform GetClosestTarget()
     {
-        if (lockableTargets.Count == 0) return null;
+        var sortedTargets = GetTargetsSortedByScreenPosition();
+        if (sortedTargets.Count == 0) return null;
         
-        ITargetable closest = null;
+        Transform closest = null;
         float closestDistance = float.MaxValue;
         
-        foreach (var target in lockableTargets)
+        foreach (var target in sortedTargets)
         {
-            if (!target.CanBeTargeted) continue;
+            if (target == null || !IsEnemyAlive(target.gameObject)) continue;
             
-            Vector3 targetPos = target.TargetPoint != null ? target.TargetPoint.position : target.Transform.position;
-            float distance = Vector3.Distance(nyxTransform.position, targetPos);
+            float distance = Vector3.Distance(nyxTransform.position, target.position);
             
             if (distance < closestDistance)
             {
@@ -310,129 +273,160 @@ public class NyxLockOnSystem : MonoBehaviour
         return closest;
     }
     
-    private void OnTargetsUpdated(List<ITargetable> targets)
+    /// <summary>
+    /// Get all enemies visible on screen, sorted by their screen X position (left to right).
+    /// Simple camera-based targeting using "Enemy" tag only.
+    /// </summary>
+    private List<Transform> GetTargetsSortedByScreenPosition()
     {
-        lockableTargets.Clear();
+        if (mainCamera == null)
+            return new List<Transform>();
         
-        foreach (var target in targets)
+        var validTargets = new List<Transform>();
+        var targetsWithScreenPos = new List<(Transform target, float screenX)>();
+        
+        // Find all enemies by tag - simple and direct
+        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+        
+        foreach (var enemyObj in allEnemies)
         {
-            if (target.TargetType == TargetType.Enemy || target.TargetType == TargetType.Boss)
+            if (enemyObj == null || !enemyObj.activeInHierarchy) continue;
+            
+            // Check if enemy is alive
+            if (!IsEnemyAlive(enemyObj)) continue;
+            
+            Vector3 worldPos = enemyObj.transform.position;
+            
+            // Optional distance check (can be disabled for pure camera-based targeting)
+            if (!useCameraOnlyTargeting && nyxTransform != null)
             {
-                lockableTargets.Add(target);
+                float distance = Vector3.Distance(nyxTransform.position, worldPos);
+                if (distance > lockOnRange) continue;
+            }
+            
+            Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos);
+            
+            // Only include targets that are in front of the camera and within screen bounds
+            if (screenPos.z > 0 && 
+                screenPos.x >= 0 && screenPos.x <= Screen.width &&
+                screenPos.y >= 0 && screenPos.y <= Screen.height)
+            {
+                targetsWithScreenPos.Add((enemyObj.transform, screenPos.x));
+                if (enableDebugLogs)
+                    DebugLog($"Screen target: {enemyObj.name} at X:{screenPos.x:F0} Y:{screenPos.y:F0}");
             }
         }
         
-        // Check if current locked target is still in the list
-        if (isLockOnActive && currentLockedTarget != null)
+        // Sort by screen X position (left to right)
+        targetsWithScreenPos.Sort((a, b) => a.screenX.CompareTo(b.screenX));
+        
+        // Extract just the targets in sorted order
+        foreach (var item in targetsWithScreenPos)
         {
-            if (!lockableTargets.Contains(currentLockedTarget))
+            validTargets.Add(item.target);
+        }
+        
+        if (enableDebugLogs)
+        {
+            DebugLog($"Total enemies found: {allEnemies.Length}, Screen visible: {validTargets.Count}");
+            if (validTargets.Count > 0)
             {
-                DebugLog("Current target no longer in target list - releasing lock-on");
-                ReleaseLockOn();
-                return;
-            }
-            else
-            {
-                // Update the current target index
-                currentTargetIndex = lockableTargets.IndexOf(currentLockedTarget);
+                string sortedOrder = $"Screen targets: ";
+                for (int i = 0; i < targetsWithScreenPos.Count; i++)
+                {
+                    sortedOrder += $"{targetsWithScreenPos[i].target.name}";
+                    if (i < targetsWithScreenPos.Count - 1) sortedOrder += " → ";
+                }
+                DebugLog(sortedOrder);
             }
         }
         
-        // Auto-lock disabled - user must manually activate with E/R keys
-        // if (autoLockOnClosest && !isLockOnActive && lockableTargets.Count > 0)
-        // {
-        //     // Respect cooldown even for automatic lock-on
-        //     if (!isInCooldown)
-        //     {
-        //         var closestTarget = targetingSystem.GetClosestTargetTo(nyxTransform.position);
-        //         if (closestTarget != null && (closestTarget.TargetType == TargetType.Enemy || closestTarget.TargetType == TargetType.Boss))
-        //         {
-        //             LockOnToTarget(closestTarget);
-        //         }
-        //     }
-        // }
+        return validTargets;
     }
+    
+    /// <summary>
+    /// Check if an enemy GameObject is alive
+    /// </summary>
+    private bool IsEnemyAlive(GameObject enemyObj)
+    {
+        if (enemyObj == null) return false;
+        
+        // Check different enemy types
+        var enemyBasic = enemyObj.GetComponent<Enemy_Basic>();
+        if (enemyBasic != null && enemyBasic.dead) return false;
+        
+        var worker = enemyObj.GetComponent<Worker>();
+        if (worker != null && worker.dead) return false;
+        
+        var boss = enemyObj.GetComponent<Boss>();
+        if (boss != null && boss.currentHealth <= 0) return false;
+        
+        return true;
+    }
+    
+    /// <summary>
+    /// Find the next target to the right (higher screen X) of the current target
+    /// </summary>
+    private Transform GetNextTargetRight()
+    {
+        var sortedTargets = GetTargetsSortedByScreenPosition();
+        if (sortedTargets.Count == 0 || currentLockedTarget == null) return null;
+        
+        int currentIndex = sortedTargets.IndexOf(currentLockedTarget);
+        if (currentIndex == -1 || currentIndex >= sortedTargets.Count - 1)
+        {
+            // No target to the right, return null to trigger unlock
+            return null;
+        }
+        
+        return sortedTargets[currentIndex + 1];
+    }
+    
+    /// <summary>
+    /// Find the next target to the left (lower screen X) of the current target
+    /// </summary>
+    private Transform GetNextTargetLeft()
+    {
+        var sortedTargets = GetTargetsSortedByScreenPosition();
+        if (sortedTargets.Count == 0 || currentLockedTarget == null) return null;
+        
+        int currentIndex = sortedTargets.IndexOf(currentLockedTarget);
+        if (currentIndex <= 0)
+        {
+            // No target to the left, return null to trigger unlock
+            return null;
+        }
+        
+        return sortedTargets[currentIndex - 1];
+    }
+    
+    // OnTargetsUpdated method removed - now using direct camera-based targeting
     
     private void HandleTargetCycling()
     {
-        if (cycleTargets == null)
-        {
-            DebugLog("CycleTargets input action is null!");
-            return;
-        }
+        if (cycleTargets == null) return;
         
         float cycleInput = cycleTargets.ReadValue<float>();
         
-        // Force debug logs to always show - something is wrong
-        Debug.Log($"FORCE DEBUG - Input: current={cycleInput:F3}, last={lastCycleInput:F3}, enableDebugLogs={enableDebugLogs}");
-        
-        // Force debug for all key presses
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            Debug.Log("FORCE DEBUG - Unity Input: E key pressed!");
-        }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            Debug.Log("FORCE DEBUG - Unity Input: R key pressed!");
-        }
-        
-        // Simplified input detection - try both edge detection and direct key checking
-        bool inputDetected = false;
-        
-        // Method 1: Edge detection (original)
+        // Simple edge detection
         if (Mathf.Abs(cycleInput) > 0.5f && Mathf.Abs(lastCycleInput) <= 0.5f)
         {
-            Debug.Log($"FORCE DEBUG - Method 1 triggered: {cycleInput} (was: {lastCycleInput})");
-            inputDetected = true;
-        }
-        
-        // Method 2: Direct Unity Input (backup)
-        if (!inputDetected && (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.R)))
-        {
-            cycleInput = Input.GetKeyDown(KeyCode.E) ? -1f : 1f;
-            Debug.Log($"FORCE DEBUG - Method 2 triggered: {cycleInput}");
-            inputDetected = true;
-        }
-        
-        if (inputDetected)
-        {
-            if (!isLockOnActive && lockableTargets.Count > 0)
+            if (!isLockOnActive)
             {
-                // Check cooldown before reactivating
-                if (isInCooldown)
+                if (!isInCooldown)
                 {
-                    // Only log cooldown warning once per debounce period to prevent spam
-                    if (Time.time - lastCooldownWarningTime > inputDebounceTime)
-                    {
-                        float remainingCooldown = lockOnCooldown - (Time.time - lastLockOnReleaseTime);
-                        DebugLog($"Lock-on reactivation blocked by cooldown ({remainingCooldown:F2}s remaining)");
-                        lastCooldownWarningTime = Time.time;
-                    }
-                    lastCycleInput = cycleInput;
-                    return;
+                    ActivateLockOn();
                 }
-                
-                DebugLog($"Reactivating lock-on. Available targets: {lockableTargets.Count}");
-                ActivateLockOn();
             }
             else if (isLockOnActive)
             {
                 if (cycleInput > 0)
                 {
-                    CycleNextTargetOrCancel();
+                    CycleTargetRight(); // R key = move right
                 }
                 else if (cycleInput < 0)
                 {
-                    CyclePreviousTargetOrCancel();
-                }
-            }
-            else if (!isLockOnActive && lockableTargets.Count == 0)
-            {
-                // Only log this message once per debounce period
-                if (Time.time - lastCooldownWarningTime > inputDebounceTime)
-                {
-                    DebugLog($"Cannot reactivate - no targets available. Target count: {lockableTargets.Count}");
-                    lastCooldownWarningTime = Time.time;
+                    CycleTargetLeft(); // E key = move left
                 }
             }
         }
@@ -442,54 +436,44 @@ public class NyxLockOnSystem : MonoBehaviour
     
     public void ActivateLockOn()
     {
-        DebugLog($"ActivateLockOn called. Available targets: {lockableTargets.Count}");
+        // ActivateLockOn called
         
-        // Force update targeting system to ensure we have latest targets
-        if (targetingSystem != null)
-        {
-            targetingSystem.ForceUpdate();
-        }
+        Transform bestTarget = null;
         
-        if (lockableTargets.Count == 0) 
+        // Try to get the closest target to screen center for initial lock-on
+        var sortedTargets = GetTargetsSortedByScreenPosition();
+        if (sortedTargets.Count > 0 && mainCamera != null)
         {
-            DebugLog("No targets available for lock-on");
-            return;
-        }
-        
-        ITargetable bestTarget = null;
-        if (targetingSystem != null)
-        {
-            targetingSystem.ForceUpdate();
-            bestTarget = targetingSystem.BestTarget;
+            float screenCenterX = Screen.width * 0.5f;
+            float closestToCenter = float.MaxValue;
             
-            if (bestTarget != null && bestTarget.TargetType != TargetType.Enemy && bestTarget.TargetType != TargetType.Boss)
+            foreach (var target in sortedTargets)
             {
-                DebugLog($"Best target {bestTarget.Transform.name} is not Enemy/Boss type, ignoring");
-                bestTarget = null;
-            }
-        }
-        
-        if (bestTarget == null && lockableTargets.Count > 0)
-        {
-            DebugLog("No best target from targeting system, finding closest manually");
-            float closestDistance = float.MaxValue;
-            foreach (var target in lockableTargets)
-            {
-                Vector3 targetPos = target.TargetPoint != null ? target.TargetPoint.position : target.Transform.position;
-                float distance = Vector3.Distance(nyxTransform.position, targetPos);
+                Vector3 worldPos = target.position;
+                Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos);
                 
-                if (distance < closestDistance)
+                float distanceFromCenter = Mathf.Abs(screenPos.x - screenCenterX);
+                if (distanceFromCenter < closestToCenter)
                 {
-                    closestDistance = distance;
+                    closestToCenter = distanceFromCenter;
                     bestTarget = target;
                 }
             }
-            DebugLog($"Found closest target: {(bestTarget != null ? bestTarget.Transform.name : "None")} at distance {closestDistance:F1}");
+            if (enableDebugLogs && bestTarget != null)
+                DebugLog($"Initial target: {bestTarget.name} (closest to screen center)");
+        }
+        
+        // Fallback to traditional closest target if camera method fails
+        if (bestTarget == null)
+        {
+            bestTarget = GetClosestTarget();
+            if (enableDebugLogs && bestTarget != null)
+                DebugLog($"Fallback target: {bestTarget.name} (closest by distance)");
         }
         
         if (bestTarget != null)
         {
-            DebugLog($"Activating lock-on to target: {bestTarget.Transform.name}");
+            DebugLog($"Activating lock-on to target: {bestTarget.name}");
             LockOnToTarget(bestTarget);
         }
         else
@@ -498,9 +482,9 @@ public class NyxLockOnSystem : MonoBehaviour
         }
     }
     
-    public void LockOnToTarget(ITargetable target)
+    public void LockOnToTarget(Transform target)
     {
-        if (target == null || !target.CanBeTargeted) 
+        if (target == null || !IsEnemyAlive(target.gameObject)) 
         {
             DebugLog("Cannot lock onto invalid target");
             return;
@@ -509,38 +493,29 @@ public class NyxLockOnSystem : MonoBehaviour
         // Release previous target cleanly
         if (currentLockedTarget != null)
         {
+            // Disable previous target's highlight
+            SetEnemyHighlight(currentLockedTarget, false);
             // Hide red dot BEFORE deselecting to prevent multiple highlights
-            HideRedDot();
-            DebugLog($"Calling OnTargetDeselected for: {currentLockedTarget.Transform.name}");
-            currentLockedTarget.OnTargetDeselected();
+            // HideRedDot(); // Commented out
+            DebugLog($"Releasing previous target: {currentLockedTarget.name}");
         }
         
         currentLockedTarget = target;
         isLockOnActive = true;
         
-        currentTargetIndex = lockableTargets.IndexOf(target);
-        if (currentTargetIndex == -1)
-        {
-            // Target not in list, add it and use index 0
-            DebugLog("Target not in lockable list, adding it");
-            lockableTargets.Insert(0, target);
-            currentTargetIndex = 0;
-        }
-        
-        DebugLog($"Locked onto target: {target.Transform.name} (index: {currentTargetIndex})");
-        DebugLog($"Calling OnTargetSelected for: {target.Transform.name}");
-        target.OnTargetSelected();
+        DebugLog($"Locked onto target: {target.name}");
         
         // Only show red dot if enabled (disable this to use new mesh highlight system)
-        if (useRedDotIndicator)
-        {
-            ShowRedDot(target);
-        }
+        // Red dot code commented out
+        // if (useRedDotIndicator)
+        // {
+        //     ShowRedDot(target);
+        // }
+        
+        // Enable enemy highlight
+        SetEnemyHighlight(target, true);
         
         OnTargetLocked?.Invoke(target);
-        
-        // Reset cooldown warning timer for smooth experience
-        lastCooldownWarningTime = 0f;
     }
     
     public void ReleaseLockOn()
@@ -550,15 +525,16 @@ public class NyxLockOnSystem : MonoBehaviour
             // Safely check if the target still exists before accessing its properties
             try
             {
-                if (currentLockedTarget.Transform != null)
+                if (currentLockedTarget != null)
                 {
-                    DebugLog($"Releasing lock-on from target: {currentLockedTarget.Transform.name}");
+                    DebugLog($"Releasing lock-on from target: {currentLockedTarget.name}");
                 }
                 else
                 {
                     DebugLog("Releasing lock-on from target (Transform is null)");
                 }
-                currentLockedTarget.OnTargetDeselected();
+                // Disable enemy highlight
+                SetEnemyHighlight(currentLockedTarget, false);
             }
             catch (System.Exception)
             {
@@ -572,149 +548,95 @@ public class NyxLockOnSystem : MonoBehaviour
         }
         
         isLockOnActive = false;
-        currentTargetIndex = -1;
         
+        // Red dot code commented out
         // Force red dot to disappear immediately
-        HideRedDot();
+        // HideRedDot();
         
         // Double-check that red dot is actually hidden
-        if (currentRedDot != null && currentRedDot.activeInHierarchy)
-        {
-            DebugLog("Force hiding red dot - was still active");
-            currentRedDot.SetActive(false);
-        }
+        // if (currentRedDot != null && currentRedDot.activeInHierarchy)
+        // {
+        //     DebugLog("Force hiding red dot - was still active");
+        //     currentRedDot.SetActive(false);
+        // }
         
-        // Record the release time for cooldown and reset warning timer
+        // Record the release time for cooldown
         lastLockOnReleaseTime = Time.time;
-        lastCooldownWarningTime = 0f; // Reset to allow immediate feedback next time
         
-        DebugLog($"Lock-on released. IsActive: {isLockOnActive}, TargetIndex: {currentTargetIndex}, RedDotActive: {(currentRedDot?.activeInHierarchy ?? false)}");
+        DebugLog($"Lock-on released. IsActive: {isLockOnActive}, RedDotActive: {(currentRedDot?.activeInHierarchy ?? false)}");
         OnLockOnReleased?.Invoke();
     }
     
-    public void CycleNextTargetOrCancel()
+    /// <summary>
+    /// Cycle to the target on the right (camera-relative). 
+    /// If no target exists to the right, unlock.
+    /// </summary>
+    public void CycleTargetRight()
     {
-        if (lockableTargets.Count == 0) 
+        if (!isLockOnActive || currentLockedTarget == null)
         {
-            Debug.Log("NyxLockOn: No targets available - releasing lock-on");
             ReleaseLockOn();
             return;
         }
         
-        if (lockableTargets.Count == 1)
+        var nextTarget = GetNextTargetRight();
+        if (nextTarget != null)
         {
-            // Only one target - cancel lock-on on next scroll
-            Debug.Log("NyxLockOn: Only one target - cancelling lock-on");
-            ReleaseLockOn();
-            return;
-        }
-        
-        // Validate current target index
-        if (currentTargetIndex < 0 || currentTargetIndex >= lockableTargets.Count)
-        {
-            Debug.Log("NyxLockOn: Invalid target index - resetting to 0");
-            currentTargetIndex = 0;
-        }
-        
-        // Check if we're at the last target
-        if (currentTargetIndex >= lockableTargets.Count - 1)
-        {
-            // We're at the last target, cancel lock-on instead of cycling
-            Debug.Log("NyxLockOn: At last target - cancelling lock-on");
-            ReleaseLockOn();
-            return;
-        }
-        
-        // Cycle to next target
-        currentTargetIndex++;
-        
-        // Validate the new target
-        if (currentTargetIndex < lockableTargets.Count && lockableTargets[currentTargetIndex] != null)
-        {
-            var newTarget = lockableTargets[currentTargetIndex];
-            Debug.Log($"NyxLockOn: Cycling to next target: {newTarget.Transform.name}");
-            LockOnToTarget(newTarget);
+            LockOnToTarget(nextTarget);
+            DebugLog($"Cycled right to: {nextTarget.name}");
         }
         else
         {
-            Debug.Log("NyxLockOn: Next target is invalid - releasing lock-on");
+            // No target to the right - unlock
+            DebugLog("No target to the right - unlocking");
             ReleaseLockOn();
         }
+    }
+    
+    /// <summary>
+    /// Cycle to the target on the left (camera-relative). 
+    /// If no target exists to the left, unlock.
+    /// </summary>
+    public void CycleTargetLeft()
+    {
+        if (!isLockOnActive || currentLockedTarget == null)
+        {
+            ReleaseLockOn();
+            return;
+        }
+        
+        var nextTarget = GetNextTargetLeft();
+        if (nextTarget != null)
+        {
+            LockOnToTarget(nextTarget);
+            DebugLog($"Cycled left to: {nextTarget.name}");
+        }
+        else
+        {
+            // No target to the left - unlock
+            DebugLog("No target to the left - unlocking");
+            ReleaseLockOn();
+        }
+    }
+    
+    // Legacy methods kept for backward compatibility (now just redirect to camera-relative methods)
+    public void CycleNextTargetOrCancel()
+    {
+        CycleTargetRight();
     }
     
     public void CyclePreviousTargetOrCancel()
     {
-        if (lockableTargets.Count == 0) 
-        {
-            Debug.Log("NyxLockOn: No targets available - releasing lock-on");
-            ReleaseLockOn();
-            return;
-        }
-        
-        if (lockableTargets.Count == 1)
-        {
-            // Only one target - cancel lock-on on scroll
-            Debug.Log("NyxLockOn: Only one target - cancelling lock-on");
-            ReleaseLockOn();
-            return;
-        }
-        
-        // Validate current target index
-        if (currentTargetIndex < 0 || currentTargetIndex >= lockableTargets.Count)
-        {
-            Debug.Log("NyxLockOn: Invalid target index - resetting to last");
-            currentTargetIndex = lockableTargets.Count - 1;
-        }
-        
-        // Check if we're at the first target
-        if (currentTargetIndex <= 0)
-        {
-            // We're at the first target, cancel lock-on instead of cycling
-            DebugLog("At first target - cancelling lock-on");
-            ReleaseLockOn();
-            return;
-        }
-        
-        // Cycle to previous target
-        currentTargetIndex--;
-        
-        // Validate the new target
-        if (currentTargetIndex >= 0 && currentTargetIndex < lockableTargets.Count && lockableTargets[currentTargetIndex] != null)
-        {
-            var newTarget = lockableTargets[currentTargetIndex];
-            Debug.Log($"NyxLockOn: Cycling to previous target: {newTarget.Transform.name}");
-            LockOnToTarget(newTarget);
-        }
-        else
-        {
-            Debug.Log("NyxLockOn: Previous target is invalid - releasing lock-on");
-            ReleaseLockOn();
-        }
+        CycleTargetLeft();
     }
     
-    public void CycleNextTarget()
-    {
-        if (lockableTargets.Count <= 1) return;
-        
-        currentTargetIndex = (currentTargetIndex + 1) % lockableTargets.Count;
-        var newTarget = lockableTargets[currentTargetIndex];
-        
-        LockOnToTarget(newTarget);
-    }
+    // Old cycling methods removed - now using camera-relative CycleTargetRight() and CycleTargetLeft()
     
-    public void CyclePreviousTarget()
+    // Red dot methods commented out
+    /*
+    private void ShowRedDot(Transform target)
     {
-        if (lockableTargets.Count <= 1) return;
-        
-        currentTargetIndex = (currentTargetIndex - 1 + lockableTargets.Count) % lockableTargets.Count;
-        var newTarget = lockableTargets[currentTargetIndex];
-        
-        LockOnToTarget(newTarget);
-    }
-    
-    private void ShowRedDot(ITargetable target)
-    {
-        if (target?.Transform == null) return;
+        if (target == null) return;
         
         // Always hide any existing red dot first to prevent multiple highlights
         HideRedDot();
@@ -734,8 +656,8 @@ public class NyxLockOnSystem : MonoBehaviour
         if (currentRedDot != null)
         {
             currentRedDot.SetActive(true);
-            UpdateRedDotPosition(target.Transform);
-            DebugLog($"Red dot shown for target: {target.Transform.name}");
+            UpdateRedDotPosition(target);
+            DebugLog($"Red dot shown for target: {target.name}");
         }
     }
     
@@ -756,14 +678,14 @@ public class NyxLockOnSystem : MonoBehaviour
     {
         if (currentRedDot == null) return;
         
-        bool shouldShow = isLockOnActive && currentLockedTarget != null && currentLockedTarget.Transform != null;
+        bool shouldShow = isLockOnActive && currentLockedTarget != null;
         bool isCurrentlyVisible = currentRedDot.activeInHierarchy;
         
         if (shouldShow && !isCurrentlyVisible)
         {
             // Should show but currently hidden - show it
             currentRedDot.SetActive(true);
-            UpdateRedDotPosition(currentLockedTarget.Transform);
+            UpdateRedDotPosition(currentLockedTarget);
             DebugLog("Red dot activated");
         }
         else if (!shouldShow && isCurrentlyVisible)
@@ -777,9 +699,9 @@ public class NyxLockOnSystem : MonoBehaviour
             // Should show and is showing - just update position
             try
             {
-                if (currentLockedTarget?.Transform != null)
+                if (currentLockedTarget != null)
                 {
-                    UpdateRedDotPosition(currentLockedTarget.Transform);
+                    UpdateRedDotPosition(currentLockedTarget);
                 }
                 else
                 {
@@ -850,7 +772,8 @@ public class NyxLockOnSystem : MonoBehaviour
         
         return dot;
     }
-    
+    */
+    // End of commented red dot methods
 
     
     void OnDrawGizmos()
@@ -864,12 +787,48 @@ public class NyxLockOnSystem : MonoBehaviour
         // Draw line to locked target
         if (isLockOnActive && currentLockedTarget != null)
         {
-            Vector3 targetPos = currentLockedTarget.TargetPoint != null ? 
-                currentLockedTarget.TargetPoint.position : 
-                currentLockedTarget.Transform.position;
+            Vector3 targetPos = currentLockedTarget.position;
             
             Gizmos.color = Color.red;
             Gizmos.DrawLine(nyxTransform.position, targetPos);
         }
+    }
+    
+    /// <summary>
+    /// Sets enemy highlight on/off by finding and enabling/disabling the Enemy Highlight renderer
+    /// </summary>
+    private void SetEnemyHighlight(Transform enemyTransform, bool enabled)
+    {
+        if (enemyTransform == null) return;
+        
+        // Try to find TargetableEnemy component first (preferred method)
+        TargetableEnemy targetableEnemy = enemyTransform.GetComponent<TargetableEnemy>();
+        if (targetableEnemy != null)
+        {
+            if (enabled)
+            {
+                targetableEnemy.OnTargetSelected();
+            }
+            else
+            {
+                targetableEnemy.OnTargetDeselected();
+            }
+            return;
+        }
+        
+        // Fallback: directly look for Enemy Highlight renderer in children
+        SkinnedMeshRenderer[] renderers = enemyTransform.GetComponentsInChildren<SkinnedMeshRenderer>();
+        foreach (SkinnedMeshRenderer renderer in renderers)
+        {
+            if (renderer.gameObject.name.Contains("Enemy Highlight") || 
+                renderer.gameObject.name.Contains("Highlight"))
+            {
+                renderer.enabled = enabled;
+                DebugLog($"Set enemy highlight {(enabled ? "ON" : "OFF")} for {enemyTransform.name}");
+                return;
+            }
+        }
+        
+        DebugLog($"No highlight renderer found for enemy: {enemyTransform.name}");
     }
 } 
