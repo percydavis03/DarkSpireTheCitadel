@@ -39,6 +39,14 @@ public class WeaponScript : MonoBehaviour
     [Tooltip("Enable debug logs for weapon collisions - disable for performance")]
     public bool enableDebugLogs = true; // ENABLED for parry debugging
     
+    [Header("Knockback System Integration")]
+    [Tooltip("This script now uses KnockbackManager for unified knockback handling.\n" +
+             "• Regular attacks use KnockbackManager.ApplyWeaponKnockback()\n" +
+             "• Parries use KnockbackManager.ApplyParryKnockback()\n" +
+             "• Configure weapon/parry knockback data in KnockbackManager component\n" +
+             "• Falls back to legacy system if enemy has no KnockbackReceiver")]
+    [SerializeField] private bool _knockbackSystemInfo = true; // Info field only
+    
     [Header("Parry Debug Sound System")]
     [Tooltip("Enable debug sounds when parry is successfully executed")]
     public bool enableParryDebugSounds = false;
@@ -138,11 +146,11 @@ public class WeaponScript : MonoBehaviour
                     // Use new knockback system
                     if (KnockbackManager.Instance != null)
                     {
-                        // Convert Vector3 force to directional knockback
-                        Vector3 direction = (other.transform.position - transform.position).normalized;
-                        // Use a default weapon knockback data - you may want to create specific data for weapons
-                        if (enableDebugLogs) Debug.Log($"{comboType} - Using KnockbackManager for knockback");
-                        // Note: You'll need to assign a KnockbackData asset for weapons
+                        bool knockbackApplied = KnockbackManager.Instance.ApplyWeaponKnockback(
+                            knockbackReceiver, 
+                            transform.position
+                        );
+                        if (enableDebugLogs) Debug.Log($"{comboType} - Using KnockbackManager for knockback: {(knockbackApplied ? "Success" : "Failed")}");
                     }
                     else
                     {
@@ -167,9 +175,11 @@ public class WeaponScript : MonoBehaviour
                     // Use new knockback system
                     if (KnockbackManager.Instance != null)
                     {
-                        Vector3 direction = (other.transform.position - transform.position).normalized;
-                        if (enableDebugLogs) Debug.Log($"{comboType} on Worker - Using KnockbackManager for knockback");
-                        // Note: You'll need to assign a KnockbackData asset for weapons
+                        bool knockbackApplied = KnockbackManager.Instance.ApplyWeaponKnockback(
+                            knockbackReceiver, 
+                            transform.position
+                        );
+                        if (enableDebugLogs) Debug.Log($"{comboType} on Worker - Using KnockbackManager for knockback: {(knockbackApplied ? "Success" : "Failed")}");
                     }
                     else
                     {
@@ -313,9 +323,11 @@ public class WeaponScript : MonoBehaviour
             // Use new knockback system for parries
             if (KnockbackManager.Instance != null)
             {
-                Vector3 direction = (enemy.transform.position - transform.position).normalized;
-                if (enableDebugLogs) Debug.Log($"Parry - Using KnockbackManager for knockback");
-                // Note: You may want to create specific KnockbackData for parries
+                bool knockbackApplied = KnockbackManager.Instance.ApplyParryKnockback(
+                    knockbackReceiver, 
+                    transform.position
+                );
+                if (enableDebugLogs) Debug.Log($"Parry - Using KnockbackManager for knockback: {(knockbackApplied ? "Success" : "Failed")}");
             }
         }
         else
@@ -375,9 +387,11 @@ public class WeaponScript : MonoBehaviour
             // Use new knockback system for worker parries
             if (KnockbackManager.Instance != null)
             {
-                Vector3 direction = (worker.transform.position - transform.position).normalized;
-                if (enableDebugLogs) Debug.Log($"Worker Parry - Using KnockbackManager for knockback");
-                // Note: You may want to create specific KnockbackData for parries
+                bool knockbackApplied = KnockbackManager.Instance.ApplyParryKnockback(
+                    knockbackReceiver, 
+                    transform.position
+                );
+                if (enableDebugLogs) Debug.Log($"Worker Parry - Using KnockbackManager for knockback: {(knockbackApplied ? "Success" : "Failed")}");
             }
         }
         else

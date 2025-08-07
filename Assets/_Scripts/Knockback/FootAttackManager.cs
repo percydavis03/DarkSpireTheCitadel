@@ -84,7 +84,7 @@ public class FootAttackManager : MonoBehaviour
         }
         
         // Use KnockbackManager's dedicated foot attack method
-        int enemiesHit = KnockbackManager.Instance.ApplyFootAttackKnockback(attackPosition, enemyLayerMask);
+        int enemiesHit = KnockbackManager.Instance.ApplyFootAttackKnockback(attackPosition);
         
         // Apply knockdown states manually since KnockbackManager only handles physics
         ApplyKnockdownToEnemiesInRange(attackPosition, range);

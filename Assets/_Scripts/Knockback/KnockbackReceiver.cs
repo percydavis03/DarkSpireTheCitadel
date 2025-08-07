@@ -228,13 +228,13 @@ public class KnockbackReceiver : MonoBehaviour, IKnockbackReceiver
             rb.isKinematic = true;
         }
         
-        // Set animation parameters
+        // Set animation parameters (safely check if they exist)
         if (animator != null)
         {
-            if (!string.IsNullOrEmpty(knockbackBoolParameter))
+            if (!string.IsNullOrEmpty(knockbackBoolParameter) && HasAnimatorParameter(knockbackBoolParameter, AnimatorControllerParameterType.Bool))
                 animator.SetBool(knockbackBoolParameter, true);
             
-            if (!string.IsNullOrEmpty(knockbackTriggerParameter))
+            if (!string.IsNullOrEmpty(knockbackTriggerParameter) && HasAnimatorParameter(knockbackTriggerParameter, AnimatorControllerParameterType.Trigger))
                 animator.SetTrigger(knockbackTriggerParameter);
         }
     }
@@ -280,11 +280,23 @@ public class KnockbackReceiver : MonoBehaviour, IKnockbackReceiver
             rb.isKinematic = false;
         }
         
-        // Reset animation
-        if (animator != null && !string.IsNullOrEmpty(knockbackBoolParameter))
+        // Reset animation (safely check if parameter exists)
+        if (animator != null && !string.IsNullOrEmpty(knockbackBoolParameter) && HasAnimatorParameter(knockbackBoolParameter, AnimatorControllerParameterType.Bool))
         {
             animator.SetBool(knockbackBoolParameter, false);
         }
+    }
+    
+    private bool HasAnimatorParameter(string parameterName, AnimatorControllerParameterType parameterType)
+    {
+        if (animator == null) return false;
+        
+        foreach (AnimatorControllerParameter param in animator.parameters)
+        {
+            if (param.name == parameterName && param.type == parameterType)
+                return true;
+        }
+        return false;
     }
     
     private void SpawnImpactEffect(KnockbackData data)

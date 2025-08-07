@@ -28,10 +28,10 @@ public class EnemyWeaponHitbox : MonoBehaviour
             if (enableDebugLogs) 
                 Debug.Log($"🗡️ Player hit by {gameObject.name}!");
             
-            // Apply knockback using modern system
+            // Apply knockback using modern system (knockback only)
             ApplyKnockbackToPlayer(other);
             
-            // Apply damage using existing system
+            // Apply damage separately (damage only)
             if (dealsDamage)
             {
                 ApplyDamageToPlayer();
@@ -53,7 +53,7 @@ public class EnemyWeaponHitbox : MonoBehaviour
             if (enableDebugLogs) 
                 Debug.Log($"🗡️ Applying knockback using KnockbackManager!");
             
-            // Apply knockback using modern system
+            // Apply knockback using modern system (knockback only, no damage)
             bool success = KnockbackManager.Instance.ApplyKnockback(
                 knockbackReceiver, 
                 transform.position, 
@@ -71,15 +71,10 @@ public class EnemyWeaponHitbox : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"🗡️ Player doesn't have KnockbackReceiver component! Using fallback system.");
+            if (enableDebugLogs) 
+                Debug.LogWarning($"🗡️ Player doesn't have KnockbackReceiver component! No knockback applied.");
             
-            // Fallback to legacy system
-            if (Main_Player.instance != null)
-            {
-                // Calculate direction from weapon to player
-                Vector3 knockbackDirection = (playerCollider.transform.position - transform.position).normalized;
-                Main_Player.instance.TakeDamageFromEnemy(transform, knockbackDirection);
-            }
+            // No fallback - damage will be handled separately by ApplyDamageToPlayer()
         }
     }
     

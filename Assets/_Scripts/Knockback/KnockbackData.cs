@@ -26,6 +26,20 @@ public class KnockbackData : ScriptableObject
     [Tooltip("Effect to spawn on impact")]
     public GameObject impactEffect;
     
+    [Header("Area of Effect")]
+    [Tooltip("Radius for area knockback attacks (0 = single target only)")]
+    public float areaRadius = 0f;
+    
+    [Tooltip("Force multiplier for this knockback type")]
+    public float forceMultiplier = 1f;
+    
+    [Header("Targeting")]
+    [Tooltip("Required tag for targets (empty = any tag)")]
+    public string requiredTag = "";
+    
+    [Tooltip("Layer mask for knockback detection")]
+    public LayerMask targetLayers = -1;
+    
     [Header("Advanced")]
     [Tooltip("How much object mass affects knockback distance")]
     [Range(0f, 1f)]

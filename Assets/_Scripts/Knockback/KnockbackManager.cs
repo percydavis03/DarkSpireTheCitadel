@@ -23,14 +23,27 @@ public class KnockbackManager : MonoBehaviour
         }
     }
     
-    [Header("Default Settings")]
+    [Header("Knockback Data References")]
     [SerializeField] private KnockbackData defaultKnockbackData;
     
+    [Header("Attack Type Knockback Data")]
+    [SerializeField] [Tooltip("Knockback data for foot/kick attacks")]
+    private KnockbackData footAttackKnockbackData;
+    
+    [SerializeField] [Tooltip("Knockback data for weapon attacks")]
+    private KnockbackData weaponAttackKnockbackData;
+    
+    [SerializeField] [Tooltip("Knockback data for parry counterattacks")]
+    private KnockbackData parryKnockbackData;
+    
+    [SerializeField] [Tooltip("Knockback data for enemy weapon attacks")]
+    private KnockbackData enemyWeaponKnockbackData;
+    
     [Header("Foot Attack Settings")]
-    [SerializeField] [Tooltip("Multiplier for foot attack knockback force (2x = twice as strong as normal)")]
+    [SerializeField] [Tooltip("Force multiplier for foot attacks")]
     private float footAttackMultiplier = 2f;
     
-    [SerializeField] [Tooltip("Range for foot attack area-of-effect")]
+    [SerializeField] [Tooltip("Range for foot attacks")]
     private float footAttackRange = 3f;
     
     [Header("Debug")]
@@ -189,12 +202,20 @@ public class KnockbackManager : MonoBehaviour
     /// Apply foot attack knockback using the configured foot attack settings
     /// </summary>
     /// <param name="center">Center of the foot attack</param>
-    /// <param name="layerMask">Layer mask to filter targets</param>
-    /// <param name="requireTag">Optional tag requirement for targets (default: "Enemy")</param>
+    /// <param name="customData">Optional override knockback data (uses footAttackKnockbackData if null)</param>
     /// <returns>Number of targets successfully knocked back</returns>
-    public int ApplyFootAttackKnockback(Vector3 center, LayerMask layerMask, string requireTag = "Enemy")
+    public int ApplyFootAttackKnockback(Vector3 center, KnockbackData customData = null)
     {
-        return ApplyAreaKnockback(center, footAttackRange, layerMask, defaultKnockbackData, footAttackMultiplier, requireTag);
+        KnockbackData dataToUse = customData ?? footAttackKnockbackData ?? defaultKnockbackData;
+        
+        if (dataToUse == null)
+        {
+            Debug.LogError("No knockback data available for foot attack!");
+            return 0;
+        }
+        
+        string targetTag = string.IsNullOrEmpty(dataToUse.requiredTag) ? "Enemy" : dataToUse.requiredTag;
+        return ApplyAreaKnockback(center, dataToUse.areaRadius, dataToUse.targetLayers, dataToUse, dataToUse.forceMultiplier, targetTag);
     }
     
     /// <summary>
@@ -259,6 +280,33 @@ public class KnockbackManager : MonoBehaviour
         activeKnockbacks.Clear();
         
         if (enableDebugLogs) Debug.Log("Stopped all active knockbacks");
+    }
+    
+    /// <summary>
+    /// Apply weapon attack knockback
+    /// </summary>
+    public bool ApplyWeaponKnockback(IKnockbackReceiver target, Vector3 sourcePosition, KnockbackData customData = null)
+    {
+        KnockbackData dataToUse = customData ?? weaponAttackKnockbackData ?? defaultKnockbackData;
+        return ApplyKnockback(target, sourcePosition, dataToUse, dataToUse?.forceMultiplier ?? 1f);
+    }
+    
+    /// <summary>
+    /// Apply parry counterattack knockback
+    /// </summary>
+    public bool ApplyParryKnockback(IKnockbackReceiver target, Vector3 sourcePosition, KnockbackData customData = null)
+    {
+        KnockbackData dataToUse = customData ?? parryKnockbackData ?? defaultKnockbackData;
+        return ApplyKnockback(target, sourcePosition, dataToUse, dataToUse?.forceMultiplier ?? 1f);
+    }
+    
+    /// <summary>
+    /// Apply enemy weapon attack knockback
+    /// </summary>
+    public bool ApplyEnemyWeaponKnockback(IKnockbackReceiver target, Vector3 sourcePosition, KnockbackData customData = null)
+    {
+        KnockbackData dataToUse = customData ?? enemyWeaponKnockbackData ?? defaultKnockbackData;
+        return ApplyKnockback(target, sourcePosition, dataToUse, dataToUse?.forceMultiplier ?? 1f);
     }
     
     /// <summary>

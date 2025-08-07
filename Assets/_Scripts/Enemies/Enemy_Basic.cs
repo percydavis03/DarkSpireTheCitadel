@@ -457,18 +457,30 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     }
     public void WeaponOn()
     {
-        spear_hitbox.SetActive(true);
-        print("weapon on");
+        if (spear_hitbox != null)
+        {
+            spear_hitbox.SetActive(true);
+            print("weapon on");
+        }
     }
 
     public void WeaponOff()
     {
-        spear_hitbox.SetActive(false);
-        print("weapon off");
+        if (spear_hitbox != null && spear_hitbox.activeInHierarchy)
+        {
+            spear_hitbox.SetActive(false);
+            print("weapon off");
+        }
     }
     public void StopAttacking()
     {
-        spear_hitbox.SetActive(false);
+        // Safe to call multiple times - only deactivate if currently active
+        if (spear_hitbox != null && spear_hitbox.activeInHierarchy)
+        {
+            spear_hitbox.SetActive(false);
+            print("weapon off (stop attacking)");
+        }
+        
         anim.SetBool("IsAttacking", false);
         anim.SetBool("IsAttacking2", false);
         
