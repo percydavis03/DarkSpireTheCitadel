@@ -2370,6 +2370,156 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 185615151}
   m_Mesh: {fileID: -6687291838341632206, guid: b48dbe8d141e50f44bf6f94038660691, type: 3}
+--- !u!1 &185754402
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 185754404}
+  - component: {fileID: 185754403}
+  m_Layer: 0
+  m_Name: CombatAudiomanager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &185754403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 185754402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ff7d6420af122147a3faf892005f47f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackEvent:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  hitEvent:
+    Guid:
+      Data1: 118721347
+      Data2: 1239511754
+      Data3: 116412339
+      Data4: 2080810703
+    Path: event:/SFX/Combat/Hit
+  hurtEvent:
+    Guid:
+      Data1: 1359314272
+      Data2: 1099595491
+      Data3: -1420446810
+      Data4: 1834712172
+    Path: event:/SFX/Combat/Hurt
+  knockedEvent:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  fallEvent:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  kickedEvent:
+    Guid:
+      Data1: 1628273200
+      Data2: 1258892648
+      Data3: 1964806793
+      Data4: 2047785402
+    Path: event:/SFX/Combat/Woosh
+  wooshEvent:
+    Guid:
+      Data1: 1628273200
+      Data2: 1258892648
+      Data3: 1964806793
+      Data4: 2047785402
+    Path: event:/SFX/Combat/Woosh
+  deadEvent:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  stunnedEvent:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  slash1Event:
+    Guid:
+      Data1: 1628273200
+      Data2: 1258892648
+      Data3: 1964806793
+      Data4: 2047785402
+    Path: event:/SFX/Combat/Woosh
+  slash2Event:
+    Guid:
+      Data1: 1628273200
+      Data2: 1258892648
+      Data3: 1964806793
+      Data4: 2047785402
+    Path: event:/SFX/Combat/Woosh
+  gauntletAttackEvent:
+    Guid:
+      Data1: 1628273200
+      Data2: 1258892648
+      Data3: 1964806793
+      Data4: 2047785402
+    Path: event:/SFX/Combat/Woosh
+  spinAttackEvent:
+    Guid:
+      Data1: 1628273200
+      Data2: 1258892648
+      Data3: 1964806793
+      Data4: 2047785402
+    Path: event:/SFX/Combat/Woosh
+  parryEvent:
+    Guid:
+      Data1: 1099092476
+      Data2: 1080829841
+      Data3: 381414532
+      Data4: -1553944996
+    Path: event:/SFX/Combat/Parry
+  rollEvent:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  enableDebugLogs: 0
+--- !u!4 &185754404
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 185754402}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.726339, y: 1.5436863, z: 72.642654}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &187528268
 GameObject:
   m_ObjectHideFlags: 0
@@ -9068,7 +9218,7 @@ Transform:
   m_GameObject: {fileID: 651313438}
   serializedVersion: 2
   m_LocalRotation: {x: 0.20906459, y: 0.25268406, z: -0.0560187, w: 0.9430295}
-  m_LocalPosition: {x: -5.5446086, y: 4.9916315, z: -7.914642}
+  m_LocalPosition: {x: -5.022985, y: 4.9916315, z: -8.215801}
   m_LocalScale: {x: 1.3333334, y: 1.3333333, z: 1.3333333}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13542,7 +13692,7 @@ PrefabInstance:
     - target: {fileID: 222445111304655754, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -5.5446086
+      value: -5.022985
       objectReference: {fileID: 0}
     - target: {fileID: 222445111304655754, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -13552,7 +13702,7 @@ PrefabInstance:
     - target: {fileID: 222445111304655754, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -7.914642
+      value: -8.215801
       objectReference: {fileID: 0}
     - target: {fileID: 222445111304655754, guid: f041864c8b27c7248a1e1e012f3a3cc9,
         type: 3}
@@ -27910,6 +28060,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultKnockbackData: {fileID: 11400000, guid: 464d1ec0d5872e24ab0f2e291381e474,
     type: 2}
+  footAttackKnockbackData: {fileID: 0}
+  weaponAttackKnockbackData: {fileID: 0}
+  parryKnockbackData: {fileID: 0}
+  enemyWeaponKnockbackData: {fileID: 0}
   footAttackMultiplier: 2
   footAttackRange: 3
   enableDebugLogs: 0
@@ -30361,7 +30515,7 @@ Transform:
   m_GameObject: {fileID: 2016756476}
   serializedVersion: 2
   m_LocalRotation: {x: 0.20906459, y: 0.25268406, z: -0.0560187, w: 0.9430295}
-  m_LocalPosition: {x: -5.5446086, y: 4.9916315, z: -7.914642}
+  m_LocalPosition: {x: -5.022985, y: 4.9916315, z: -8.215801}
   m_LocalScale: {x: 1.3333334, y: 1.3333333, z: 1.3333333}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -31954,10 +32108,11 @@ SceneRoots:
   - {fileID: 2101247907}
   - {fileID: 756303861}
   - {fileID: 26145374}
+  - {fileID: 1867796671}
+  - {fileID: 185754404}
   - {fileID: 1812384029}
   - {fileID: 1249149030}
   - {fileID: 353858193}
   - {fileID: 967299906}
   - {fileID: 213596640}
-  - {fileID: 1867796671}
   - {fileID: 451392020}

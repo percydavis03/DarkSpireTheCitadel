@@ -2203,6 +2203,7 @@ GameObject:
   - component: {fileID: 1481794033222216808}
   - component: {fileID: 2486048015007352420}
   - component: {fileID: 6027539891366021649}
+  - component: {fileID: 3605256714853612608}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -2853,6 +2854,22 @@ MonoBehaviour:
   OnKnockbackProgress:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3605256714853612608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154107589237833224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9721e6eef0971e742a397a40e64dc59d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterType: 0
+  enableDebugLogs: 0
+  use3DAudio: 1
+  soundCooldown: 0.1
 --- !u!1 &1233231036507952271
 GameObject:
   m_ObjectHideFlags: 0
@@ -8483,6 +8500,7 @@ MonoBehaviour:
   comboParryWindow: 0.1
   comboParryBonus: 1.1
   enableDebugLogs: 0
+  _knockbackSystemInfo: 1
   enableParryDebugSounds: 0
   normalParryDebugSound: {fileID: 0}
   perfectParryDebugSound: {fileID: 0}
@@ -15182,7 +15200,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3965471598424005867}
   m_HandleRect: {fileID: 309865338705156792}
   m_Direction: 2
-  m_Value: 0.99999976
+  m_Value: 1
   m_Size: 0.6171716
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -31851,8 +31869,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6273563783167962138}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -93.404854, y: -8.333384, z: -42.634468}
+  m_LocalRotation: {x: 0.20906459, y: 0.25268406, z: -0.0560187, w: 0.9430295}
+  m_LocalPosition: {x: -96.83616, y: -6.4569464, z: -41.453583}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -47206,6 +47224,7 @@ MonoBehaviour:
   comboParryWindow: 0.1
   comboParryBonus: 1.1
   enableDebugLogs: 0
+  _knockbackSystemInfo: 1
   enableParryDebugSounds: 0
   normalParryDebugSound: {fileID: 0}
   perfectParryDebugSound: {fileID: 0}

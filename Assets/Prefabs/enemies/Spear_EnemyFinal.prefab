@@ -984,6 +984,7 @@ GameObject:
   - component: {fileID: 1540319993185730511}
   - component: {fileID: 1932904333835786560}
   - component: {fileID: 3172927457328170398}
+  - component: {fileID: 455721033995496511}
   m_Layer: 0
   m_Name: Spear_EnemyFinal
   m_TagString: Enemy
@@ -1169,6 +1170,9 @@ MonoBehaviour:
   stunDuration: 2
   defaultStunDuration: 2
   canBeParried: 1
+  characterType: Worker
+  primaryWeapon: Sword
+  surfaceType: Metal
   isInParryWindow: 0
   isInPerfectParryWindow: 0
   canBeParriedNow: 0
@@ -1293,6 +1297,22 @@ MonoBehaviour:
   OnKnockbackProgress:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &455721033995496511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1814872507465041094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9721e6eef0971e742a397a40e64dc59d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterType: 2
+  enableDebugLogs: 0
+  use3DAudio: 1
+  soundCooldown: 0.1
 --- !u!1 &1887902235097528551
 GameObject:
   m_ObjectHideFlags: 0
@@ -3468,6 +3488,8 @@ MonoBehaviour:
   knockbackMultiplier: 1
   weaponDamage: 1
   dealsDamage: 1
+  characterType: Worker
+  weaponType: Sword
   enableDebugLogs: 1
 --- !u!1 &8703262014188857393
 GameObject:
@@ -3875,6 +3897,8 @@ MonoBehaviour:
   knockbackMultiplier: 1
   weaponDamage: 1
   dealsDamage: 1
+  characterType: Worker
+  weaponType: Sword
   enableDebugLogs: 1
 --- !u!1001 &5868637599522305297
 PrefabInstance:

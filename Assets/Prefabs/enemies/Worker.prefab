@@ -1040,6 +1040,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 240598904198042100}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 28cf48f10c921dc489abc7ae80125414,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1601986218212772978}
   m_SourcePrefab: {fileID: 100100000, guid: 28cf48f10c921dc489abc7ae80125414, type: 3}
 --- !u!4 &96492180210885670 stripped
 Transform:
@@ -1327,6 +1331,9 @@ MonoBehaviour:
   stunDuration: 2
   defaultStunDuration: 2
   canBeParried: 1
+  characterType: Worker
+  primaryWeapon: Sword
+  surfaceType: Metal
   isInParryWindow: 0
   isInPerfectParryWindow: 0
   canBeParriedNow: 0
@@ -1401,6 +1408,22 @@ MonoBehaviour:
   OnKnockbackProgress:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1601986218212772978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728773405014425244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9721e6eef0971e742a397a40e64dc59d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterType: 1
+  enableDebugLogs: 0
+  use3DAudio: 1
+  soundCooldown: 0.1
 --- !u!4 &1057579786203653553 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 608321761475470972, guid: 28cf48f10c921dc489abc7ae80125414,
@@ -2216,6 +2239,8 @@ MonoBehaviour:
   knockbackMultiplier: 1
   weaponDamage: 1
   dealsDamage: 1
+  characterType: Worker
+  weaponType: Sword
   enableDebugLogs: 1
 --- !u!4 &8390783776869733975 stripped
 Transform:

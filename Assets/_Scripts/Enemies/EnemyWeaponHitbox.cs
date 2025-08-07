@@ -14,6 +14,10 @@ public class EnemyWeaponHitbox : MonoBehaviour
     [SerializeField] private int weaponDamage = 1;
     [SerializeField] private bool dealsDamage = true;
     
+    [Header("Audio Configuration")]
+    [SerializeField] private string characterType = "Worker";
+    [SerializeField] private string weaponType = "Sword";
+    
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = true;
     
@@ -27,6 +31,18 @@ public class EnemyWeaponHitbox : MonoBehaviour
         {
             if (enableDebugLogs) 
                 Debug.Log($"🗡️ Player hit by {gameObject.name}!");
+            
+            // Play successful hit sound
+            if (CombatSoundManager.Instance != null)
+            {
+                CombatSoundManager.Instance.PlayHitSound(
+                    transform.position,
+                    "Nyx", // Target (player)
+                    "Flesh", // Surface type
+                    weaponType,
+                    false // Not critical
+                );
+            }
             
             // Apply knockback using modern system (knockback only)
             ApplyKnockbackToPlayer(other);
@@ -91,6 +107,8 @@ public class EnemyWeaponHitbox : MonoBehaviour
             Main_Player.instance.TakeDamageFromEnemy(transform, knockbackDirection);
         }
     }
+    
+
     
     private void OnValidate()
     {

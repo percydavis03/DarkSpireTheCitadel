@@ -47,6 +47,11 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     public float defaultStunDuration = 2.0f;
     private Coroutine stunCoroutine;
     public bool canBeParried = true; // Can this enemy be parried?
+    
+    [Header("Audio Configuration")]
+    [SerializeField] private string characterType = "Worker";
+    [SerializeField] private string primaryWeapon = "Sword";
+    [SerializeField] private string surfaceType = "Metal";
 
     [Header("Animation-Driven Parry Windows")]
     public bool isInParryWindow = false;        // Set by animation events
@@ -185,6 +190,17 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         anim.SetBool("IsRunning", false);
         anim.SetBool("IsAttacking", false);
         KnockbackEntity(player);
+        
+        // Play hurt sound
+        if (CombatSoundManager.Instance != null && enemyHP > 0)
+        {
+            CombatSoundManager.Instance.PlayHurtSound(
+                transform.position,
+                characterType,
+                "Light", // Damage type
+                "Gauntlet" // Weapon causing damage (could be enhanced)
+            );
+        }
        
         // FIXED: Only apply knockback if not recently knocked back (prevents double knockback)
         if (Time.time - lastKnockbackTime > knockbackCooldown)
@@ -270,12 +286,26 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
     {
         return isInPerfectParryWindow && isInAttackActive;
     }
+    
+
 
     public void GetParried(float customStunDuration = -1f)
     {
         if (!canBeParried || isStunned || dead) return;
 
         print("Enemy parried! Stunned.");
+        
+        // Play parry sound effect
+        if (CombatSoundManager.Instance != null)
+        {
+            CombatSoundManager.Instance.PlayParrySound(
+                transform.position,
+                characterType,
+                primaryWeapon,
+                "Unknown", // Attacker weapon (could be enhanced later)
+                IsInPerfectParryWindow() // Perfect parry if in perfect window
+            );
+        }
         
         // Stop current actions
         StopAllAttacks();
@@ -353,6 +383,19 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         
         print("knockback");
         lastKnockbackTime = Time.time;
+        
+        // Play fall down sound for knockback
+        if (CombatSoundManager.Instance != null)
+        {
+            CombatSoundManager.Instance.PlayFallDownSound(
+                transform.position,
+                characterType,
+                "Knockdown",
+                surfaceType, // Surface type from inspector
+                force.magnitude > 200f // Heavy fall if strong force
+            );
+        }
+        
         StopMoving();
         // Simple knockback without complex physics
         StartCoroutine(SimpleKnockback(force));
@@ -424,6 +467,8 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         }
     }
     
+
+    
     /// <summary>
     /// Auto-add EnemyRootMotionHandler to animation source if missing
     /// </summary>
@@ -461,6 +506,18 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         {
             spear_hitbox.SetActive(true);
             print("weapon on");
+            
+            // Play attack sound when weapon activates
+            if (CombatSoundManager.Instance != null)
+            {
+                CombatSoundManager.Instance.PlayAttackSound(
+                    transform.position,
+                    characterType,
+                    primaryWeapon,
+                    "Light", // Attack type
+                    false // Not critical
+                );
+            }
         }
     }
 
@@ -522,6 +579,18 @@ public class Enemy_Basic : MonoBehaviour, IKnockbackable
         dead = true;
         setSpeed = 0;
         spear_hitbox.SetActive (false);
+        
+        // Play death sound
+        if (CombatSoundManager.Instance != null)
+        {
+            CombatSoundManager.Instance.PlayDeathSound(
+                transform.position,
+                characterType,
+                "Normal", // Death type
+                "Gauntlet" // Killer weapon
+            );
+        }
+        
         Bleed();
         this.GetComponent<BoxCollider>().enabled = false; 
         this.GetComponent<CapsuleCollider>().enabled = false;
