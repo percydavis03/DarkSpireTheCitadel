@@ -14,6 +14,7 @@ public class NyxLockOnSystem : MonoBehaviour
     [Header("Nyx Reference")]
     [SerializeField] private Transform nyxTransform;
     [SerializeField] private bool autoFindNyx = true;
+    [SerializeField] private Player_Movement playerMovement;
     
     [Header("Camera")]
     [SerializeField] private Camera mainCamera;
@@ -34,6 +35,7 @@ public class NyxLockOnSystem : MonoBehaviour
     
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
+    [SerializeField] private bool enableRotationDebugLogs = false;
 
     [Header("Rotation Settings")]
     [SerializeField] private bool enableAutoRotation = true; // Enable rotation to face locked-on targets
@@ -106,6 +108,16 @@ public class NyxLockOnSystem : MonoBehaviour
             if (mainCamera == null)
             {
                 Debug.LogError("NyxLockOnSystem: Could not find main camera!");
+            }
+        }
+        
+        // Find player movement if not assigned
+        if (playerMovement == null)
+        {
+            playerMovement = FindObjectOfType<Player_Movement>();
+            if (playerMovement == null)
+            {
+                Debug.LogError("NyxLockOnSystem: Could not find Player_Movement component!");
             }
         }
         
@@ -209,6 +221,9 @@ public class NyxLockOnSystem : MonoBehaviour
     {
         // Auto-rotation disabled by default to prevent camera movement when switching targets
         if (!enableAutoRotation || nyxTransform == null) return;
+        
+        // Respect player movement's canRotate state (important during knockback, etc.)
+        if (playerMovement != null && !playerMovement.canRotate) return;
         
         // Only rotate when locked on if specified
         if (onlyRotateWhenLocked && !isLockOnActive) return;

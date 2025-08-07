@@ -15,7 +15,7 @@ public class NyxRootMotionHandler : MonoBehaviour
     [Header("Root Motion Settings")]
     [SerializeField] private bool enableRootMotion = true;
     [SerializeField] private bool applyPositionY = false; // Usually false to prevent floating
-    [SerializeField] private bool applyRotation = true;
+    [SerializeField] private bool applyRotation = false; // Disabled - let lock-on and movement systems handle rotation
     [SerializeField] private float rootMotionMultiplier = 1f;
     
     [Header("State-Based Root Motion")]
@@ -145,7 +145,7 @@ public class NyxRootMotionHandler : MonoBehaviour
         // Apply movement through CharacterController to respect collisions
         characterController.Move(movement);
         
-        // Apply rotation if enabled
+        // Apply rotation if enabled (disabled by default - let other systems handle rotation)
         if (applyRotation)
         {
             cachedTransform.rotation = cachedTransform.rotation * rootMotionRotationDelta;
@@ -217,4 +217,6 @@ public class NyxRootMotionHandler : MonoBehaviour
     {
         return rootMotionPositionDelta;
     }
+    
+
 } 
