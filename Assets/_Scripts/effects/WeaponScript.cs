@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using FMODUnity;
 
 public class WeaponScript : MonoBehaviour
 {
@@ -36,7 +37,17 @@ public class WeaponScript : MonoBehaviour
     
     [Header("Debug Settings")]
     [Tooltip("Enable debug logs for weapon collisions - disable for performance")]
-    public bool enableDebugLogs = false; // DISABLED - was causing spam
+    public bool enableDebugLogs = true; // ENABLED for parry debugging
+    
+    [Header("Parry Debug Sound System")]
+    [Tooltip("Enable debug sounds when parry is successfully executed")]
+    public bool enableParryDebugSounds = false;
+    
+    [Tooltip("Sound to play when a normal parry is executed")]
+    public StudioEventEmitter normalParryDebugSound;
+    
+    [Tooltip("Sound to play when a perfect parry is executed")]
+    public StudioEventEmitter perfectParryDebugSound;
     
     private float lastParryTime = -1f;
     
@@ -386,9 +397,23 @@ public class WeaponScript : MonoBehaviour
     {
         if (enableDebugLogs) Debug.Log($"Parry executed! Perfect: {isPerfectParry} - Focus: Extended stun for grappling!");
         
+        // Play debug sounds for parry testing
+        if (enableParryDebugSounds)
+        {
+            if (isPerfectParry && perfectParryDebugSound != null)
+            {
+                perfectParryDebugSound.Play();
+                if (enableDebugLogs) Debug.Log("PERFECT PARRY DEBUG SOUND PLAYED!");
+            }
+            else if (!isPerfectParry && normalParryDebugSound != null)
+            {
+                normalParryDebugSound.Play();
+                if (enableDebugLogs) Debug.Log("Normal parry debug sound played.");
+            }
+        }
+        
         // TODO: Simple feedback without slow motion:
         // - Brief screen shake for all parries
-        // - Different sound effects for perfect vs normal
         // - UI feedback showing stun duration
         // - Particle effects or visual indicators
     }
