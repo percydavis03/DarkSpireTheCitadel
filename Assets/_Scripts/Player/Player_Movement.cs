@@ -1093,6 +1093,13 @@ public bool canRollCancelAttacks = true;
         {
             if (ShouldDebugAttacks()) Debug.Log($"🎮 Attack button pressed - isAttacking: {isAttacking}, isComboing: {isComboing}, canComboNext: {canComboNext}");
             
+            // Handle shift+click spin attack - takes priority
+            if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && !isAttacking)
+            {
+                PerformSpinAttack();
+                return;
+            }
+            
             // Handle sprint attack (spin attack) - takes priority
             if (isSprint && !isAttacking)
             {
