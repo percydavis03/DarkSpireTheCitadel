@@ -2624,6 +2624,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enableAttackDebugLogs: 0
   footAttackManager: {fileID: 1976774959474409518}
+  swordParticleEffects: {fileID: 9220059695493636089}
 --- !u!114 &1302204275184489568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17519,6 +17520,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enableAttackDebugLogs: 1
   footAttackManager: {fileID: 0}
+  swordParticleEffects: {fileID: 0}
 --- !u!1 &3358717872239056578
 GameObject:
   m_ObjectHideFlags: 0
@@ -31869,8 +31871,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6273563783167962138}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.20906459, y: 0.25268406, z: -0.0560187, w: 0.9430295}
-  m_LocalPosition: {x: -96.83616, y: -6.4569464, z: -41.453583}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -94.374725, y: -8.333384, z: -42.634468}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -46978,6 +46980,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6911014458839337292, guid: 0029171dc53593f49b254821bedc349c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9166730899124131539, guid: 0029171dc53593f49b254821bedc349c,
         type: 3}
       propertyPath: lengthInSec
@@ -47231,6 +47238,12 @@ MonoBehaviour:
 --- !u!1 &7632901661931008053 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5328149679179605632, guid: 0029171dc53593f49b254821bedc349c,
+    type: 3}
+  m_PrefabInstance: {fileID: 2313971121767995061}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &9220059695493636089 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6911014458839337292, guid: 0029171dc53593f49b254821bedc349c,
     type: 3}
   m_PrefabInstance: {fileID: 2313971121767995061}
   m_PrefabAsset: {fileID: 0}

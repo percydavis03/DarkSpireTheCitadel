@@ -11,6 +11,10 @@ public class Animations_Nyx : MonoBehaviour
     [Header("Combat System References")]
     [Tooltip("Foot attack manager handles all foot/kick attack logic")]
     public FootAttackManager footAttackManager;
+
+    [Header("Visual Effects")]
+    [Tooltip("Sword particle effects to activate during attacks")]
+    public GameObject swordParticleEffects;
     
     // Performance optimization: Cache the Player_Movement instance
     private Player_Movement playerMovement;
@@ -70,6 +74,13 @@ public class Animations_Nyx : MonoBehaviour
     {
         // Deprecated - was causing issues
         // Player_Movement.instance.AttackFailSafe();
+        
+        // Activate sword particle effects for regular attack
+        if (swordParticleEffects != null)
+        {
+            swordParticleEffects.SetActive(true);
+            if (ShouldDebugAttacks()) Debug.Log("🎬 ActivateAttack: Sword particle effects activated");
+        }
     }
     
     // Main animation event for ending attacks
@@ -79,6 +90,13 @@ public class Animations_Nyx : MonoBehaviour
         {
             if (ShouldDebugAttacks()) Debug.Log("🎬 AttackAnimEnd: Animation event triggered");
             playerMovement.EndAttack();
+        }
+        
+        // Deactivate sword particle effects when attack ends
+        if (swordParticleEffects != null)
+        {
+            swordParticleEffects.SetActive(false);
+            if (ShouldDebugAttacks()) Debug.Log("🎬 AttackAnimEnd: Sword particle effects deactivated");
         }
     }
 
@@ -90,6 +108,13 @@ public class Animations_Nyx : MonoBehaviour
             if (ShouldDebugAttacks()) Debug.Log("🎬 SpinAttackEnd: Spin attack animation event triggered");
             playerMovement.EndAttack();
             playerMovement.isSpinAttack = false;
+        }
+        
+        // Deactivate sword particle effects when spin attack ends
+        if (swordParticleEffects != null)
+        {
+            swordParticleEffects.SetActive(false);
+            if (ShouldDebugAttacks()) Debug.Log("🎬 SpinAttackEnd: Sword particle effects deactivated");
         }
     }
     
@@ -145,6 +170,13 @@ public class Animations_Nyx : MonoBehaviour
     {
         // This can be used for special spin attack setup if needed
         // Player_Movement.instance.isSpinAttack = true;
+        
+        // Activate sword particle effects for spin attack
+        if (swordParticleEffects != null)
+        {
+            swordParticleEffects.SetActive(true);
+            if (ShouldDebugAttacks()) Debug.Log("🎬 StartSpinAttack: Sword particle effects activated");
+        }
     }
 
     // Hitbox control events
