@@ -137,6 +137,7 @@ public class SettingsManager : MonoBehaviour
         
         // Load display settings
         settingsData.ScrollSensitivity = PlayerPrefs.GetFloat("DarkSpire_ScrollSensitivity", settingsData.ScrollSensitivity);
+        settingsData.ScrollThreshold = PlayerPrefs.GetFloat("DarkSpire_ScrollThreshold", settingsData.ScrollThreshold);
         settingsData.WindowMode = PlayerPrefs.GetInt("DarkSpire_WindowMode", settingsData.WindowMode);
         settingsData.ResolutionWidth = PlayerPrefs.GetInt("DarkSpire_ResolutionWidth", Screen.currentResolution.width);
         settingsData.ResolutionHeight = PlayerPrefs.GetInt("DarkSpire_ResolutionHeight", Screen.currentResolution.height);
@@ -170,6 +171,7 @@ public class SettingsManager : MonoBehaviour
         
         // Save display settings
         PlayerPrefs.SetFloat("DarkSpire_ScrollSensitivity", settingsData.ScrollSensitivity);
+        PlayerPrefs.SetFloat("DarkSpire_ScrollThreshold", settingsData.ScrollThreshold);
         PlayerPrefs.SetInt("DarkSpire_WindowMode", settingsData.WindowMode);
         PlayerPrefs.SetInt("DarkSpire_ResolutionWidth", settingsData.ResolutionWidth);
         PlayerPrefs.SetInt("DarkSpire_ResolutionHeight", settingsData.ResolutionHeight);

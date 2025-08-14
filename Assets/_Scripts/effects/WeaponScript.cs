@@ -117,8 +117,9 @@ public class WeaponScript : MonoBehaviour
             
             if (Player_Movement.instance != null && Player_Movement.instance.isComboing)
             {
-                // Regular combo knockback
-                switch (Player_Movement.instance.comboCount)
+                // Use combo count for appropriate knockback
+                int currentCombo = Player_Movement.instance.comboCount;
+                switch (currentCombo)
                 {
                     case 1:
                         knockbackForce = lightKnockback;
@@ -131,6 +132,10 @@ public class WeaponScript : MonoBehaviour
                     case 3:
                         knockbackForce = heavyKnockback;
                         comboType = "3rd Combo - HEAVY HIT!";
+                        break;
+                    default:
+                        knockbackForce = mediumKnockback;
+                        comboType = "Combo Attack";
                         break;
                 }
             }

@@ -124,7 +124,14 @@ public class Animations_Nyx : MonoBehaviour
         if (playerMovement != null)
         {
             if (ShouldDebugAttacks()) Debug.Log("🎬 EnableComboWindow: Combo window opened via animation event");
+            
+            // DON'T increment combo count here - only open the window
+            // Combo count will be incremented when player actually continues the combo
+            
+            // Open the combo window
             playerMovement.EnableComboNext();
+            
+            if (ShouldDebugAttacks()) Debug.Log($"🎬 EnableComboWindow: Combo window opened, waiting for player input");
         }
     }
     
@@ -155,6 +162,22 @@ public class Animations_Nyx : MonoBehaviour
         {
             if (ShouldDebugAttacks()) Debug.Log("🎬 EndSlash: Arm/gauntlet attack animation event triggered");
             playerMovement.EndSlash(); // Call the proper EndSlash function in Player_Movement
+        }
+    }
+    
+    // Reset attack state when rolling starts
+    public void RollStart()
+    {
+        if (playerMovement != null)
+        {
+            if (ShouldDebugAttacks()) Debug.Log("🎬 RollStart: Resetting attack state for roll");
+            
+            // Reset attack state
+            playerMovement.anim.SetBool("isAttacking", false);
+            playerMovement.anim.SetInteger("AttackInt", 0);
+            
+            // Also reset combo state
+            playerMovement.ResetCombo();
         }
     }
     

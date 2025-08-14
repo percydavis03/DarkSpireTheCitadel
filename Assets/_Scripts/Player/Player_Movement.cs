@@ -30,7 +30,7 @@ public class Player_Movement : MonoBehaviour
     //combo system
     [Header("Combo System")]
     public bool isComboing = false;
-    public int comboCount = 0;
+    public int comboCount = 0; // Only increments when combo window opens, not on button press
     public float comboWindow = 1.5f; // Time window to continue combo
     private Coroutine comboResetCoroutine;
     public bool canComboNext = false; // Simple flag to allow next combo attack
@@ -268,10 +268,11 @@ public bool canRollCancelAttacks = true;
     IEnumerator EnableComboAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        if (isComboing && comboCount < 3)
+        if (isComboing)
         {
+            // Combo count is now incremented by animation events, not here
             canComboNext = true;
-            if (ShouldDebugAttacks()) Debug.Log($"🎯 Combo window opened for attack {comboCount + 1}");
+            if (ShouldDebugAttacks()) Debug.Log($"🎯 Combo window opened for next attack");
             
             // Start a timer to close the combo window if no input
             StartCoroutine(CloseComboWindowAfterDelay(0.5f)); // Short window for responsive gameplay
@@ -284,7 +285,12 @@ public bool canRollCancelAttacks = true;
         if (canComboNext && !isAttacking)
         {
             canComboNext = false;
-            if (ShouldDebugAttacks()) Debug.Log($"⏰ Combo window closed - no input received");
+            
+            // Reset comboCount when combo window closes (player missed their chance)
+            // AttackInt will automatically match comboCount
+            comboCount = 0; // Reset combo count so next attack starts fresh
+            
+            if (ShouldDebugAttacks()) Debug.Log($"⏰ Combo window closed - no input received, resetting AttackInt to 0 and comboCount to 0");
         }
     }
 
@@ -1113,9 +1119,9 @@ public bool canRollCancelAttacks = true;
                 // Start new attack sequence
                 PerformComboAttack();
             }
-            else if (isComboing && canComboNext && comboCount < 3)
+            else if (isComboing && canComboNext)
             {
-                // Continue combo ONLY if window is open and count < 3
+                // Continue combo ONLY if window is open
                 PerformComboAttack();
             }
             else if (isAttacking && isSpinAttack) // Cancel spin attack
@@ -1226,15 +1232,28 @@ public bool canRollCancelAttacks = true;
     private void PerformComboAttack()
     {
         // Start or continue combo
-        comboCount++;
-        if (comboCount > 3) comboCount = 1; // Reset to 1 after 3
+        if (comboCount == 0)
+        {
+            // First attack - set combo count to 1
+            comboCount = 1;
+            anim.SetInteger(attackAnimations[3], comboCount); // AttackInt = 1
+        }
+        else if (isComboing && canComboNext)
+        {
+            // Continuing combo - increment combo count
+            comboCount++;
+            if (comboCount > 3) comboCount = 1; // Reset to 1 after 3
+            anim.SetInteger(attackAnimations[3], comboCount); // AttackInt = new combo count
+            
+            // Immediately close the combo window to prevent spam clicking
+            canComboNext = false;
+        }
         
         isComboing = true;
         canComboNext = false; // Reset flag after using it
         
         // Update animator - use existing boolean system (triggers don't exist in animator)
         anim.SetBool(attackAnimations[1], true);     // isComboing  
-        anim.SetInteger(attackAnimations[3], comboCount); // AttackInt
         anim.SetBool(attackAnimations[0], true);     // isAttacking
         
         SafeSetAnimatorBool("isArmAttack", false);
@@ -1249,7 +1268,7 @@ public bool canRollCancelAttacks = true;
         }
         comboResetCoroutine = StartCoroutine(ComboTimeout());
         
-        if (ShouldDebugAttacks()) Debug.Log($"⚔️ Combo attack {comboCount} started");
+        if (ShouldDebugAttacks()) Debug.Log($"⚔️ Combo attack started - comboCount: {comboCount}");
     }
 
     private void CancelSpinAttack()

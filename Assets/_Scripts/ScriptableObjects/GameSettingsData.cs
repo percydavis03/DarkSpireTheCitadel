@@ -11,6 +11,9 @@ public class GameSettingsData : ScriptableObject
     [SerializeField] private float scrollSensitivity = 1.0f;
     [SerializeField] private float minScrollSensitivity = 0.1f;
     [SerializeField] private float maxScrollSensitivity = 3.0f;
+    [SerializeField] private float scrollThreshold = 0.1f;
+    [SerializeField] private float minScrollThreshold = 0.01f;
+    [SerializeField] private float maxScrollThreshold = 1.0f;
     
     [Header("Display Settings")]
     [SerializeField] private int windowMode = 0; // 0 = Fullscreen, 1 = Windowed, 2 = Windowed Fullscreen
@@ -37,6 +40,12 @@ public class GameSettingsData : ScriptableObject
     {
         get => scrollSensitivity;
         set => scrollSensitivity = Mathf.Clamp(value, minScrollSensitivity, maxScrollSensitivity);
+    }
+    
+    public float ScrollThreshold
+    {
+        get => scrollThreshold;
+        set => scrollThreshold = Mathf.Clamp(value, minScrollThreshold, maxScrollThreshold);
     }
     
     public int WindowMode
@@ -128,6 +137,8 @@ public class GameSettingsData : ScriptableObject
     // Range getters for UI setup
     public float MinScrollSensitivity => minScrollSensitivity;
     public float MaxScrollSensitivity => maxScrollSensitivity;
+    public float MinScrollThreshold => minScrollThreshold;
+    public float MaxScrollThreshold => maxScrollThreshold;
     public float MinBrightness => minBrightness;
     public float MaxBrightness => maxBrightness;
     
@@ -137,6 +148,7 @@ public class GameSettingsData : ScriptableObject
     public void ResetToDefaults()
     {
         scrollSensitivity = 1.0f;
+        scrollThreshold = 0.1f;
         windowMode = 0;
         resolutionWidth = Screen.currentResolution.width;
         resolutionHeight = Screen.currentResolution.height;
@@ -166,6 +178,7 @@ public class GameSettingsData : ScriptableObject
     public void ValidateSettings()
     {
         scrollSensitivity = Mathf.Clamp(scrollSensitivity, minScrollSensitivity, maxScrollSensitivity);
+        scrollThreshold = Mathf.Clamp(scrollThreshold, minScrollThreshold, maxScrollThreshold);
         windowMode = Mathf.Clamp(windowMode, 0, 2);
         resolutionWidth = Mathf.Max(640, resolutionWidth);
         resolutionHeight = Mathf.Max(480, resolutionHeight);

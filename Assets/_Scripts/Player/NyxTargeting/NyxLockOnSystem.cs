@@ -28,6 +28,12 @@ public class NyxLockOnSystem : MonoBehaviour
     
     [Header("Input")]
     [SerializeField] private PlayerInputActions playerControls;
+
+    // Add scroll wheel settings
+    [Header("Scroll Wheel Settings")]
+    [SerializeField] private bool enableScrollWheel = true;
+    [SerializeField] private float scrollSensitivity = 1f;
+    [SerializeField] private GameSettingsData gameSettings; // Reference to game settings for scroll threshold
     
     // Add cooldown to prevent immediate reactivation
     [Header("Timing")]
@@ -45,6 +51,7 @@ public class NyxLockOnSystem : MonoBehaviour
     
     private InputAction cycleTargets;
     private float lastCycleInput;
+    private float lastScrollInput; // Add this for scroll wheel tracking
     
     // Add cooldown tracking
     private float lastLockOnReleaseTime;
@@ -133,6 +140,20 @@ public class NyxLockOnSystem : MonoBehaviour
             {
                 playerControls = new PlayerInputActions();
                 Debug.LogWarning("NyxLockOnSystem: Could not find existing PlayerInputActions, created new instance.");
+            }
+        }
+        
+        // Find game settings if not assigned
+        if (gameSettings == null)
+        {
+            gameSettings = Resources.Load<GameSettingsData>("GameSettings");
+            if (gameSettings == null)
+            {
+                gameSettings = FindObjectOfType<GameSettingsData>();
+            }
+            if (gameSettings == null)
+            {
+                Debug.LogWarning("NyxLockOnSystem: Could not find GameSettingsData! Scroll threshold will use default value.");
             }
         }
         
@@ -423,7 +444,7 @@ public class NyxLockOnSystem : MonoBehaviour
         
         float cycleInput = cycleTargets.ReadValue<float>();
         
-        // Simple edge detection
+        // Handle keyboard input (E/R keys)
         if (Mathf.Abs(cycleInput) > 0.5f && Mathf.Abs(lastCycleInput) <= 0.5f)
         {
             if (!isLockOnActive)
@@ -447,6 +468,54 @@ public class NyxLockOnSystem : MonoBehaviour
         }
         
         lastCycleInput = cycleInput;
+        
+        // Handle scroll wheel input
+        if (enableScrollWheel)
+        {
+            HandleScrollWheelInput();
+        }
+    }
+
+    private void HandleScrollWheelInput()
+    {
+        // Get scroll wheel input
+        float scrollInput = Input.mouseScrollDelta.y;
+        
+        // Apply sensitivity and check threshold
+        float adjustedScroll = scrollInput * scrollSensitivity;
+        
+        // Get scroll threshold from game settings, fallback to local if not available
+        float currentScrollThreshold = (gameSettings != null) ? gameSettings.ScrollThreshold : 0.1f;
+        
+        if (Mathf.Abs(adjustedScroll) > currentScrollThreshold)
+        {
+            if (!isLockOnActive)
+            {
+                if (!isInCooldown)
+                {
+                    ActivateLockOn();
+                }
+            }
+            else if (isLockOnActive)
+            {
+                if (adjustedScroll > 0)
+                {
+                    CycleTargetRight(); // Scroll up = move right
+                }
+                else if (adjustedScroll < 0)
+                {
+                    CycleTargetLeft(); // Scroll down = move left
+                }
+            }
+            
+            // Update last scroll input to prevent multiple triggers
+            lastScrollInput = adjustedScroll;
+        }
+        else
+        {
+            // Reset scroll input when below threshold
+            lastScrollInput = 0f;
+        }
     }
     
     public void ActivateLockOn()
